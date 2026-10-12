@@ -491,6 +491,23 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .rp-sp button{padding:4px 8px}
 .rp{user-select:none;-webkit-user-select:none}
 .rp .rp-b{grid-area:b} .rp .rp-m{display:contents} .rp .rp-t{grid-area:t} .rp #rpR{grid-area:r} .rp .rp-sp{grid-area:sp}
+/* «Назад» в нижнем меню (телефон): появляется, когда есть куда вернуться; отделена тонкой линией */
+.tabbar .tbk{display:none}
+.tabbar button{transition:max-width .3s cubic-bezier(.3,.7,.2,1),flex-basis .3s cubic-bezier(.3,.7,.2,1),opacity .25s,transform .3s cubic-bezier(.3,.7,.2,1),margin .3s}
+@media (max-width:900px), (orientation:landscape) and (max-height:600px){
+  .top .back{display:none}
+  .tabbar .tbk{display:flex;position:relative;flex:0 0 0;max-width:0;opacity:0;transform:translateX(-12px);overflow:visible;padding-inline:0;pointer-events:none}
+  .tabbar .tbk em,.tabbar .tbk svg{overflow:hidden}
+  body.has-back .tabbar .tbk{flex:0 0 58px;max-width:58px;opacity:1;transform:none;margin-right:6px;pointer-events:auto}
+  .tabbar .tbk::after{content:"";position:absolute;right:-4px;top:8px;bottom:8px;width:1px;background:color-mix(in srgb,var(--muted) 45%,transparent)}
+  body.has-back .tabbar button:not(.tbk){max-width:84px}
+}
+@media (orientation:landscape) and (max-height:600px){
+  body.has-back .tabbar .tbk{flex:0 0 auto;max-width:none;margin:0 0 6px}
+  .tabbar .tbk{max-height:0;padding-block:0;overflow:hidden;transform:translateY(-8px)} body.has-back .tabbar .tbk{max-height:80px;padding-block:10px;overflow:visible;transform:none}
+  .tabbar .tbk::after{left:12px;right:12px;top:auto;bottom:-4px;width:auto;height:1px}
+  body.has-back .tabbar button:not(.tbk){max-width:none}
+}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -592,6 +609,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
     <div class="fpop-f"><span class="fcount" id="fcount"></span><button type="button" class="freset" id="fReset">Сбросить всё</button><button type="button" class="fdone" id="fDone">Готово</button></div>
   </div>
   <nav class="tabbar" role="tablist" aria-label="Разделы">
+    <button type="button" class="tbk" id="scrBack" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><em>Назад</em></button>
     <button type="button" role="tab" id="scrMap" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><em>Карта</em></button>
 <button type="button" id="scrFilt" aria-expanded="false" aria-controls="fpop"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg><b id="fN" hidden></b></span><em>Фильтры</em></button>
         <button type="button" role="tab" id="scrStats" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/></svg><em>Статистика</em></button>
@@ -602,7 +620,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:23,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:24,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -777,12 +795,13 @@ function go(patch,noPush){ if(!noPush) hist.push({...state}); if(patch.level==='
   if(state.level==='well'){const w=WELLS.find(x=>x.id===state.well); if(state.cust&&state.cust!==w.cust.id) state.cust=null; state.field=w.field.id; if(!patch.wtab) state.wtab='drill'}
   if(state.level==='cust'&&state.field){const c=CUSTOMERS.find(x=>x.id===state.cust); if(!c.wells.some(w=>w.field.id===state.field)) state.field=null}
   refresh(true)}
-document.getElementById('back').onclick=()=>{const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
+const goBack=()=>{const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
+document.getElementById('back').onclick=goBack; document.getElementById('scrBack').onclick=goBack;
 function setTabs(){[['scrMap','map'],['scrStats','stats'],['scrProf','profile']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s))}
 function setScreen(s){state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
 document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>setScreen('profile');
 function refresh(fit){
-  document.getElementById('back').disabled=!hist.length;
+  document.getElementById('back').disabled=!hist.length; document.body.classList.toggle('has-back',hist.length>0);
   syncFilters(); renderCrumbs();
   const scr=state.screen, isMap=scr==='map';
   document.getElementById('main').classList.toggle('stats',!isMap);
