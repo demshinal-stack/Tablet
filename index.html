@@ -27,7 +27,7 @@
   --accent:#006E64; --mint:#00DCC8; --pale:#E5FBF9; --bad:#C8372D; --good:#0B8A5F; --warn:#B7791F;
   --chrome:#00234B; --chrome-ink:#FFFFFF; --chrome-mut:#AFC0D6; --chrome-line:#284667;
   --tip:#00234B; --tip-ink:#FFFFFF; --ring:#006E64;
-  --st-drill:#00A693; --st-casing:#2F6FD0; --st-finish:#7A5AF8; --st-npv:#D0473A;
+  --st-drill:#00A693; --st-casing:#2F6FD0; --st-finish:#7A5AF8; --rs-idle:#8C9BB0; --rs-move:#E08A00; --rs-vmr:#2F6FD0; --st-npv:#D0473A;
   --r-red:#D0473A; --r-orange:#E08A00; --r-green:#16A34A; --r-none:#AFC0D6;
   --sea:#C9DDEE; --land:#F3F1EA; --land-2:#E9EDF2; --yanao:#F7F5EF; --water:#B4D0E8; --water-ln:#7FAED6; --field:#D3F3EE; --field-ln:#006E64;
   --city:#2A3B52; --grat:#D9E2EC; --plan:#006E64; --fact:#00234B; --lks:#00B5A3;
@@ -39,7 +39,7 @@
   --accent:#00DCC8; --mint:#00DCC8; --pale:#062C57; --bad:#FF6B5E; --good:#3DDC97; --warn:#F2B53A;
   --chrome:#001A38; --chrome-ink:#FFFFFF; --chrome-mut:#AFC0D6; --chrome-line:#1B3A60;
   --tip:#FFFFFF; --tip-ink:#00234B; --ring:#00DCC8;
-  --st-drill:#00DCC8; --st-casing:#6FA8FF; --st-finish:#A693FF; --st-npv:#FF6B5E;
+  --st-drill:#00DCC8; --st-casing:#6FA8FF; --st-finish:#A693FF; --rs-idle:#7D8FAA; --rs-move:#F2B53A; --rs-vmr:#6FA8FF; --st-npv:#FF6B5E;
   --r-red:#FF6B5E; --r-orange:#F2B53A; --r-green:#3DDC97; --r-none:#4F6685;
   --sea:#021A33; --land:#082B4F; --land-2:#06233F; --yanao:#0B335C; --water:#0E3A64; --water-ln:#2A6AA8; --field:#0A4A5E; --field-ln:#00DCC8;
   --city:#AFC0D6; --grat:#0C3158; --plan:#AFC0D6; --fact:#00DCC8; --lks:#3AA89C; color-scheme:dark }}
@@ -48,7 +48,7 @@
   --accent:#00DCC8; --mint:#00DCC8; --pale:#062C57; --bad:#FF6B5E; --good:#3DDC97; --warn:#F2B53A;
   --chrome:#001A38; --chrome-ink:#FFFFFF; --chrome-mut:#AFC0D6; --chrome-line:#1B3A60;
   --tip:#FFFFFF; --tip-ink:#00234B; --ring:#00DCC8;
-  --st-drill:#00DCC8; --st-casing:#6FA8FF; --st-finish:#A693FF; --st-npv:#FF6B5E;
+  --st-drill:#00DCC8; --st-casing:#6FA8FF; --st-finish:#A693FF; --rs-idle:#7D8FAA; --rs-move:#F2B53A; --rs-vmr:#6FA8FF; --st-npv:#FF6B5E;
   --r-red:#FF6B5E; --r-orange:#F2B53A; --r-green:#3DDC97; --r-none:#4F6685;
   --sea:#021A33; --land:#082B4F; --land-2:#06233F; --yanao:#0B335C; --water:#0E3A64; --water-ln:#2A6AA8; --field:#0A4A5E; --field-ln:#00DCC8;
   --city:#AFC0D6; --grat:#0C3158; --plan:#AFC0D6; --fact:#00DCC8; --lks:#3AA89C; color-scheme:dark }
@@ -765,12 +765,6 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 .sv-chips button b{margin-left:5px;color:var(--ink)}
 .sv-chips button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
 .sv-chips button[aria-pressed="true"] b{color:var(--prog)}
-.sv-rig{all:unset;box-sizing:border-box;display:block;width:100%;padding:11px 12px;cursor:pointer}
-div.sv-rig{cursor:default}
-.sv-rig .bar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px}
-.sv-rig .lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;color:var(--body)}
-.sv-rig .lg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
-.sv-rig .lg b{color:var(--ink)}
 .sv-fc{display:block;padding:11px 12px}
 .sv-fc .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
 .sv-fc .t b{font-family:var(--f-display);font-size:17px;color:var(--ink);font-weight:600}
@@ -825,6 +819,22 @@ div.sv-rig{cursor:default}
 .sv-sum .v{font-family:var(--f-display);font-size:16px;color:var(--ink)}
 .sv-sum .s{font-size:11px;color:var(--muted)}
 .sv-pad .sec.dyn{margin:0}
+
+.sv-rig{padding:11px 12px}
+.sv-rig .bar{display:flex;height:14px;border-radius:7px;overflow:hidden;gap:2px}
+.sv-rig .bar button{all:unset;box-sizing:border-box;cursor:pointer;min-width:12px;display:flex;align-items:center;justify-content:center;transition:opacity .2s,filter .2s}
+.sv-rig .bar button em{font-style:normal;font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 2px rgba(0,20,40,.45);display:none}
+.sv-rig .bar button.off,.sv-rig .lg button.off{opacity:.3}
+.sv-rig .bar button[aria-pressed="true"]{box-shadow:inset 0 0 0 2px rgba(255,255,255,.75)}
+.sv-rig .bar button:focus-visible{outline:2px solid var(--mint);outline-offset:1px}
+.sv-rig .lg{display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:8px}
+.sv-rig .lg button{all:unset;box-sizing:border-box;cursor:pointer;font-size:12px;color:var(--body);display:inline-flex;align-items:center;padding:3px 8px 3px 6px;border-radius:999px;transition:opacity .2s,background .2s}
+.sv-rig .lg button[aria-pressed="true"]{background:var(--band);color:var(--ink)}
+.sv-rig .lg button i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+.sv-rig .lg button b{color:var(--ink);margin-left:4px}
+.sv-rig .lg .all{color:var(--accent);font-weight:600}
+.sv-mh .v small{font-family:var(--f-body);font-size:13px;color:var(--muted)}
+@media (max-width:900px){.sv-rig .bar{height:30px;border-radius:9px;gap:3px}.sv-rig .bar button{min-width:28px}.sv-rig .bar button em{display:block}.sv-rig .lg button{padding:6px 10px 6px 8px;font-size:12.5px}}
 </style>
 </head>
 <body>
@@ -877,7 +887,7 @@ div.sv-rig{cursor:default}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:37,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:39,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1797,8 +1807,21 @@ function svScore(ws,per){const gs=svGroups(ws,SC.dim).map(g=>({...g,a:svAgg(g.ws
   gs.forEach(g=>{const op=!g.w&&SC.open[SC.dim+g.id]; h+=svRow(g,(g.w?'flat ':'grp ')+(op?'open':''),per);
     if(op) g.ws.slice().sort((x,y)=>totals([x],per).pct-totals([y],per).pct).forEach(w=>{h+=svRow({n:'Скв. '+w.no,sub:w.rig+' · '+ST[w.status].n.toLowerCase(),ws:[w],w},'w',per)})});
   return h+`</div><p class="sv-why">НПВ — собственное, % календарного времени. ГТН: сколько скважин отстаёт больше чем на 2 сут / максимум, сут. Нажмите строку — раскроются скважины.</p>`}
-function svRigs(ws,clickable){const c={}; ws.forEach(w=>c[w.status]=(c[w.status]||0)+1); const ks=Object.keys(ST).filter(s=>c[s]);
-  return `<div class="sv-card"><${clickable?'button type="button" data-sv="rigs"':'div'} class="sv-rig"><span class="bar">${ks.map(s=>`<i style="flex:${c[s]};background:${col(s)}"></i>`).join('')}</span><span class="lg">${ks.map(s=>`<span><i style="background:${col(s)}"></i>${ST[s].n} <b>${c[s]}</b></span>`).join('')}</span></${clickable?'button':'div'}></div>`}
+/* состояние станка (не путать со статусом скважины). Простой, переезд и ВМР — демо до подключения рапортов */
+const RST={drill:{n:'Бурение',v:'--st-drill'},npv:{n:'НПВ',v:'--st-npv'},idle:{n:'Простой',v:'--rs-idle'},vmr:{n:'ВМР',v:'--rs-vmr'},move:{n:'Переезд',v:'--rs-move'}};
+const rcol=k=>'var('+RST[k].v+')';
+const RS_DEMO=(()=>{const m={}, dw=WELLS.filter(w=>w.status==='drill'||w.status==='casing'), H=h=>new Date(LOAD.at.getTime()-h*36e5);
+  WELLS.filter(w=>w.status==='finish').forEach(w=>m[w.id]={k:'vmr',why:'Демонтаж после окончания бурения',since:H(30)});
+  if(dw[2]) m[dw[2].id]={k:'idle',why:'Ожидание обсадных труб',since:H(14)};
+  if(dw[8]) m[dw[8].id]={k:'idle',why:'Ожидание погоды: ветер > 20 м/с',since:H(9)};
+  if(dw[5]) m[dw[5].id]={k:'move',why:'Переезд'+(dw[5].next?' на '+dw[5].next:' на следующий куст'),since:H(40)};
+  if(dw[11]) m[dw[11].id]={k:'vmr',why:'Монтаж после переезда',since:H(52)};
+  return m})();
+function rigState(w){const d=RS_DEMO[w.id]; if(d) return d; if(w.status==='npv') return {k:'npv',why:'НПВ',since:null}; return {k:'drill',why:'',since:null}}
+const fmtDur=d=>{const h=Math.max(0,Math.round((LOAD.at-d)/36e5)); return h>=48?Math.floor(h/24)+' сут '+(h%24)+' ч':h+' ч'};
+function svRigs(ws,sel){const c={}; ws.forEach(w=>{const k=rigState(w).k; c[k]=(c[k]||0)+1}); const ks=Object.keys(RST).filter(s=>c[s]), on=s=>!sel||sel===s;
+  return `<div class="sv-card sv-rig"><div class="bar" role="group" aria-label="Состояния станков — нажмите, чтобы отфильтровать">${ks.map(s=>`<button type="button" data-rs="${s}" aria-pressed="${sel===s}" class="${on(s)?'':'off'}" style="flex:${c[s]};background:${rcol(s)}" aria-label="${RST[s].n}: ${c[s]}"><em>${c[s]}</em></button>`).join('')}</div>
+   <div class="lg">${ks.map(s=>`<button type="button" data-rs="${s}" aria-pressed="${sel===s}" class="${on(s)?'':'off'}"><i style="background:${rcol(s)}"></i>${RST[s].n} <b>${c[s]}</b></button>`).join('')}${sel?'<button type="button" data-rs="" class="all">Все ×</button>':''}</div></div>`}
 function svForecast(ws){const [a,b]=PER.month.tot, el=b-a, dim=new Date(SNAP.getFullYear(),SNAP.getMonth()+1,0).getDate(), t=totals(ws,'month'), pl=d3.sum(ws,w=>w.planDay)*dim, fc=el>0?t.fact/el*dim:0, mx=Math.max(pl,fc,1)*1.04;
   return `<div class="sv-card sv-fc"><span class="t"><b class="${svHP(fc/pl)}">${Math.round(fc/pl*100)} % плана</b><span>прогноз на ${dim}.${pad2(SNAP.getMonth()+1)} при текущем темпе</span></span><span class="bb"><i class="f2" style="width:${fc/mx*100}%"></i><i class="f1" style="width:${t.fact/mx*100}%"></i><span class="pl" style="left:${pl/mx*100}%"></span></span><span class="n">факт ${nf0(t.fact)} · прогноз ${nf0(fc)} · план ${nf0(pl)} м</span></div>`}
 function svBars(vals,labels,fmt,thr,badf){const W=340,H=150,ml=34,mr=6,mt=12,mb=20,iw=W-ml-mr,ih=H-mt-mb,n=vals.length,bw=iw/n;
@@ -1818,7 +1841,7 @@ const SVS={
    <section class="sv-sec"><div class="sv-l"><b>Как идём</b><small>${PER[per].sub}</small></div>${svTiles(ws,per)}</section>
    <div class="sv-cols">
     <section class="sv-sec"><div class="sv-l"><b>Требует внимания · ${L.length}</b>${L.length>3?'<button type="button" data-sv="att">Все ›</button>':''}</div>${L.length?`<div class="sv-att">${L.slice(0,3).map(svAttCard).join('')}</div>`:'<div class="sv-card sv-ok">Все скважины в норме</div>'}</section>
-    <div><section class="sv-sec"><div class="sv-l"><b>Станки сейчас</b><button type="button" data-sv="rigs">Все ›</button></div>${svRigs(ws,true)}</section>
+    <div><section class="sv-sec"><div class="sv-l"><b>Станки сейчас</b><button type="button" data-sv="rigs">Все ›</button></div>${svRigs(ws,null)}</section>
     <section class="sv-sec"><div class="sv-l"><b>Месяц · прогноз</b></div>${svForecast(ws)}</section></div>
    </div>
    <section class="sv-sec"><div class="sv-l"><b>Разрез</b><small>${PER[per].n.toLowerCase()}</small></div>${svScore(ws,per)}</section>
@@ -1855,10 +1878,12 @@ const SVS={
   return `<div class="sv-hd"><h3>Требует внимания</h3><small>${L.length} из ${ws.length} скв.</small></div>
    <div class="sv-chips">${[['all','Все',L.length],['lag','ГТН',cnt('lag')],['npv','НПВ',cnt('npv')],['res','Ресурс',cnt('res')],['sync','Нет рапорта',cnt('sync')]].map(([k,n,c])=>`<button type="button" data-svb="${k}" aria-pressed="${SC.bf===k}">${n}<b>${c}</b></button>`).join('')}</div>
    <div class="sv-att">${Fl.map(svAttCard).join('')}</div>`},
- rigs(ws){const by={}; ws.forEach(w=>(by[w.status]=by[w.status]||[]).push(w));
-  return `<div class="sv-mh"><span class="k">Станки сейчас</span><span class="v sm">${ws.length} станков</span><span class="s">по данным на ${fmtMsk(LOAD.at)} МСК</span></div><section class="sv-sec">${svRigs(ws,false)}</section>
-   ${Object.keys(ST).filter(s=>by[s]).map(s=>`<section class="sv-sec"><div class="sv-l"><b><i class="dot" style="background:${col(s)}"></i>${ST[s].n} · ${by[s].length}</b></div><div class="sv-card sv-rk">${by[s].map(w=>{const d=totals([w],'day'); return `<button type="button" class="sv-rr" data-svw="${w.id}"><span class="nm"><b>${esc(w.rig)}</b><small>скв. ${esc(w.no)} · ${w.field.n}</small></span><span class="mb"><b>${nf0(d.fact)} м</b><small>за сутки · ${Math.round(d.pct*100)} %</small></span></button>`}).join('')}</div></section>`).join('')}
-   <p class="sv-why">ВМР и переезды появятся, когда подключим состояния станков из рапортов.</p>`}
+ rigs(ws,per,sv){const by={}, f=sv.f||null; ws.forEach(w=>{const k=rigState(w).k; (by[k]=by[k]||[]).push(w)}); const n=f?(by[f]||[]).length:ws.length;
+  const row=w=>{const r=rigState(w), d=totals([w],'day');
+    return `<button type="button" class="sv-rr" data-svw="${w.id}"><span class="nm"><b>${esc(w.rig)}</b><small>${r.k==='drill'||r.k==='npv'?'скв. '+esc(w.no)+' · '+w.field.n:esc(r.why)+' · скв. '+esc(w.no)}</small></span>${r.since?`<span class="mb"><b>${fmtDur(r.since)}</b><small>с ${fmtMsk(r.since)}</small></span>`:`<span class="mb"><b>${nf0(d.fact)} м</b><small>за сутки · ${Math.round(d.pct*100)} %</small></span>`}</button>`};
+  return `<div class="sv-mh"><span class="k">Станки сейчас${f?' · '+RST[f].n:''}</span><span class="v sm">${n} ${plural(n,'станок','станка','станков')}${f?` <small>из ${ws.length}</small>`:''}</span><span class="s">по данным на ${fmtMsk(LOAD.at)} МСК · нажмите на полосу, чтобы отфильтровать</span></div><section class="sv-sec">${svRigs(ws,f)}</section>
+   ${Object.keys(RST).filter(s=>by[s]&&(!f||f===s)).map(s=>`<section class="sv-sec"><div class="sv-l"><b><i class="dot" style="background:${rcol(s)}"></i>${RST[s].n} · ${by[s].length}</b>${s==='idle'||s==='move'||s==='vmr'?'<small>длительность</small>':''}</div><div class="sv-card sv-rk">${by[s].map(row).join('')}</div></section>`).join('')}
+   <p class="sv-why">Бурение включает крепление. Простой, переезд и ВМР показаны на демонстрационных данных — до подключения состояний станков из рапортов.</p>`}
 };
 function svOpen(sv){hist.push({...state}); state.sv=sv; refresh(false); document.getElementById('statwrap').scrollTop=0}
 function svWell(id){const w=WELLS.find(x=>x.id===id); hist.push({...state}); state.screen='map'; setTabs(); go({level:'well',well:w.id,field:w.field.id,cust:null},true)}
@@ -1874,6 +1899,7 @@ function renderStats(){
     if(d.scx){const k=SC.dim+d.scx; SC.open[k]=!SC.open[k]; renderStats(); return}
     if(d.svb){SC.bf=d.svb; renderStats(); return}
     if(d.svd){state.sv={...state.sv,dim:d.svd}; renderStats(); return}
+    if(d.rs!==undefined){const f=d.rs||null; if(sv.t==='rigs'){state.sv={...state.sv,f:state.sv.f===f?null:f}; renderStats()} else {svOpen({t:'rigs',f}); el.scrollTop=0} return}
     if(d.npvopen){npvOpen(ws,per); return}
     if(d.svw){svWell(d.svw); return}
     if(d.svmap){const [dm,id]=d.svmap.split(':'); hist.push({...state}); state.screen='map'; state.sv=null; setTabs(); go(dm==='field'?{level:'field',field:id,cust:null,well:null}:{level:'cust',cust:id,field:null,well:null},true); return}
