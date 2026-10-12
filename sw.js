@@ -1,6 +1,6 @@
 /* Пульс 2 © Demshin_lab. Офлайн-кеш и обновления.
    Версию поднимайте вместе с APP в index.html и version.json. */
-const VERSION = "pulse2-2.0.0-40";
+const VERSION = "pulse2-2.0.0-43";
 const SHELL = [
   "./",
   "./index.html",

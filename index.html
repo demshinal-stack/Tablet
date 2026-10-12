@@ -5,10 +5,11 @@
 <title>Пульс 2 — ЭНГС</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Пульс 2">
 <meta name="application-name" content="Пульс 2">
-<meta name="theme-color" content="#00234B">
+<meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#001A38" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap">
@@ -846,6 +847,13 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 .sync.rep{border:1.5px solid var(--stamp);color:var(--chrome-ink);gap:4px;padding:4px 10px 4px 8px}
 .sync.rep .rk{color:var(--stamp)}
 #repwrap{background:transparent;border:0;box-shadow:none;padding:0}
+#repwrap[hidden]{display:none!important}
+html.glass body.mode-rep .app{background:
+  radial-gradient(60% 40% at 8% 6%,color-mix(in srgb,var(--prog) 30%,transparent),transparent 70%),
+  radial-gradient(55% 38% at 95% 30%,color-mix(in srgb,#2F6FD0 32%,transparent),transparent 70%),
+  radial-gradient(60% 40% at 20% 70%,color-mix(in srgb,#7A5AF8 22%,transparent),transparent 70%),
+  radial-gradient(50% 35% at 90% 92%,color-mix(in srgb,var(--prog) 24%,transparent),transparent 70%),var(--bg)}
+html.glass body.mode-rep .tabbar{--g-base:color-mix(in srgb,var(--surface) 55%,transparent)}
 .tabbar .rt{display:none}
 body.mode-rep .tabbar .rt{display:flex}
 body.mode-rep #scrMap,body.mode-rep #scrFilt,body.mode-rep #scrStats{display:none}
@@ -867,6 +875,14 @@ body.mode-rep #scrMap,body.mode-rep #scrFilt,body.mode-rep #scrStats{display:non
   .top .bell,.top .hava{width:28px;height:28px}
   .sync b{font-size:11.5px} .sync em{min-width:16px;height:16px;font-size:10px;padding:0 4px}
 }
+
+/* светлая тема: светлая шапка (переопределяем «хромовые» цвета только внутри шапки) */
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .top{--chrome:#FFFFFF;--chrome-ink:#00234B;--chrome-mut:#6B7A90;--chrome-line:#E3E8EF;border-bottom:1px solid #E3E8EF}}
+:root[data-theme="light"] .top{--chrome:#FFFFFF;--chrome-ink:#00234B;--chrome-mut:#6B7A90;--chrome-line:#E3E8EF;border-bottom:1px solid #E3E8EF}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .top .mseg{background:#EEF1F6} :root:not([data-theme="dark"]) .top .mseg button[aria-pressed="true"]{background:#00234B;color:#FFFFFF}}
+:root[data-theme="light"] .top .mseg{background:#EEF1F6} :root[data-theme="light"] .top .mseg button[aria-pressed="true"]{background:#00234B;color:#FFFFFF}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .top .sync{background:#F3F5F9}}
+:root[data-theme="light"] .top .sync{background:#F3F5F9}
 </style>
 </head>
 <body>
@@ -924,7 +940,7 @@ body.mode-rep #scrMap,body.mode-rep #scrFilt,body.mode-rep #scrStats{display:non
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:40,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:43,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2046,6 +2062,7 @@ let PREFS={...PREF_DEF};
 try{PREFS={...PREF_DEF,...JSON.parse(localStorage.getItem('engs-prefs')||'{}')}}catch(e){}
 function savePrefs(){try{localStorage.setItem('engs-prefs',JSON.stringify(PREFS))}catch(e){}}
 function applyTheme(){const r=document.documentElement; if(PREFS.theme==='system') delete r.dataset.theme; else r.dataset.theme=PREFS.theme;
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{if(PREFS.theme==='system') m.content=m.media.includes('dark')?'#001A38':'#FFFFFF'; else m.content=PREFS.theme==='dark'?'#001A38':'#FFFFFF'});
   r.classList.toggle('glass',!!PREFS.glass&&!matchMedia('(prefers-reduced-transparency: reduce)').matches)}
 function initials(n){const p=(n||'').trim().split(/\s+/).filter(Boolean); return p.length?(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase():'ЭН'}
 function renderProfile(){
@@ -2354,7 +2371,8 @@ function tile(I,wide){const ps=CMP(), v=I.v, cur=val(v,ps[2]); let sub='', ch;
 
 
 const host=document.getElementById('repwrap'), shadow=host.attachShadow({mode:'open'}), root=shadow;
-const RCSS=`:host{display:block;color:var(--body);font-family:var(--f-body);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
+const RCSS=`:host([hidden]){display:none!important}
+:host{display:block;color:var(--body);font-family:var(--f-body);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
 
 /* Макет: телефон (лента плиток) и планшет (все плитки на одном экране); цвета по позиции периода в сравнении */
 
@@ -2622,6 +2640,14 @@ h2{font-size:20px}
 .wide .rb{height:100%;overflow:auto;padding:4px 0 6px;display:flex;flex-direction:column}
 .wide .rb>.setg.w,.wide .rb>.tbl{flex:1;min-height:0}
 .rh h3{font-size:18px}
+/* Liquid Glass: плитки и карточки — стекло над цветной подложкой страницы */
+.glass .tile,.glass .card{background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,0) 55%),var(--g-base,var(--surface));-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);border:1px solid var(--g-edge,var(--line));box-shadow:inset 0 1px 0 var(--g-hi,transparent),inset 0 -1px 1px rgba(255,255,255,.06),0 10px 30px var(--g-shadow,transparent)}
+.glass .tile{border-radius:20px}
+.glass .card .card{background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.glass .tbl .th{background:transparent;-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
+.glass .ord li{background:color-mix(in srgb,var(--surface) 35%,transparent)}
+.glass .seg{background:color-mix(in srgb,var(--surface) 40%,transparent);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
+.glass .dp{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
 @media (min-width:600px){.narrow .tiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))} .narrow .chart svg,.narrow .vizc>*{max-width:560px;margin-inline:auto} .narrow .tile .ch svg{max-height:200px}}
 `;
 let wide=false;
@@ -2686,7 +2712,8 @@ const SCR={home,ind,table,set};
 const APPS=[{render:k=>{saveRep(); render(k); if(typeof renderSync==='function') renderSync()}}];
 function render(keep){wide=innerWidth>900&&innerHeight>=560;
   const old=$('.rb'), st=old?old.scrollTop:0;
-  shadow.innerHTML=`<style>${RCSS}</style><div class="rp ${wide?'wide':'narrow'}"><div class="rb">${SCR[top().t](top())}</div></div>`;
+  const gl=document.documentElement.classList.contains('glass');
+  shadow.innerHTML=`<style>${RCSS}</style><div class="rp ${wide?'wide':'narrow'}${gl?' glass':''}"><div class="rb">${SCR[top().t](top())}</div></div>`;
   if(keep&&wide) $('.rb').scrollTop=st; if(!keep){const a=document.querySelector('.app'); if(a) a.scrollTop=0; host.scrollTop=0}
   bindDrag(); const det=$('.det'); if(det&&!keep) det.scrollTop=0;
   if(typeof updBack==='function') updBack(); if(typeof setTabs==='function') setTabs()}
