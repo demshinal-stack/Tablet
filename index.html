@@ -977,6 +977,28 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
   .phandle i{width:3px;height:22px;border-radius:2px}
   .phandle::before{content:"";position:absolute;inset:-14px -6px -14px -20px}
 }
+
+/* шапка: в режиме «Отчёты» — заголовок и легенда периодов вместо метки «✓ 9+3» */
+#syncBtn[hidden]{display:none!important}
+.rephead{display:flex;align-items:center;gap:14px;flex:1 1 auto;min-width:0;margin-left:6px}
+.rephead[hidden]{display:none}
+.rephead b{font-family:var(--f-display);font-weight:500;font-size:17px;color:var(--chrome-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.rephead .rlg{display:inline-flex;gap:10px;margin-left:auto;font-size:12.5px;font-weight:600;color:var(--chrome-ink);white-space:nowrap;flex:none}
+.rephead .rlg i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+body.mode-rep .top .crumbs{display:none!important}
+@media (max-width:900px){.rephead b{display:none} .rephead .rlg{gap:7px;font-size:11.5px} .rephead .rlg i{margin-right:3px}}
+@media (max-width:400px){.rephead .rlg{font-size:10.5px;gap:5px}}
+/* горизонтальный телефон: шапка до правого края (под вырез экрана) */
+@media (orientation:landscape) and (max-height:600px){
+  .app>.top{margin-right:calc(-1 * env(safe-area-inset-right, 0px));padding-right:calc(12px + env(safe-area-inset-right, 0px))!important}
+  .rephead b{display:inline;font-size:15px}
+}
+
+/* горизонтально: «Отчётность · 2026» по центру шапки */
+@media (orientation:landscape){
+  body.mode-rep .app>.top{position:relative}
+  body.mode-rep .rephead b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:34vw;pointer-events:none}
+}
 </style>
 </head>
 <body>
@@ -986,6 +1008,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
     <div class="brand"><b>ЭНГС</b><span>Пульс 2</span></div>
     <div class="mseg" id="modeSeg" role="group" aria-label="Режим данных"><button type="button" data-mode="ops" aria-pressed="true" title="Оперативные данные: суточные рапорты и ТОИР">Опер</button><button type="button" data-mode="rep" aria-pressed="false" title="Утверждённая отчётность: БП и прогнозы">Отчёты</button></div>
     <span class="hchips" id="hchips"></span>
+    <span class="rephead" id="repHead"></span>
     <nav class="crumbs" id="crumbs" aria-label="Уровни"></nav>
     <button type="button" class="sync" id="syncBtn" aria-haspopup="dialog" aria-controls="syncPop"></button>
     <button type="button" class="bell" id="bellBtn" aria-label="Уведомления" aria-haspopup="dialog" aria-controls="npanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><em id="bellN" hidden></em></button>
@@ -1038,7 +1061,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:52,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:54,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2158,7 +2181,9 @@ function renderChips(){const ch=[], atW=state.level==='well'&&state.well; /* н�
     if(k==='npv'){F.npv=false; refresh(true)} else if(k==='res'){F.res=false; refresh(true)}
     else if(k==='field') go({level:'fields',field:null,cust:null,well:null}); else if(k==='cust') go({level:state.field?'field':'fields',cust:null,well:null}); else go({level:state.cust?'cust':state.field?'field':'fields',well:null})})}
 function renderSync(){const b=document.getElementById('syncBtn'); if(!b) return;
-  if(state.mode==='rep'&&window.REP){b.className='sync rep'; b.innerHTML=REP.pill(); b.setAttribute('aria-label',REP.pillLabel()+'. Открыть настройки сравнения'); document.getElementById('syncPop').hidden=true; return}
+  const RH=document.getElementById('repHead');
+  if(state.mode==='rep'&&window.REP){b.hidden=true; document.getElementById('syncPop').hidden=true; if(RH){RH.hidden=false; RH.innerHTML=`<b>Отчётность · 2026</b><span class="rlg" aria-label="${esc(REP.pillLabel())}">${REP.legend()}</span>`} return}
+  b.hidden=false; if(RH){RH.hidden=true; RH.innerHTML=''}
   const S=syncState();
   b.className='sync '+S.lvl; b.innerHTML=`<i class="dot"></i><span class="sl">Данные на</span><b>${fmtMsk(LOAD.at)}</b><span class="sm">МСК</span>${S.fails.length?`<em>${S.fails.length}</em>`:''}`;
   b.setAttribute('aria-label','Данные на '+fmtMsk(LOAD.at,1)+' МСК'+(S.missed?', плановая загрузка не прошла':'')+(S.fails.length?', без обмена: '+S.fails.length+' буровые':''));
@@ -2778,6 +2803,7 @@ h2{font-size:20px}
 .wide .rb{height:100%;overflow:auto;padding:4px 0 6px;display:flex;flex-direction:column}
 .wide .rb>.setg.w,.wide .rb>.tbl{flex:1;min-height:0}
 .rh h3{font-size:18px}
+.rh.rhome{display:none}
 /* Liquid Glass: плитки и карточки — стекло над цветной подложкой страницы */
 .glass .tile,.glass .card{background:linear-gradient(160deg,rgba(255,255,255,.13),rgba(255,255,255,0) 55%),var(--g-base,var(--surface));-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);border:1px solid var(--g-edge,var(--line));box-shadow:inset 0 1px 0 var(--g-hi,transparent),inset 0 -1px 1px rgba(255,255,255,.06),0 10px 30px var(--g-shadow,transparent)}
 .glass .tile{border-radius:var(--r-xl)}
@@ -2795,7 +2821,7 @@ const $=s=>shadow.querySelector(s);
 try{const o=JSON.parse(localStorage.getItem('pulse-rep')||'{}'); if(Array.isArray(o.order)&&o.order.every(p=>PER[p])&&o.order.length===DEF.length) ORDER=o.order; if(Array.isArray(o.tiles)&&o.tiles.length===TDEF.length&&o.tiles.every(id=>TDEF.includes(id))) TORD=o.tiles; if(Array.isArray(o.hide)) THIDE=new Set(o.hide.filter(id=>TDEF.includes(id)))}catch(e){}
 const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:ORDER,tiles:TORD,hide:[...THIDE]}))}catch(e){}};
   const groups=[...new Set(IND.map(i=>i.g))];
-  function home(){return `<div class="rh"><h3>Отчётность · 2026</h3><span class="lgd" aria-label="Периоды сравнения">${legend()}</span></div>
+  function home(){return `<div class="rh rhome"><h3>Отчётность · 2026</h3><span class="lgd" aria-label="Периоды сравнения">${legend()}</span></div>
     <div class="tiles" style="${wide?(()=>{const n=TILES().length, c=n<=3?Math.max(1,n):n<=6?3:4; return `grid-template-columns:repeat(${c},minmax(0,1fr));grid-template-rows:repeat(${Math.max(1,Math.ceil(n/c))},minmax(0,1fr))`})():''}">${TILES().map(I=>tile(I,wide)).join('')||'<div class="card" style="padding:16px">Все плитки скрыты. Включите их в «Настройках».</div>'}</div>${wide?'':'<p class="why">Нажмите плитку — откроется детализация.</p>'}`}
   function rowsHTML(b,I){
     if(b.share){const tot=b.rows.reduce((a,r)=>a+r[1],0);
@@ -2875,7 +2901,8 @@ window.REP={render,
   go:t=>{S.stack=t==='home'?[{t:'home'}]:[{t:'home'},{t}]},
   canBack:()=>S.stack.length>1, back:()=>{S.stack.pop(); render()},
   pill:()=>`<svg class="rk" width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 8.5l3 3 7-7"/></svg><b>${PER[CMP()[2]].sh}</b>`,
-  pillLabel:()=>'Утверждённый период: '+PER[CMP()[2]].n};
+  pillLabel:()=>'Утверждённый период: '+PER[CMP()[2]].n,
+  legend:()=>CMP().map((p,i)=>`<span><i style="background:${SLOT[i]}"></i>${PER[p].sh}</span>`).join('')};
 })();
 
 if(state.mode==='rep'){setTabs(); refresh(true)}
