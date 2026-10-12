@@ -636,6 +636,10 @@ button.np-tr{cursor:pointer} .np-tr.h{font-size:10.5px;color:var(--muted);border
 .npv-loss{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:6px;margin-top:8px} .npv-loss div{background:var(--surface);border-radius:10px;padding:7px 9px;min-width:0} .npv-loss small{display:block;font-size:10.5px;color:var(--muted)} .npv-loss b{color:var(--ink);font-size:13.5px}
 .np-kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:12.5px} .np-kv span{color:var(--muted)} .np-kv b{color:var(--ink);font-weight:500;text-align:right}
 .npv-tl{margin:4px 0 6px 6px;padding-left:16px;border-left:2px solid var(--line)} .npv-tl div{position:relative;padding-bottom:12px;font-size:12.5px} .npv-tl div::before{content:"";position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)} .npv-tl div.now::before{background:var(--bad);border-color:var(--bad)} .npv-tl b{display:block;color:var(--ink)} .npv-tl span{color:var(--muted)}
+.opsum{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:12px;align-items:center;width:100%;text-align:left;margin:14px 0 4px;padding:10px 14px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));background:var(--pale);border-radius:14px;cursor:pointer;font:inherit;color:inherit}
+.opsum svg{width:34px;height:34px;padding:6px;border-radius:10px;background:var(--accent);color:var(--surface)}
+.opsum b{display:block;color:var(--ink);font-weight:600;font-size:14px} .opsum small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .opsum i{font-style:normal;font-size:20px;color:var(--accent)}
+.opsum:hover{border-color:var(--accent)}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -757,7 +761,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:31,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:33,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1268,6 +1272,30 @@ function trajectory(w){const tp=w.tp, T=w.T, hz=w.prof==='hz';
 function viewAt(w,t){if(t>=w.tNow-1e-6) return {t:w.tNow,dep:w.depth,st:w.status,op:w.op};
   const g=w.fact.segs.find(g=>t>=g.t0&&t<g.t1)||w.fact.segs[0], st=g.op.k==='N'?'npv':g.op.k==='D'?'drill':'casing';
   return {t,dep:Math.min(w.depth,depthAt(w.fact,t)),st,op:g.op}}
+/* этапы строительства на схеме: скобка по глубине + подпись; подписи раздвигаются, чтобы не накладываться */
+function relaxLabels(L,G,lo,hi){L.sort((p,q)=>p.y-q.y); for(let it=0;it<40;it++){let mv=false;
+  for(let i=1;i<L.length;i++){const p=L[i-1],q=L[i],d=G(p,q)-(q.y-p.y); if(d>.5){mv=true; if(p.fixed) q.y+=d; else if(q.fixed) p.y-=d; else {p.y-=d/2; q.y+=d/2}}}
+  L.forEach(o=>{if(!o.fixed) o.y=Math.max(lo,Math.min(hi,o.y))}); if(!mv) break}}
+function stageLabels(ctx,o){const {ns,tp,ys,stg,dep,yD,bx,W,H,top,cs}=o, lx=bx+14, prog='#00BFAE';
+  const L=[]; for(let s=0;s<ns;s++){const a=ys(tp[s]), b=ys(tp[s+1]); L.push({s,a,b,mid:(a+b)/2,y:(a+b)/2,h:26,st:stg[s]})}
+  const pill={pill:true,fixed:true,y:Math.max(top,Math.min(H-14,yD)),h:22}; L.push(pill);
+  relaxLabels(L,(p,q)=>(p.h+q.h)/2+4,top+4,H-18);
+  // скобки
+  L.filter(x=>!x.pill).forEach(x=>{const c=x.st==='done'?prog:x.st==='act'?cs.fact:cs.muted; ctx.strokeStyle=c; ctx.lineWidth=2;
+    const a=x.a+1.5, b=Math.max(a+2,x.b-1.5);
+    if(x.st==='act'){const m=Math.max(a,Math.min(b,ys(dep))); ctx.beginPath(); ctx.moveTo(bx,a); ctx.lineTo(bx,m); ctx.stroke(); ctx.setLineDash([3,4]); ctx.globalAlpha=.6; ctx.beginPath(); ctx.moveTo(bx,m); ctx.lineTo(bx,b); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1}
+    else {if(x.st==='proj'){ctx.setLineDash([3,4]); ctx.globalAlpha=.7} ctx.beginPath(); ctx.moveTo(bx,a); ctx.lineTo(bx,b); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1}
+    ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(bx-4,a); ctx.lineTo(bx+2,a); ctx.moveTo(bx-4,b); ctx.lineTo(bx+2,b); ctx.stroke();
+    // выноска от середины скобки к подписи
+    const my=Math.max(a,Math.min(b,x.mid)); ctx.strokeStyle=c; ctx.globalAlpha=.55; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(bx+2,my); ctx.bezierCurveTo(bx+8,my,lx-8,x.y,lx-3,x.y); ctx.stroke(); ctx.globalAlpha=1;
+    const mark=x.st==='done'?'✓ ':x.st==='act'?'● ':'';
+    ctx.font='600 11px Golos Text, system-ui'; ctx.fillStyle=x.st==='proj'?cs.muted:cs.ink; ctx.fillText(mark+SEC_N[x.s],lx,x.y-2);
+    ctx.font='10px Golos Text, system-ui'; ctx.fillStyle=cs.muted;
+    const sub=SEC_C[x.s]+' · до '+nf0(tp[x.s+1])+' м'+(x.st==='proj'?' · проект':x.st==='act'?(o.crep?' · крепление':' · бурение'):'');
+    ctx.fillText(sub,lx,x.y+11)});
+  // забой
+  const label='Забой '+nf0(dep)+' м'; ctx.font='600 11px Golos Text, system-ui'; const lw=ctx.measureText(label).width+14, px=Math.min(W-lw-6,lx);
+  ctx.fillStyle=o.npv?cs['st-npv']:cs.fact; ctx.beginPath(); ctx.roundRect?ctx.roundRect(px,pill.y-10,lw,20,10):ctx.rect(px,pill.y-10,lw,20); ctx.fill(); ctx.fillStyle=cs.surface; ctx.fillText(label,px+7,pill.y+4)}
 function wellbore(canvas,w){
   canvas._V=canvas._V||{t:w.tNow};
   if(w.traj) return wellboreDir(canvas,w);
@@ -1291,15 +1319,15 @@ function wellbore(canvas,w){
     const dep=v.dep, yD=ys(dep);
     for(let s=0;s<ns;s++){if(dep<=tp[s]) break; const a=ys(tp[s]), b=ys(Math.min(dep,tp[s+1])), rh=r(BIT[s]); ctx.fillStyle=mud; ctx.fillRect(cx-rh,a,rh*2,b-a)}
     const doneC=new Set(w.fact.segs.filter(g=>g.op.k==='C'&&g.t1<=v.t).map(g=>g.op.s)); const curC=w.fact.segs.find(g=>g.op.k==='C'&&g.t0<=v.t&&g.t1>v.t);
-    ctx.font='10.5px Golos Text, system-ui';
+    const stg=[];
     for(let s=0;s<ns;s++){const run=doneC.has(s)?1:(curC&&curC.op.s===s?Math.min(1,(v.t-curC.t0)/(curC.t1-curC.t0)/.6):0);
-      const ly=ys(tp[s+1])+4, lx=cx+maxR+14;
-      if(!run){ctx.fillStyle=cs.muted; ctx.fillText(SEC_C[s]+' · '+nf0(tp[s+1])+' м · проект',lx,ly); continue}
+      stg[s]=run>=1?'done':run>0||(dep>tp[s]&&dep<=tp[s+1])?'act':'proj';
+      if(!run) continue;
       const bot=tp[s+1]*run, yb=ys(bot), rc=r(CASD[s]), rh=r(BIT[s]), wd=2.5;
       ctx.fillStyle=cement; const ya=ys(tp[s]), yc=ys(Math.min(bot,tp[s+1])); if(yc>ya){ctx.fillRect(cx-rh,ya,rh-rc-wd,yc-ya); ctx.fillRect(cx+rc+wd,ya,rh-rc-wd,yc-ya)}
       ctx.fillStyle=steelLo; ctx.fillRect(cx-rc-wd,y0,wd,yb-y0); ctx.fillRect(cx+rc,y0,wd,yb-y0);
       ctx.beginPath(); ctx.moveTo(cx-rc-wd-3,yb); ctx.lineTo(cx-rc,yb); ctx.lineTo(cx-rc,yb-6); ctx.fill(); ctx.beginPath(); ctx.moveTo(cx+rc+wd+3,yb); ctx.lineTo(cx+rc,yb); ctx.lineTo(cx+rc,yb-6); ctx.fill();
-      ctx.fillStyle=cs.body; ctx.fillText((run>=1?'✓ ':'↓ ')+SEC_C[s]+' · '+nf0(tp[s+1])+' м',lx,ly)}
+    }
     const drilling=v.st==='drill', stringOn=v.st==='drill'||v.st==='npv';
     if(stringOn&&dep>0){const s=v.op.s, rb=r(BIT[s])*.94, hb=Math.max(10,rb*.6), rp=Math.max(3,r(127)*.6);
       if(drilling&&!RM.matches) phase+=dt*(4+s);
@@ -1312,9 +1340,7 @@ function wellbore(canvas,w){
       for(let k=0;k<12;k++){const th=k*Math.PI/6+phase, c=Math.cos(th); if(c<0) continue; ctx.fillStyle=mud; ctx.beginPath(); ctx.arc(cx+rb*.8*Math.sin(th),yD-2.5,1+1.6*c,0,7); ctx.fill()}
       if(v.st==='npv'){ctx.strokeStyle=cs['st-npv']; ctx.globalAlpha=.5+.45*Math.sin(now/220); ctx.lineWidth=2.5; ctx.beginPath(); ctx.ellipse(cx,yD-hb*.5,rb+7,hb+5,0,0,7); ctx.stroke(); ctx.globalAlpha=1}}
     ctx.strokeStyle=cs.fact; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(40,yD); ctx.lineTo(cx-maxR,yD); ctx.stroke(); ctx.setLineDash([]);
-    const label='Забой '+nf0(dep)+' м'; ctx.font='600 11px Golos Text, system-ui'; const lw=ctx.measureText(label).width+14, lx=Math.min(W-lw-6,cx+maxR+12);
-    let ly=yD; for(let s=0;s<ns;s++){if(Math.abs(ys(tp[s+1])+0-ly)<14) ly=ys(tp[s+1])-16} ly=Math.max(y0+12,Math.min(H-14,ly));
-    ctx.fillStyle=v.st==='npv'?cs['st-npv']:cs.fact; ctx.beginPath(); ctx.roundRect?ctx.roundRect(lx,ly-10,lw,20,10):ctx.rect(lx,ly-10,lw,20); ctx.fill(); ctx.fillStyle=cs.surface; ctx.fillText(label,lx+7,ly+4);
+    stageLabels(ctx,{ns,tp,ys,stg,dep,yD,bx:cx+maxR+10,W,H,top:y0+12,cs,npv:v.st==='npv',crep:v.op.k==='C'});
     raf=requestAnimationFrame(frame);
   }
   raf=requestAnimationFrame(frame); return ()=>cancelAnimationFrame(raf);
@@ -1361,7 +1387,7 @@ function wellboreDir(canvas,w){
       ctx.strokeStyle=steelLo; ctx.lineWidth=rc*2+3; path(0,bt); ctx.stroke(); ctx.strokeStyle=mud; ctx.lineWidth=rc*2-1; path(0,bt); ctx.stroke(); shoes.push([s,run])}
     const drawShoes=LB=>{ctx.font='10.5px Golos Text, system-ui'; const placed=LB?[LB]:[]; const hit=(x,y,w)=>placed.some(b=>x<b[0]+b[2]&&x+w>b[0]&&y>b[1]-2&&y-11<b[1]+b[3]);
     shoes.forEach(([s,run])=>{const md=tp[s+1]; if(s<1) return; const [x,y,a]=P(md), nx=Math.cos(a), ny=-Math.sin(a), off=maxR+10;
-      const t=(run>=1?'✓ ':run>0?'↓ ':'')+SEC_C[s]+' · '+nf0(md)+' м'+(run?'':' · проект'); ctx.fillStyle=run?cs.body:cs.muted;
+      const act=!run&&dep>tp[s]&&dep<=tp[s+1], t=(run>=1?'✓ ':run>0||act?'● ':'')+SEC_N[s]+' '+SEC_C[s]+' · '+nf0(md)+' м'+(run?'':act?' · бурение':' · проект'); ctx.fillStyle=run||(dep>tp[s]&&dep<=tp[s+1])?cs.body:cs.muted;
       const tw=ctx.measureText(t).width, low=a>1.05; let tx=low?x-tw+4:x+nx*off, ty=low?y+off+8:y+ny*off+4; tx=Math.max(4,Math.min(W-tw-4,tx));
       let n=0; while(hit(tx,ty,tw)&&n++<6) ty+=low?14:-14; placed.push([tx,ty-11,tw,13]); ctx.fillText(t,tx,ty)})};
     // точка начала набора угла
@@ -1488,7 +1514,7 @@ function sparkSVG(ws){const r=d3.sum(ws,w=>w.planDay)||1, v=PER.month.bins.map(b
 function sectionsHTML(w){const wts=[]; w.planS.segs.forEach(g=>{wts[g.op.s]=(wts[g.op.s]||0)+(g.t1-g.t0)});
   const per=wts.map((x,s)=>{let wd=0,wc=0; w.planS.segs.filter(g=>g.op.s===s).forEach(g=>{if(g.op.k==='D') wd+=g.t1-g.t0; else wc+=g.t1-g.t0});
     const df=Math.max(0,Math.min(1,(w.depth-w.tp[s])/(w.tp[s+1]-w.tp[s]))); const cs=w.fact.segs.filter(g=>g.op.k==='C'&&g.op.s===s); let cp=0; if(cs.length){const a=cs[0].t0,b=cs[cs.length-1].t1; cp=w.tNow>=b?1:w.tNow<=a?0:(w.tNow-a)/(b-a)} return (wd*df+wc*cp)/(wd+wc)});
-  return '<div class="pg">'+per.map((p,s)=>`<span class="${p>0&&p<.999&&w.status!=='npv'?'act':''}" style="flex-grow:${wts[s]}"><em style="width:${(p*100).toFixed(1)}%"></em></span>`).join('')+'</div><div class="pg-l">'+per.map((p,s)=>`<span style="flex-grow:${wts[s]}">${SEC_N[s]} ${SEC_C[s]}</span>`).join('')+'</div>'}
+  return '<div class="pg">'+per.map((p,s)=>`<span class="${p>0&&p<.999&&w.status!=='npv'?'act':''}" style="flex-grow:${wts[s]}"><em style="width:${(p*100).toFixed(1)}%"></em></span>`).join('')+'</div>'}
 function custRow(c,ws){const t=totals(ws,'month');
   return `<button type="button" class="row" data-go="cust:${c.id}"><span class="av">${avHTML(c)}</span><span style="min-width:0"><div class="t">${esc(c.n)}</div><div class="s">${ws.length} скв. · ${ws.map(w=>w.no).join(', ')}</div></span><span class="r">${ws.some(w=>w.npv)?'<span class="pill" style="background:var(--st-npv)">НПВ</span>':''}<b class="${Math.round(t.pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(t.pct*100)} %</b>плана мес.${sparkSVG(ws)}</span></button>`}
 function renderPanel(){
@@ -1542,6 +1568,7 @@ function renderPanel(){
       ${w.bad?`<div class="warnbox">Забой ${nf0(w.depth)} м больше проектного ${nf0(w.target)} м — проверьте данные источника.</div>`:''}
       <div class="sub" style="margin-top:-8px">${w.status==='npv'?'<b style="color:var(--bad)">НПВ:</b> ':''}${esc(w.op.n)} <span class="note">(демо)</span></div>
       ${sectionsHTML(w)}
+      <button type="button" class="opsum" id="opSum"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M9 3.5h6v3H9zM8.5 11h7M8.5 14.5h7M8.5 18h4"/></svg><span><b>Оперативная сводка</b><small>работы за сутки и план · на ${fmtMsk(LOAD.at)}</small></span><i>›</i></button>
       <div class="tabs" role="tablist">${[['drill','Бурение'],['ggd','ГГД'],['dyn','Динамика'],['rig','Станок']].map(([k,n])=>`<button type="button" role="tab" data-wt="${k}" aria-selected="${tab===k}">${n}</button>`).join('')}</div>`;
     if(tab==='drill') h+=`<div class="rp nogest"><button type="button" class="rp-b" id="rpGo" aria-label="Показать бурение с начала"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="rpIco" d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></button>
       <div class="rp-m"><div class="rp-t"><b id="rpD"></b><span id="rpS"></span></div><input type="range" id="rpR" min="0" max="${w.tNow.toFixed(3)}" step="0.01" value="${w.tNow.toFixed(3)}" aria-label="Момент бурения"></div>
@@ -1575,6 +1602,7 @@ function renderPanel(){
         <div class="rig-l">${rows.map(r=>`<div class="rl${r.cur?' cur':''}"><span class="pad">${esc(String(r.pad)).slice(0,4)}</span><span class="m"><b>${esc(r.no)}${r.cur?'<em>сейчас</em>':''}</b><small>${fmtR(r.d0)} – ${r.d1?fmtR(r.d1):'по н. в.'} · ${nf1(r.days)} сут</small></span><span class="v">${nf0(r.T)} м</span></div>`).join('')}</div></div>`}
     h+='</div>'; panel.innerHTML=h; bindGo(panel);
     panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{state.wtab=b.dataset.wt; renderPanel()});
+    document.getElementById('opSum').onclick=()=>nOpen('well',{w:w.id,d:0});
     if(tab==='drill'){const cv=document.getElementById('wbc'); cv._V={t:w.tNow}; const stop=wellbore(cv,w);
       const R=document.getElementById('rpR'), go=document.getElementById('rpGo'), ico=document.getElementById('rpIco'); let play=false, raf=0, last=0, spd=1;
       const DUR=16; // секунд на весь путь при 1×
