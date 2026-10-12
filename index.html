@@ -607,6 +607,35 @@ button.np-tr{cursor:pointer} .np-tr.h{font-size:10.5px;color:var(--muted);border
 .np-ops td,.np-ops th{text-align:left} .np-ops td:last-child,.np-ops th:last-child{text-align:right}
 .np-p{margin:0;font-size:13px}
 @media (max-width:900px), (orientation:landscape) and (max-height:600px){.np-b[data-nb]{display:none}}
+/* НПВ: карточка в блоке и экран */
+.npvc{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:10px 12px;cursor:pointer;font:inherit;color:inherit;margin:6px 0 12px}
+.npvc:hover{border-color:var(--accent)}
+.npvc-n{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:8px} .npvc-n small{display:block;font-size:10.5px;color:var(--muted)} .npvc-n b{font-family:var(--f-display);font-weight:500;font-size:18px;color:var(--ink);white-space:nowrap} .npvc-n b.bad{color:var(--bad)}
+.npvc-f{display:flex;justify-content:space-between;gap:8px;margin-top:8px;font-size:11.5px;color:var(--muted)} .npvc-f b{color:var(--accent);font-weight:600;white-space:nowrap}
+.npv-pc{display:grid;grid-template-columns:1fr 1fr;gap:8px} .npv-pc button{text-align:left;border:1px solid var(--line);background:var(--band);border-radius:14px;padding:9px 12px;cursor:pointer;font:inherit;color:inherit}
+.npv-pc button.on{border-color:var(--accent);background:var(--pale)} .npv-pc small{display:block;font-size:11px;color:var(--muted)} .npv-pc b{display:block;font-family:var(--f-display);font-weight:500;font-size:22px;color:var(--bad)} .npv-pc span{font-size:10.5px;color:var(--muted)}
+.npv-src{font-size:11.5px;color:var(--accent);margin:8px 0}
+.npv-hr{display:grid;grid-template-columns:repeat(3,1fr);gap:6px} .npv-hr>*{text-align:left;border:1px solid transparent;background:var(--band);border-radius:12px;padding:7px 10px;font:inherit;color:inherit;cursor:pointer} .npv-hr div{cursor:default}
+.npv-hr .on{border-color:var(--line);box-shadow:inset 0 0 0 1px var(--accent)} .npv-hr small{display:block;font-size:10.5px;color:var(--muted)} .npv-hr b{font-size:16px;color:#C99A00;font-weight:600}
+:root[data-theme="dark"] .npv-hr b{color:#F2C14E} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .npv-hr b{color:#F2C14E}}
+.npv-tm{position:relative;height:300px;margin-top:10px}
+.npv-tm .tile{position:absolute;border:0;border-radius:14px;padding:10px 12px;display:flex;flex-direction:column;justify-content:space-between;text-align:left;cursor:pointer;font:inherit;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.06)}
+.npv-tm .tile .n{font-size:13px;font-weight:500} .npv-tm .tile .v{font-family:var(--f-display);font-weight:500;font-size:24px;text-align:right;line-height:1} .npv-tm .tile .v small{display:block;font-family:var(--f-body);font-size:11px;opacity:.8;margin-bottom:4px;text-align:left}
+.npv-tm .tile.xs{padding:7px 9px} .npv-tm .tile.xs .v{font-size:15px} .npv-tm .tile.xs .v small{display:none} .npv-tm .tile.xs .n{font-size:11.5px}
+.npv-empty{display:grid;place-items:center;height:100%;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+.npg-l{display:flex;justify-content:space-between;align-items:center} .npg-l .np-all{text-transform:none;letter-spacing:0}
+.nprow{display:grid;grid-template-columns:4px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;text-align:left;padding:9px 12px 9px 0;border:0;border-radius:12px;background:var(--band);margin-bottom:6px;cursor:pointer;font:inherit;color:inherit;overflow:hidden}
+.nprow>i{align-self:stretch;border-radius:0 3px 3px 0} .nprow .m{min-width:0} .nprow .m b{display:block;color:var(--ink);font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .nprow small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nprow .r{text-align:right;white-space:nowrap} .nprow .r b{display:block;color:var(--ink);font-size:14px}
+.live{display:inline-flex;align-items:center;gap:5px;font-style:normal;font-size:10.5px;font-weight:700;color:var(--bad)} .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--bad);animation:sdp 1.2s infinite}
+.npv-mon{display:flex;align-items:flex-end;gap:4px;height:84px} .npv-mon div{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0} .npv-mon i{width:100%;border-radius:4px 4px 0 0;min-height:2px} .npv-mon span{font-size:10px;color:var(--muted)}
+.npv-sub{display:grid;grid-template-columns:minmax(0,1fr) 60px 40px;gap:8px;align-items:center;font-size:12.5px;margin-bottom:8px} .npv-sub b{text-align:right;color:var(--ink)} .npv-sub em{font-style:normal;text-align:right;color:var(--muted)} .npv-sub i{grid-column:1/-1;height:6px;border-radius:3px;background:var(--grid);overflow:hidden;display:block} .npv-sub u{display:block;height:100%}
+.npv-f{display:flex;gap:6px;overflow-x:auto;margin:4px 0 10px;scrollbar-width:none} .npv-f button{flex:none;border:1px solid var(--line);background:var(--band);color:var(--body);font:inherit;font-size:12px;border-radius:999px;padding:5px 11px;cursor:pointer} .npv-f button.on{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.np-card{background:var(--band);border-radius:14px;padding:12px 14px;margin-bottom:8px} .tag{display:inline-block;font-size:10.5px;padding:2px 8px;border-radius:6px;font-weight:600;margin-right:6px}
+.np-ttl{font-family:var(--f-display);font-weight:500;font-size:16px;color:var(--ink);margin:8px 0 2px} .npv-big2{display:flex;align-items:baseline;gap:8px} .npv-big2 b{font-family:var(--f-display);font-weight:500;font-size:28px;color:var(--bad)} .npv-big2 span{color:var(--muted)}
+.npv-loss{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:6px;margin-top:8px} .npv-loss div{background:var(--surface);border-radius:10px;padding:7px 9px;min-width:0} .npv-loss small{display:block;font-size:10.5px;color:var(--muted)} .npv-loss b{color:var(--ink);font-size:13.5px}
+.np-kv{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:12.5px} .np-kv span{color:var(--muted)} .np-kv b{color:var(--ink);font-weight:500;text-align:right}
+.npv-tl{margin:4px 0 6px 6px;padding-left:16px;border-left:2px solid var(--line)} .npv-tl div{position:relative;padding-bottom:12px;font-size:12.5px} .npv-tl div::before{content:"";position:absolute;left:-23px;top:3px;width:10px;height:10px;border-radius:50%;background:var(--surface);border:2px solid var(--accent)} .npv-tl div.now::before{background:var(--bad);border-color:var(--bad)} .npv-tl b{display:block;color:var(--ink)} .npv-tl span{color:var(--muted)}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -722,7 +751,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:29,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:30,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -806,11 +835,12 @@ const BIT=[490,393.7,295.3,220.7,155.6], CASD=[426,323.9,244.5,177.8,114.3];
 const D_NAME=['Бурение под направление','Бурение под кондуктор','Бурение под техколонну','Бурение под эксплуатационную колонну','Бурение под хвостовик'];
 const C_NAME=['Крепление направления','Спуск и цементирование кондуктора','Спуск и цементирование техколонны','Спуск и цементирование э/к','Спуск хвостовика'];
 /* НПВ: типы верхнего уровня и причины (демо) */
-const NPV_T=[{n:'Отказ оборудования',c:'#E08A00',r:['Ремонт верхнего привода','Отказ ВЗД: замена','Ремонт бурового насоса','Отказ ДВС']},
-  {n:'Геологические осложнения',c:'#D0473A',r:['Поглощение: ликвидация','Прихват: ликвидация','ГНВП: глушение']},
-  {n:'Ожидание сервиса',c:'#7A5AF8',r:['Ожидание тампонажного флота','Ожидание партии ГИС','Ожидание телесистемы']},
-  {n:'Организационные',c:'#2F6FD0',r:['Ожидание решения заказчика','Ожидание материалов и долот']},
-  {n:'Погодные условия',c:'#7F93AB',r:['Метель: остановка работ']}];
+const NPV_T=[{n:'НПР',full:'Непроизводительные работы',c:'#7A2328',own:1,r:['Повторные СПО','Промывка сверх нормы','Доработка ствола','Ожидание телесистемы']},
+  {n:'Инцидент',c:'#C9434A',own:1,r:['Прихват: ликвидация','Обрыв бурильной колонны','Падение предмета в скважину','Отказ ВЗД: замена']},
+  {n:'Брак',c:'#3A3F47',own:1,r:['Брак цементирования','Брак при креплении']},
+  {n:'Простои',c:'#6B7078',own:0,r:['Ожидание решения заказчика','Ожидание тампонажного флота','Ожидание материалов и долот','Ожидание партии ГИС','Метель: остановка работ']},
+  {n:'Осложнения',c:'#3F5875',own:0,r:['Поглощение: ликвидация','ГНВП: глушение','Осыпи и обвалы']},
+  {n:'Ремонт',c:'#D9DEE5',fg:'#3F5875',own:1,r:['Ремонт верхнего привода','Ремонт бурового насоса','Отказ ДВС']}];
 const NPV_R=NPV_T.flatMap(t=>t.r), NPV_CAT=Object.fromEntries(NPV_T.flatMap((t,i)=>t.r.map(r=>[r,i])));
 function build(ops,noise,seed){
   const R=rng(seed||1), pts=[{t:0,d:0}], segs=[]; let t=0,d=0;
@@ -871,8 +901,10 @@ function metersW(w,a,b){let m=0; b=Math.min(b,0);
   return Math.max(0,m)}
 function npvBy(ws,a,b){const out=NPV_T.map(()=>0); ws.forEach(w=>{const add=(S,t0,lim)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1,lim); if(y>x) out[NPV_CAT[g.op.n]??0]+=(y-x)*24});
   w.hist.forEach(h=>add(h.fact,h.t0,h.t1)); add(w.fact,w.spud,0)}); return out}
-function npvShare(ws,per){const [a,b]=PER[per].tot, cal=ws.length*(b-a)*24, h=d3.sum(ws,w=>npvTime(w,a,b))*24; return {h,cal,pct:cal?h/cal:0}}
-const npvPctTxt=ws=>{const x=npvShare(ws,'month'); return (x.pct*100).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' %'};
+function npvShare(ws,per){const [a,b]=PER[per].tot; return npvShareAB(ws,a,b)}
+function npvShareAB(ws,a,b){const cal=ws.length*(b-a)*24, by=npvBy(ws,a,b), h=d3.sum(by), own=d3.sum(by.filter((x,i)=>NPV_T[i].own)); return {h,own,by,cal,pct:cal?h/cal:0,opct:cal?own/cal:0}}
+const pct1=v=>(v*100).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
+const npvPctTxt=ws=>{const x=npvShare(ws,'month'); return 'собств. '+pct1(x.opct)+' · весь '+pct1(x.pct)};
 function npvTime(w,a,b){let s=0; const add=(S,t0,lim)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1,lim); if(y>x) s+=y-x});
   w.hist.forEach(h=>add(h.fact,h.t0,h.t1)); add(w.fact,w.spud,0); return s}
 CUSTOMERS.forEach(c=>{c.wells=WELLS.filter(w=>w.cust===c); c.fields=[...new Set(c.wells.map(w=>w.field))]});
@@ -1371,17 +1403,16 @@ function bindW(root){root.querySelectorAll('[data-w]').forEach(b=>b.addEventList
 function bindGo(root){root.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [l,id]=b.dataset.go.split(':'); if(state.screen==='stats'){state.screen='map'; setTabs()} if(l==='field') go({level:'field',field:id,cust:null,well:null}); else if(l==='cust') go({level:'cust',cust:id,well:null})}))}
 function dynHTML(id){return `<div class="sec dyn"><div class="sec-h"><h3>Проходка: факт и план</h3><span>нажмите период</span></div>
   <div class="dbul" id="${id}bul"></div>
+  <div class="sec-h" style="margin-top:4px"><h3>НПВ</h3><span id="${id}ns"></span></div><div class="npvb" id="${id}npv"></div>
   <div class="sec-h"><h3 style="font-size:12.5px">Нарастающим итогом</h3><span id="${id}cs"></span></div>
   <div class="cum" id="${id}ch"></div>
   <div class="cleg"><span><i></i>факт</span><span><i class="pl"></i>план</span><span><i class="fc"></i>прогноз по темпу</span><span><i class="gp"></i>отставание</span></div>
   <div class="verd" id="${id}vd"></div>
-  <div class="sec-h" style="margin-top:16px"><h3>НПВ</h3><span id="${id}ns"></span></div><div class="npvb" id="${id}npv"></div></div>`}
-function npvHTML(ws,per){const [a,b]=PER[per].tot, sh=npvShare(ws,per), by=npvBy(ws,a,b), tot=d3.sum(by)||0, f1=v=>v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
-  if(!tot) return `<div class="npv-top"><div class="npv-big good">0 %</div><div class="npv-s">НПВ нет · календарное время ${nf0(sh.cal)} ч</div></div>`;
-  const rows=NPV_T.map((t,i)=>({...t,h:by[i]})).filter(x=>x.h>0.05).sort((x,y)=>y.h-x.h);
-  return `<div class="npv-top"><div class="npv-big${sh.pct>.05?' bad':''}">${f1(sh.pct*100)} %</div><div class="npv-s"><b>${nf0(sh.h)} ч</b> из ${nf0(sh.cal)} ч календарного времени станков<br>${f1(sh.h/24)} сут · ${ws.length} ${plural(ws.length,'станок','станка','станков')}</div></div>
-    <div class="npv-bar">${rows.map(x=>`<i style="flex-grow:${x.h};background:${x.c}" title="${esc(x.n)}"></i>`).join('')}</div>
-    <div class="npv-l">${rows.map(x=>`<div class="npv-r"><span class="d" style="background:${x.c}"></span><span class="n">${esc(x.n)}</span><span class="h">${nf0(x.h)} ч</span><span class="p">${Math.round(x.h/tot*100)} %</span></div>`).join('')}</div>`}
+</div>`}
+function npvHTML(ws,per){const x=npvShare(ws,per), live=ws.filter(w=>w.status==='npv').length;
+  return `<button type="button" class="npvc"><span class="npvc-n"><span><small>Собственное</small><b class="${x.opct>.05?'bad':''}">${pct1(x.opct)}</b></span><span><small>Весь НПВ</small><b class="${x.pct>.1?'bad':''}">${pct1(x.pct)}</b></span><span><small>Сейчас в НПВ</small><b class="${live?'bad':''}">${live} скв.</b></span></span>
+    <span class="npv-bar">${x.h?NPV_T.map((t,i)=>x.by[i]>0.05?`<i style="flex-grow:${x.by[i]};background:${t.c}"></i>`:'').join(''):'<i style="flex-grow:1;background:var(--grid)"></i>'}</span>
+    <span class="npvc-f"><span>${nf0(x.own)} ч собств. · ${nf0(x.h)} ч всего · ${PER[per].n.toLowerCase()}</span><b>Типы и инциденты ›</b></span></button>`}
 const PNAME={day:'суток',month:'месяца',year:'года'};
 function bulletsHTML(ws){const mx=1.15; return ['day','month','year'].map(k=>{const t=totals(ws,k), ok=Math.round(t.pct*100)>=100;
   return `<button type="button" class="dbr" data-p="${k}" aria-pressed="${state.per===k}"><span class="p">${PER[k].n}</span>
@@ -1441,7 +1472,7 @@ function dynBind(id,ws,after,onPer){const draw=()=>{const bul=document.getElemen
     bul.innerHTML=bulletsHTML(ws);
     bul.querySelectorAll('.dbr').forEach(b=>b.onclick=()=>{state.per=b.dataset.p; if(onPer) onPer(); else draw()});
     cumChart(document.getElementById(id+'ch'),ws,state.per,document.getElementById(id+'vd'),document.getElementById(id+'cs'));
-    const nb=document.getElementById(id+'npv'); if(nb){nb.innerHTML=npvHTML(ws,state.per); document.getElementById(id+'ns').textContent=PER[state.per].n.toLowerCase()+' · доля календарного времени'}
+    const nb=document.getElementById(id+'npv'); if(nb){nb.innerHTML=npvHTML(ws,state.per); nb.querySelector('.npvc').onclick=()=>npvOpen(ws,state.per); document.getElementById(id+'ns').textContent=PER[state.per].n.toLowerCase()+' · доля календарного времени'}
     if(after) after()};
   charts.push(draw); draw()}
 /* мини-тренд: проходка за 30 суток против плана */
@@ -1667,9 +1698,9 @@ document.getElementById('syncBtn').onclick=e=>{e.stopPropagation(); const P=docu
 document.addEventListener('pointerdown',e=>{const P=document.getElementById('syncPop'); if(P&&!P.hidden&&!e.target.closest('#syncPop')&&!e.target.closest('#syncBtn')) P.hidden=true});
 function renderStrip(){const el=document.getElementById('kstrip'); if(!el) return; if(state.screen!=='map'){el.innerHTML=''; return}
   const sc=scopeWells(), t=totals(sc,'day'), npv=sc.filter(w=>w.npv).length, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
-  el.innerHTML=`<span class="kc"><span>Скважин</span><b>${sc.length}</b></span><button type="button" class="kc btn ${npv?'bad':''}" id="kNpv"><span>НПВ</span><b>${npv}</b><span>скв. · ${npvPctTxt(sc)} мес.</span></button><button type="button" class="kc btn ${rr?'bad':''}" id="kRes"><span>Ресурс</span><b>${rr}</b></button><span class="kc"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
+  el.innerHTML=`<span class="kc"><span>Скважин</span><b>${sc.length}</b></span><button type="button" class="kc btn ${npv?'bad':''}" id="kNpv"><span>НПВ</span><b>${pct1(npvShare(sc,'month').opct)}</b><span>${npv} скв. сейчас ›</span></button><button type="button" class="kc btn ${rr?'bad':''}" id="kRes"><span>Ресурс</span><b>${rr}</b></button><span class="kc"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Сводка</b>›</button>`);
-  document.getElementById('kNpv').onclick=()=>{F.npv=!F.npv; refresh(true)}; document.getElementById('kRes').onclick=()=>{F.res=!F.res; refresh(true)};
+  document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),'month'); document.getElementById('kRes').onclick=()=>{F.res=!F.res; refresh(true)};
   const ko=document.getElementById('kOpen'); if(ko) ko.onclick=()=>togglePanel(true)}
 addEventListener('resize',()=>{setSheet(sheet,true); layoutInsets()});
 
@@ -1757,13 +1788,13 @@ function renderBell(){NITEMS=nItems(); const n=unread(), e=document.getElementBy
   const P=document.getElementById('npanel'); if(P&&!P.hidden) nRender()}
 function nOpen(scr,extra){const P=document.getElementById('npanel'); if(P.hidden) NSTK=[]; else if((scr||'feed')!==NV.scr) NSTK.push({...NV}); Object.assign(NV,{scr:scr||'feed'},extra||{}); P.hidden=false; updBack(); document.getElementById('syncPop').hidden=true; nRender()}
 function nClose(){document.getElementById('npanel').hidden=true; NSTK=[]; updBack()}
-function nBack(){if(NSTK.length){Object.assign(NV,NSTK.pop()); nRender()} else nClose()}
+function nBack(){if(NSTK.length){const o=NSTK.pop(); if(o._inc!==undefined) NPV.inc=o._inc; Object.assign(NV,o); nRender()} else nClose()}
 function updBack(){const P=document.getElementById('npanel'); document.body.classList.toggle('has-back',hist.length>0||(P&&!P.hidden))}
 function nRead(id){if(!NST.r[id]){NST.r[id]=1; nSave(); renderBell()}}
 function nAct(it){nRead(it.id); if(it.kind==='sum') nOpen('sum',{d:it.d}); else if(it.kind==='well') nOpen('well',{w:it.w.id,d:it.d}); else if(it.kind==='res'){nClose(); F.res=true; if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'fields',field:null,cust:null,well:null})}}
-const NAVH=(t,sub,back)=>`<div class="np-nav">${back?`<button type="button" class="np-b" data-nb="${back}" aria-label="Назад">‹</button>`:''}<div class="np-t"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</div>${back?'':`<button type="button" class="np-all" id="npAll">Прочитать все</button>`}<button type="button" class="np-b" data-nx aria-label="Закрыть">×</button></div>`;
+const NAVH=(t,sub,back,all)=>`<div class="np-nav">${back?`<button type="button" class="np-b" data-nb="${back}" aria-label="Назад">‹</button>`:''}<div class="np-t"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</div>${all?`<button type="button" class="np-all" id="npAll">Прочитать все</button>`:''}<button type="button" class="np-b" data-nx aria-label="Закрыть">×</button></div>`;
 function nFeed(){const g=[0,1,2].map(d=>({d,L:NITEMS.filter(i=>i.d===d)})).filter(x=>x.L.length);
-  return NAVH('Уведомления')+(g.length?g.map(x=>`<div class="np-g">${x.d===0?'Последняя загрузка · '+dLbl(0):x.d===1?'Днём раньше · '+dLbl(1):dLbl(x.d)}</div>`+x.L.map(i=>`<button type="button" class="nit ${i.lvl||''}${NST.r[i.id]?'':' new'}" data-ni="${i.id}"><span class="ic ${i.kind==='sum'?'sum':i.lvl||''}">${i.ic}</span><span class="tx"><b>${esc(i.t)}</b><span>${esc(i.x)}</span><time>${dLbl(i.d)} 07:05</time></span></button>`).join('')).join('')
+  return NAVH('Уведомления','',null,1)+(g.length?g.map(x=>`<div class="np-g">${x.d===0?'Последняя загрузка · '+dLbl(0):x.d===1?'Днём раньше · '+dLbl(1):dLbl(x.d)}</div>`+x.L.map(i=>`<button type="button" class="nit ${i.lvl||''}${NST.r[i.id]?'':' new'}" data-ni="${i.id}"><span class="ic ${i.kind==='sum'?'sum':i.lvl||''}">${i.ic}</span><span class="tx"><b>${esc(i.t)}</b><span>${esc(i.x)}</span><time>${dLbl(i.d)} 07:05</time></span></button>`).join('')).join('')
     :'<p class="note">Уведомлений нет. Включите нужные в «Профиле» → «Уведомления».</p>')}
 function grpRows(by,S){const map=new Map(); WELLS.forEach(w=>{const k=by(w); if(!map.has(k)) map.set(k,[]); map.get(k).push(w)});
   return [...map].map(([k,ws])=>{const fact=d3.sum(ws,w=>metersW(w,S.a,S.b)), plan=d3.sum(ws,w=>w.planDay), nh=d3.sum(ws,w=>npvTime(w,S.a,S.b))*24, inc=S.inc.filter(i=>ws.includes(i.w)).length, nos=ws.filter(w=>!w.sync.ok).length;
@@ -1791,7 +1822,7 @@ function nWell(){const w=WELLS.find(x=>x.id===NV.w), S=daySum(NV.d,[w]), a=S.a,b
    <div class="np-g">Работы за сутки</div><table class="np-ops"><tr><th>Начало</th><th>Ч</th><th>Работы</th><th>Забой</th></tr>${ops.map(o=>`<tr><td>${fmtH(dateAt(o.x))}</td><td>${nf1r((o.y-o.x)*24)}</td><td class="${o.g.op.k==='N'?'n':''}">${o.g.op.k==='N'?'НПВ: ':''}${esc(o.g.op.n)}</td><td>${nf0(Math.min(w.depth,depthAt(w.fact,o.y-w.spud)))}</td></tr>`).join('')||'<tr><td colspan="4">нет операций</td></tr>'}</table>
    <div class="np-g">План на следующие сутки</div><p class="np-p">${nxt.length?nxt.map(esc).join('. ')+'.':'Окончание строительства скважины.'}</p>
    <button type="button" class="btn2" data-ngo="${w.id}" style="margin-top:8px">Открыть скважину</button>`}
-function nRender(){const el=document.getElementById('npin'); el.innerHTML=NV.scr==='sum'?nSum():NV.scr==='well'?nWell():nFeed(); el.scrollTop=0;
+function nRender(){const el=document.getElementById('npin'); el.innerHTML=({sum:nSum,well:nWell,npv:nNpv,ntype:nNtype,nlist:nNlist,ninc:nNinc}[NV.scr]||nFeed)(); el.scrollTop=0; npvBind(el);
   el.querySelectorAll('[data-nx]').forEach(b=>b.onclick=nClose); el.querySelectorAll('[data-nb]').forEach(b=>b.onclick=nBack);
   const all=el.querySelector('#npAll'); if(all) all.onclick=()=>{NITEMS.forEach(i=>NST.r[i.id]=1); nSave(); renderBell(); nRender()};
   el.querySelectorAll('[data-ni]').forEach(b=>b.onclick=()=>nAct(NITEMS.find(i=>i.id===b.dataset.ni)));
@@ -1799,6 +1830,62 @@ function nRender(){const el=document.getElementById('npin'); el.innerHTML=NV.scr
   el.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{NSTK.push({...NV}); NV.w=b.dataset.nw; NV.scr='well'; nRender()});
   el.querySelectorAll('[data-ngo]').forEach(b=>b.onclick=()=>{const w=WELLS.find(x=>x.id===b.dataset.ngo); nClose(); if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'well',well:w.id,field:w.field.id,cust:null})})}
 document.getElementById('bellBtn').onclick=e=>{e.stopPropagation(); const P=document.getElementById('npanel'); if(P.hidden) nOpen('feed'); else nClose()};
+
+/* ======================= экран НПВ: общая картина → тип → инцидент ======================= */
+let NPV={ws:[],per:'month',mode:'own',ti:0,inc:null,list:'top',f:null,title:''};
+function npvInc(ws,a,b){const L=[]; ws.forEach(w=>{const add=(S,t0,cur)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const s0=t0+g.t0, s1=Math.min(t0+g.t1,0), x=Math.max(a,s0), y=Math.min(b,s1); if(y<=x) return;
+    const live=cur&&w.status==='npv'&&t0+g.t1>=w.spud+w.tNow-1e-6; L.push({id:w.id+':'+Math.round(s0*1000),w,op:g.op,ti:NPV_CAT[g.op.n]??0,s0,s1,h:(y-x)*24,tot:(s1-s0)*24,live,dep:cur?g.d0:null})});
+  w.hist.forEach(h=>add(h.fact,h.t0,false)); add(w.fact,w.spud,true)}); return L}
+const YEAR0=()=>PER.year.tot[0];
+function npvOpen(ws,per){const sc=state.cust?CUSTOMERS.find(c=>c.id===state.cust).n:state.field?FIELDS.find(f=>f.id===state.field).n:'все месторождения';
+  Object.assign(NPV,{ws:ws.slice(),per:per||'month',title:ws.length===1?'Скв. '+ws[0].no:sc,f:null}); document.getElementById('syncPop').hidden=true; nOpen('npv')}
+const tColor=t=>t.c, tFg=t=>t.fg||'#fff';
+function npvRow(x){const t=NPV_T[x.ti]; return `<button type="button" class="nprow" data-inc="${x.id}"><i style="background:${t.c}"></i><span class="m"><b>Скв. ${esc(x.w.no)} · ${esc(x.op.n)}</b><small>${t.n} · ${x.w.field.n} · ${esc(x.w.cust.n)}</small></span><span class="r">${x.live?'<em class="live">идёт</em>':''}<b>${nf1(x.tot)} ч</b><small>${x.live?'с ':''}${fmtD(dateAt(x.s0))}</small></span></button>`}
+function nNpv(){const P=NPV, w0=P.ws, [a,b]=PER[P.per].tot, x=npvShareAB(w0,a,b), H={}; ['day','month','year'].forEach(k=>{const v=npvShare(w0,k); H[k]=P.mode==='own'?v.own:v.h});
+  const yr=npvInc(w0,YEAR0(),0).filter(i=>P.mode==='all'||NPV_T[i.ti].own), cur=npvInc(w0,-1,0).filter(i=>i.live);
+  return NAVH('НПВ',P.title+' · '+w0.length+' скв.',NSTK.length?'back':null)+
+  `<div class="npv-pc">${[['own','Собственное',x.opct,'по вине ЭНГС'],['all','Весь НПВ',x.pct,'с простоями и осложнениями']].map(([k,n,v,s])=>`<button type="button" data-nm="${k}" class="${P.mode===k?'on':''}"><small>${n}</small><b>${pct1(v)}</b><span>${s}</span></button>`).join('')}</div>
+   <div class="npv-src">доля календарного времени · ${PER[P.per].n.toLowerCase()} · данные на ${fmtMsk(LOAD.at)}</div>
+   <div class="npv-hr">${[['day','сутки'],['month','месяц'],['year','год']].map(([k,n])=>`<button type="button" data-np="${k}" class="${P.per===k?'on':''}"><small>${n}, ч</small><b>${nf1(H[k])}</b></button>`).join('')}</div>
+   <div class="npv-tm" id="npvTM"></div><p class="note" style="margin:4px 0 0">Плитка — доля типа в часах за ${PER[P.per].n.toLowerCase()}. Нажмите плитку — разбор по типу.</p>
+   <div class="np-g">Сейчас в НПВ · ${cur.length}</div>${cur.length?cur.map(npvRow).join(''):'<p class="note">Сейчас скважин в НПВ нет.</p>'}
+   <div class="np-g npg-l"><span>Топ с начала года</span>${yr.length>5?'<button type="button" class="np-all" data-nl="top">Все ›</button>':''}</div>${yr.sort((p,q)=>q.tot-p.tot).slice(0,5).map(npvRow).join('')||'<p class="note">Нет.</p>'}`}
+function npvTM(){const el=document.getElementById('npvTM'); if(!el) return; const P=NPV, [a,b]=PER[P.per].tot, by=npvBy(P.ws,a,b), tot=d3.sum(by.filter((v,i)=>P.mode==='all'||NPV_T[i].own));
+  if(!tot){el.innerHTML='<div class="npv-empty">НПВ за период нет</div>'; return}
+  const data={children:NPV_T.map((t,i)=>({t,i,v:by[i]})).filter(d=>d.v>0.05&&(P.mode==='all'||d.t.own))}, W=el.clientWidth||340, Hh=el.clientHeight||300;
+  const root=d3.hierarchy(data).sum(d=>d.v?Math.max(d.v,tot*.08):0).sort((p,q)=>q.value-p.value); d3.treemap().size([W,Hh]).paddingInner(6).tile(d3.treemapBinary)(root);
+  el.innerHTML=root.leaves().map(l=>{const d=l.data, ww=l.x1-l.x0, hh=l.y1-l.y0, xs=ww<92||hh<64; return `<button type="button" class="tile${xs?' xs':''}" data-ti="${d.i}" style="left:${l.x0}px;top:${l.y0}px;width:${ww}px;height:${hh}px;background:${d.t.c};color:${tFg(d.t)}"><span class="n">${d.t.n}</span><span class="v"><small>${nf1(d.v)} ч</small>${Math.round(d.v/tot*100)}%</span></button>`}).join('');
+  el.querySelectorAll('[data-ti]').forEach(b=>b.onclick=()=>{NSTK.push({...NV}); NPV.ti=+b.dataset.ti; NV.scr='ntype'; nRender()})}
+function nNtype(){const P=NPV, t=NPV_T[P.ti], w0=P.ws, H={}; ['day','month','year'].forEach(k=>{const [a,b]=PER[k].tot; H[k]=npvBy(w0,a,b)[P.ti]});
+  const cal=w0.length*(PER[P.per].tot[1]-PER[P.per].tot[0])*24, bins=PER.year.bins, mv=bins.map(bn=>npvBy(w0,bn.a,bn.b)[P.ti]), mx=Math.max(1,...mv);
+  const yr=npvInc(w0,YEAR0(),0).filter(i=>i.ti===P.ti), sub=t.r.map(r=>({r,h:d3.sum(yr.filter(i=>i.op.n===r),i=>i.tot)})).filter(x=>x.h>0).sort((p,q)=>q.h-p.h), sh=d3.sum(sub,x=>x.h)||1;
+  return NAVH(t.full||t.n,P.title+' · '+(t.own?'собственное НПВ':'не по вине ЭНГС'),'back')+
+   `<div class="np-k"><div><span>Доля · ${PER[P.per].n.toLowerCase()}</span><b class="bad">${pct1(cal?H[P.per]/cal:0)}</b><small>календарного времени</small></div><div><span>Инцидентов с начала года</span><b>${yr.length}</b><small>${yr.filter(i=>i.live).length} продолжается</small></div></div>
+   <div class="npv-hr" style="margin-top:8px">${[['day','сутки'],['month','месяц'],['year','год']].map(([k,n])=>`<div class="${P.per===k?'on':''}"><small>${n}, ч</small><b>${nf1(H[k])}</b></div>`).join('')}</div>
+   <div class="np-g">По месяцам, ч</div><div class="npv-mon">${bins.map((bn,i)=>`<div><i style="height:${mv[i]/mx*64}px;background:${t.c===NPV_T[5].c?'#9AA8B8':t.c}"></i><span>${MON[new Date(dateAt(bn.a+1)).getMonth()]}</span></div>`).join('')}</div>
+   ${sub.length?'<div class="np-g">Подтипы · с начала года</div>'+sub.map(x=>`<div class="npv-sub"><span>${esc(x.r)}</span><b>${nf0(x.h)} ч</b><em>${Math.round(x.h/sh*100)} %</em><i><u style="width:${x.h/sh*100}%;background:${t.c===NPV_T[5].c?'#9AA8B8':t.c}"></u></i></div>`).join(''):''}
+   <div class="np-g">Инциденты · ${yr.length}</div>${yr.sort((p,q)=>(q.live-p.live)||(q.tot-p.tot)).slice(0,30).map(npvRow).join('')||'<p class="note">Нет.</p>'}`}
+function nNlist(){const P=NPV, all=(P.list==='cur'?npvInc(P.ws,-1,0).filter(i=>i.live):npvInc(P.ws,YEAR0(),0)).filter(i=>P.mode==='all'||NPV_T[i.ti].own), L=all.filter(i=>P.f==null||i.ti===P.f).sort((p,q)=>q.tot-p.tot);
+  return NAVH(P.list==='cur'?'Сейчас в НПВ':'Топ с начала года',P.title+' · '+(P.mode==='own'?'собственное':'весь НПВ'),'back')+
+   `<div class="npv-f"><button type="button" data-nf="" class="${P.f==null?'on':''}">Все</button>${NPV_T.map((t,i)=>all.some(x=>x.ti===i)?`<button type="button" data-nf="${i}" class="${P.f===i?'on':''}">${t.n}</button>`:'').join('')}</div>`+
+   L.slice(0,40).map((x,i)=>npvRow(x).replace('<b>Скв.',`<b>${i+1}. Скв.`)).join('')}
+function nNinc(){const P=NPV, x=npvInc(P.ws.length?P.ws:WELLS,YEAR0()-400,0).find(i=>i.id===P.inc); if(!x) return NAVH('Инцидент','','back')+'<p class="note">Не найден.</p>';
+  const t=NPV_T[x.ti], w=x.w, lost=x.tot/24*w.planDay;
+  return NAVH('Скв. '+esc(w.no),w.field.n+' · '+esc(w.cust.n),'back')+
+   `<div class="np-card"><div><span class="tag" style="background:${t.c};color:${tFg(t)}">${t.n}</span>${x.live?'<em class="live">идёт сейчас</em>':'<span class="tag" style="background:var(--grid);color:var(--muted)">завершён</span>'}</div>
+    <div class="np-ttl">${esc(x.op.n)}</div><div class="npv-big2"><b>${nf1(x.tot)} ч</b><span>${x.live?'и продолжается':'потеряно'}</span></div>
+    <div class="npv-loss"><div><small>сутки</small><b>${nf1(x.tot/24)}</b></div><div><small>проходка</small><b>≈${nf0(lost)} м</b></div><div><small>вина</small><b>${t.own?'ЭНГС':'заказчик / подрядчик'}</b></div></div></div>
+   <div class="np-card np-kv"><span>Скважина</span><b>Скв. ${esc(w.no)} · куст ${esc(w.pad)}</b><span>Станок</span><b>${esc(w.rig)}</b><span>Заказчик</span><b>${esc(w.cust.n)}</b><span>Начало</span><b>${fmtDY(dateAt(x.s0))} ${fmtH(dateAt(x.s0))}</b><span>Окончание</span><b>${x.live?'продолжается':fmtDY(dateAt(x.s1))+' '+fmtH(dateAt(x.s1))}</b>${x.dep!=null?`<span>Глубина</span><b>${nf0(x.dep)} м</b>`:''}</div>
+   <div class="np-g">Хронология</div><div class="npv-tl"><div><b>Начало</b><span>${fmtDY(dateAt(x.s0))} ${fmtH(dateAt(x.s0))} · ${esc(x.op.n)}</span></div>${x.live?`<div class="now"><b>Сейчас</b><span>идёт ${nf1(x.tot)} ч</span></div>`:`<div><b>Работы возобновлены</b><span>${fmtDY(dateAt(x.s1))} ${fmtH(dateAt(x.s1))} · через ${nf1(x.tot)} ч</span></div>`}</div>
+   <p class="note">Описание, ответственные и меры появятся после подключения свода.</p>
+   <button type="button" class="btn2" data-ngo="${w.id}">Открыть скважину</button>`}
+function npvBind(el){
+  el.querySelectorAll('[data-nm]').forEach(b=>b.onclick=()=>{NPV.mode=b.dataset.nm; nRender()});
+  el.querySelectorAll('[data-np]').forEach(b=>b.onclick=()=>{NPV.per=b.dataset.np; nRender()});
+  el.querySelectorAll('[data-nl]').forEach(b=>b.onclick=()=>{NSTK.push({...NV}); NPV.list=b.dataset.nl; NPV.f=null; NV.scr='nlist'; nRender()});
+  el.querySelectorAll('[data-nf]').forEach(b=>b.onclick=()=>{NPV.f=b.dataset.nf===''?null:+b.dataset.nf; nRender()});
+  el.querySelectorAll('[data-inc]').forEach(b=>b.onclick=()=>{NSTK.push({...NV,_inc:NPV.inc}); NPV.inc=b.dataset.inc; NV.scr='ninc'; nRender()});
+  if(NV.scr==='npv') npvTM()}
 /* системные уведомления: при открытии приложения, если включено в «Профиле» */
 function nAskPermission(){if(!('Notification' in window)) return Promise.resolve(false); if(Notification.permission==='granted') return Promise.resolve(true); if(Notification.permission==='denied') return Promise.resolve(false);
   return Notification.requestPermission().then(p=>p==='granted').catch(()=>false)}
