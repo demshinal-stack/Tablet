@@ -455,7 +455,9 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .rl .m small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl .v{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap}
 .ggro{display:grid;gap:6px;margin:8px 0 6px}
-.gg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:nowrap;min-width:0}
+.gg-h span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gg-h b,.gg-h .gg-now{flex:none}
 .gg-h b{font-weight:600;color:var(--ink);font-size:14px} .gg-h span{font-size:12px;color:var(--muted)}
 .gg-now{margin-left:auto;border:1px solid var(--line);background:var(--band);color:var(--ink);border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer}
 .gg-v{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
@@ -464,7 +466,9 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .gg-v span i{width:10px;height:3px;border-radius:2px;display:inline-block}
 .gg-v b{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap}
 .gg-v small{font-size:11px;color:var(--muted)}
-.gg-op{font-size:12.5px;color:var(--body);background:var(--band);border-radius:10px;padding:6px 10px}
+.gg-op{font-size:12.5px;color:var(--body);background:var(--band);border-radius:10px;padding:6px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;height:30px;line-height:18px}
+.gg-v small{white-space:nowrap;min-height:15px}
+.gg-h{min-height:28px}
 .gg-op.npv{color:var(--bad)}
 .chart .ggoal{fill:var(--accent);font-size:11.5px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
 .ggcur{cursor:ew-resize}
@@ -581,7 +585,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:19,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:20,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1030,13 +1034,20 @@ function chartGGD(el,w,h=236){
     cl.attr('x1',X).attr('x2',X); knob.attr('transform',`translate(${Math.max(m.l+17,Math.min(W-m.r-17,X))},${m.t-14})`);
     dots[0].attr('cx',X).attr('cy',y(dp)); dots[1].attr('cx',X).attr('cy',y(dl)); dots[2].attr('cx',X).attr('cy',y(df??0)).style('display',past?null:'none');
     const lagD=past?t-timeAt(w.planS,df):null, dm=past?df-dp:null, op=past?fop(t):null, now=Math.abs(t-w.tNow)<.05;
-    ro.html(`<div class="gg-h"><b>${fmtDY(dateAt(w.spud+t))}</b><span>${nf1(t)} сут от забуривания${now?' · сейчас':past?'':' · прогноз по ГТН'}</span>${now?'':'<button type="button" class="gg-now">к сегодня</button>'}</div>
-      <div class="gg-v"><div><span><i style="background:var(--fact)"></i>Факт</span><b>${past?nf0(df)+' м':'—'}</b></div>
-      <div><span><i style="background:var(--plan)"></i>ГТН</span><b>${nf0(dp)} м</b></div>
-      <div><span><i style="background:var(--lks)"></i>ЛКС</span><b>${nf0(dl)} м</b></div>
-      <div><span>К ГТН</span><b class="${past?(dm<-1?'dbadc':'dgoodc'):''}">${past?signed0(dm)+' м':'—'}</b><small>${!past?'':Math.abs(lagD)<.05?'по графику':(lagD>0?'отстаём ':'опережаем ')+nf1(Math.abs(lagD))+' сут'}</small></div></div>
-      ${op?`<div class="gg-op${op.k==='N'?' npv':''}">${op.k==='N'?'НПВ: ':''}${esc(op.n)}</div>`:''}`);
-    const nb=ro.select('.gg-now').node(); if(nb) nb.onclick=()=>set(w.tNow)}
+    const ad=past?Math.abs(lagD):0, lagH=!past?'К ГТН':Math.abs(dm)<1&&ad<.05?'По графику':(lagD>0||dm<-1)?'Отстаём':'Опережаем';
+    if(!ro.node().firstChild) ro.html(`<div class="gg-h"><b data-r="d"></b><span data-r="s"></span><button type="button" class="gg-now">к сегодня</button></div>
+      <div class="gg-v"><div><span><i style="background:var(--fact)"></i>Факт</span><b data-r="f"></b></div>
+      <div><span><i style="background:var(--plan)"></i>ГТН</span><b data-r="p"></b></div>
+      <div><span><i style="background:var(--lks)"></i>ЛКС</span><b data-r="l"></b></div>
+      <div><span data-r="kh"></span><b data-r="k"></b><small data-r="kd"></small></div></div>
+      <div class="gg-op" data-r="op"></div>`);
+    const R=k=>ro.select(`[data-r="${k}"]`);
+    R('d').text(fmtDY(dateAt(w.spud+t))); R('s').text(nf1(t)+' сут'+(now?' · сейчас':past?'':' · прогноз'));
+    ro.select('.gg-now').style('visibility',now?'hidden':null).on('click',()=>set(w.tNow));
+    R('f').text(past?nf0(df)+' м':'—'); R('p').text(nf0(dp)+' м'); R('l').text(nf0(dl)+' м');
+    R('kh').text(lagH); R('k').text(past?nf0(Math.abs(dm))+' м':'—').attr('class',past?(lagH==='Отстаём'?'dbadc':'dgoodc'):null); R('kd').text(past?nf1(ad)+' сут':' ');
+    R('op').text(op?(op.k==='N'?'НПВ: ':'')+op.n:past?'—':'Дальше — план по ГТН и ЛКС').classed('npv',!!op&&op.k==='N')}
+
   const pick=ev=>{const R=s.node().getBoundingClientRect(); set(x.invert((ev.clientX-R.left)/R.width*W))};
   let drag=false;
   s.on('pointerdown',ev=>{drag=true; s.node().setPointerCapture(ev.pointerId); pick(ev)}).on('pointermove',ev=>{if(drag||ev.pointerType==='mouse'&&ev.buttons) pick(ev)}).on('pointerup pointercancel',()=>{drag=false});
