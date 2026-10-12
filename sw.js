@@ -1,6 +1,6 @@
 /* Пульс 2 © Demshin_lab. Офлайн-кеш и обновления.
    Версию поднимайте вместе с APP в index.html и version.json. */
-const VERSION = "pulse2-2.0.0-25";
+const VERSION = "pulse2-2.0.0-28";
 const SHELL = [
   "./",
   "./index.html",
@@ -31,6 +31,19 @@ self.addEventListener("activate", (e) => {
 self.addEventListener("message", (e) => {
   if (e.data === "SKIP_WAITING") self.skipWaiting();
   if (e.data === "VERSION") e.source && e.source.postMessage({ version: VERSION });
+});
+
+/* нажали на уведомление: открываем приложение на нужном пункте */
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const id = (e.notification.data && e.notification.data.id) || "";
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      const c = list[0];
+      if (c) { c.postMessage({ type: "pulse-open", id }); return c.focus && c.focus(); }
+      return self.clients.openWindow("./?n=" + encodeURIComponent(id));
+    })
+  );
 });
 
 self.addEventListener("fetch", (e) => {

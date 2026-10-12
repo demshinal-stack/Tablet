@@ -534,6 +534,78 @@ html.glass body.mode-map .panel:not(.smax) :is(.kpis,.dbr[aria-pressed="true"],.
 }
 html.glass body.mode-page .tabbar{--g-base:color-mix(in srgb,var(--surface) 80%,transparent)}
 .newb{font-size:9.5px;font-weight:700;color:#00234B;background:var(--mint);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:1px;font-family:var(--f-body)}
+.npv-top{display:flex;align-items:center;gap:14px;margin:6px 0 10px}
+.npv-big{font-family:var(--f-display);font-weight:500;font-size:28px;color:var(--ink);line-height:1;white-space:nowrap}
+.npv-big.bad{color:var(--bad)} .npv-big.good{color:var(--good)}
+.npv-s{font-size:12px;color:var(--muted);line-height:1.4} .npv-s b{color:var(--ink);font-weight:600}
+.npv-bar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;background:var(--grid)}
+.npv-bar i{display:block;min-width:3px}
+.npv-l{margin-top:8px;display:grid}
+.npv-r{display:grid;grid-template-columns:10px minmax(0,1fr) auto 40px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--grid);font-size:13px}
+.npv-r:first-child{border-top:0}
+.npv-r .d{width:10px;height:10px;border-radius:3px}
+.npv-r .n{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.npv-r .h{color:var(--ink);font-weight:600;white-space:nowrap} .npv-r .p{color:var(--muted);text-align:right}
+/* свежесть данных в шапке */
+.sync{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--chrome-line);background:rgba(255,255,255,.06);color:var(--chrome-mut);border-radius:999px;padding:5px 10px;font-size:12.5px;cursor:pointer;white-space:nowrap;flex:none;margin-left:auto}
+.sync b{color:var(--chrome-ink);font-weight:600} .sync .dot{width:8px;height:8px;border-radius:50%;background:#3DDC97;flex:none}
+.sync.warn .dot{background:#F2B53A} .sync.bad .dot{background:#FF6B5E;animation:sdp 1.4s infinite} @keyframes sdp{50%{opacity:.3}}
+.sync.bad{border-color:#FF6B5E}
+.sync em{font-style:normal;font-weight:700;font-size:11px;background:#F2B53A;color:#00234B;border-radius:9px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 5px}
+.sync.bad em{background:#FF6B5E;color:#fff}
+@media (max-width:900px){.sync .sl,.sync .sm{display:none} .sync{padding:5px 8px;font-size:12px}}
+.spop{position:fixed;z-index:135;pointer-events:auto;right:12px;top:calc(env(safe-area-inset-top,0px) + 56px);width:min(400px,calc(100vw - 24px));max-height:calc(100dvh - 140px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 44px rgba(0,25,55,.3);padding:14px 16px 16px;display:grid;gap:12px;color:var(--body)}
+.spop[hidden]{display:none}
+html.glass .spop{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--surface) 82%,transparent);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
+.sp-load span{display:block;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sp-load b{display:block;font-family:var(--f-display);font-weight:500;font-size:18px;color:var(--ink)} .sp-load small{font-size:12px;color:var(--muted)}
+.sp-next{font-size:12.5px;color:var(--muted)}
+.sp-bad{background:color-mix(in srgb,var(--bad) 12%,transparent);border:1px solid color-mix(in srgb,var(--bad) 35%,transparent);border-radius:12px;padding:9px 11px;font-size:12.5px} .sp-bad b{display:block;color:var(--bad)}
+.sp-prog{font-size:12.5px} .sp-prog b{color:var(--ink)} .sp-bar{height:7px;border-radius:4px;background:color-mix(in srgb,#F2B53A 35%,var(--grid));margin-top:6px;overflow:hidden} .sp-bar i{display:block;height:100%;background:var(--prog)}
+.sp-h{font-size:12px;font-weight:600;color:var(--ink)}
+.sp-l{display:grid;gap:6px;margin-top:-6px}
+.sp-r{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;text-align:left;border:1px solid var(--line);background:var(--band);border-radius:12px;padding:9px 11px;cursor:pointer;color:inherit;font:inherit;width:100%}
+.sp-r .t{min-width:0;display:flex;flex-direction:column} .sp-r b{color:var(--ink);font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-r small{font-size:11.5px;color:var(--muted)} .sp-r .why{color:#C77D00}
+:root[data-theme="dark"] .sp-r .why{color:#F2B53A} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sp-r .why{color:#F2B53A}}
+.sp-r .v{text-align:right;white-space:nowrap;max-width:92px;display:flex;flex-direction:column} .sp-r .v small{white-space:normal;line-height:1.25} .sp-r .v b{color:#C77D00}
+:root[data-theme="dark"] .sp-r .v b{color:#F2B53A} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .sp-r .v b{color:#F2B53A}}
+.syncw{margin-top:10px;background:color-mix(in srgb,#F2B53A 16%,transparent);border:1px solid color-mix(in srgb,#F2B53A 45%,transparent);border-radius:12px;padding:9px 11px;font-size:12.5px;color:var(--body)} .syncw b{display:block;color:var(--ink)}
+.stale{font-size:11px;font-weight:600;color:#00234B;background:#F2B53A;border-radius:6px;padding:1px 6px;margin-right:6px;white-space:nowrap}
+.sdot circle{fill:#F2B53A;stroke:var(--surface);stroke-width:1.5} .sdot path{fill:none;stroke:#00234B;stroke-width:1.4;stroke-linecap:round}
+/* колокольчик и лента уведомлений */
+.bell{position:relative;width:34px;height:34px;border-radius:50%;border:1px solid var(--chrome-line);background:rgba(255,255,255,.06);color:var(--chrome-ink);display:grid;place-items:center;cursor:pointer;flex:none}
+.bell svg{width:18px;height:18px}
+.bell em{position:absolute;top:-4px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:#FF6B5E;color:#fff;font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid var(--chrome)}
+.bell em[hidden]{display:none}
+.npanel{position:fixed;z-index:136;pointer-events:auto;right:12px;top:calc(env(safe-area-inset-top,0px) + 58px);bottom:calc(var(--tabh,64px) + 12px);width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 44px rgba(0,25,55,.32);display:flex;flex-direction:column;overflow:hidden;color:var(--body)}
+.npanel[hidden]{display:none}
+@media (max-width:640px){.npanel{left:0;right:0;width:auto;top:0;bottom:var(--tabh,64px);border-radius:0;border:0;padding-top:env(safe-area-inset-top,0px)}}
+html.glass .npanel{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 55%),color-mix(in srgb,var(--surface) 86%,transparent);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
+.np-in{flex:1;overflow:auto;padding:12px 14px 18px;overscroll-behavior:contain}
+.np-nav{display:flex;align-items:center;gap:8px;margin-bottom:8px;position:sticky;top:-12px;background:inherit;padding-top:2px;z-index:2}
+.np-t{flex:1;min-width:0} .np-t b{display:block;font-family:var(--f-display);font-weight:500;font-size:17px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .np-t small{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-b{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--band);color:var(--ink);font-size:17px;cursor:pointer;flex:none;display:grid;place-items:center}
+.np-all{border:0;background:none;color:var(--accent);font:inherit;font-size:12.5px;cursor:pointer;white-space:nowrap}
+.np-g{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 2px 6px;font-weight:600}
+.nit{display:grid;grid-template-columns:34px minmax(0,1fr);gap:10px;width:100%;text-align:left;padding:10px 12px;border-radius:14px;background:var(--band);margin-bottom:6px;cursor:pointer;position:relative;border:1px solid transparent;color:inherit;font:inherit}
+.nit.new{border-color:color-mix(in srgb,var(--accent) 40%,transparent)} .nit.new::after{content:"";position:absolute;right:12px;top:13px;width:8px;height:8px;border-radius:50%;background:var(--mint)}
+.nit .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:15px;background:var(--surface);border:1px solid var(--line)}
+.nit .ic.sum{background:var(--mint);color:#00234B;border:0} .nit .ic.bad{background:color-mix(in srgb,var(--bad) 18%,transparent);color:var(--bad);border:0} .nit .ic.warn{background:rgba(242,181,58,.2);color:#C77D00;border:0} .nit .ic.ok{background:color-mix(in srgb,var(--good) 18%,transparent);color:var(--good);border:0}
+.nit .tx{min-width:0;display:flex;flex-direction:column} .nit b{color:var(--ink);font-weight:600;font-size:13px;padding-right:14px} .nit .tx>span{font-size:12px;color:var(--muted);line-height:1.35;margin-top:2px} .nit time{font-size:11px;color:var(--muted);margin-top:3px}
+.np-k{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.np-k div{background:var(--pale);border-radius:12px;padding:9px 11px;min-width:0} .np-k span{display:block;font-size:10.5px;color:var(--accent);font-weight:600;letter-spacing:.04em;text-transform:uppercase} .np-k b{display:block;font-family:var(--f-display);font-weight:500;font-size:18px;color:var(--ink);white-space:nowrap} .np-k b.bad{color:var(--bad)} .np-k small{display:block;font-size:11px;color:var(--muted)}
+.np-k small.good,.np-tr .good{color:var(--good)} .np-k small.bad,.np-tr .bad{color:var(--bad)} .np-tr .warn,.np-tr i.warn{color:#C77D00;font-style:normal}
+:root[data-theme="dark"] .np-tr .warn,:root[data-theme="dark"] .np-tr i.warn{color:#F2B53A} @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .np-tr .warn,:root:not([data-theme="light"]) .np-tr i.warn{color:#F2B53A}}
+.np-inc{display:block;width:100%;text-align:left;border:0;border-left:3px solid var(--bad);background:var(--band);border-radius:0 12px 12px 0;padding:8px 11px;margin-bottom:6px;font:inherit;font-size:12px;cursor:pointer;color:var(--muted)} .np-inc.ok{border-left-color:var(--good)} .np-inc b{display:block;color:var(--ink);font-weight:600}
+.np-seg{display:flex;margin:12px 0 4px} .np-seg button{flex:1}
+.np-tr{display:grid;grid-template-columns:minmax(0,1fr) 98px 72px;gap:8px;align-items:center;width:100%;text-align:left;padding:8px 2px;border:0;border-top:1px solid var(--grid);background:none;font:inherit;font-size:12.5px;color:var(--body)}
+button.np-tr{cursor:pointer} .np-tr.h{font-size:10.5px;color:var(--muted);border-top:0} .np-tr>span:not(:first-child){text-align:right;white-space:nowrap}
+.np-tr b{display:block;color:var(--ink);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .np-tr small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.np-box{background:var(--band);border-radius:12px;padding:9px 11px;margin-top:8px;font-size:12.5px} .np-box b{color:var(--ink)} .np-box small{display:block;color:var(--muted);font-size:11.5px;margin-top:3px}
+.np-ops{width:100%;border-collapse:collapse;font-size:12px} .np-ops th{color:var(--muted);font-weight:500;text-align:left;padding:5px 4px;border-bottom:1px solid var(--line)} .np-ops td{padding:6px 4px;border-bottom:1px solid var(--grid);vertical-align:top;color:var(--body)} .np-ops td.n{color:var(--bad)}
+.np-ops td,.np-ops th{text-align:left} .np-ops td:last-child,.np-ops th:last-child{text-align:right}
+.np-p{margin:0;font-size:13px}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -605,7 +677,8 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
     <button class="back" id="back" type="button" aria-label="Назад" disabled><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     <div class="brand"><b>ЭНГС</b><span>Пульс 2</span></div>
     <nav class="crumbs" id="crumbs" aria-label="Уровни"></nav>
-    <div class="snap">Данные на <b>10.10.26</b></div>
+    <button type="button" class="sync" id="syncBtn" aria-haspopup="dialog" aria-controls="syncPop"></button>
+    <button type="button" class="bell" id="bellBtn" aria-label="Уведомления" aria-haspopup="dialog" aria-controls="npanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><em id="bellN" hidden></em></button>
   </header>
   <div class="filters" id="filters">
     <div class="frow" id="frow"><span id="fchips"></span><span class="kstrip" id="kstrip"></span></div>
@@ -634,6 +707,8 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
     <button type="button" class="tog" id="fRes" aria-pressed="false"><i style="background:var(--r-red)"></i>Замечания по ресурсу</button></div>
     <div class="fpop-f"><span class="fcount" id="fcount"></span><button type="button" class="freset" id="fReset">Сбросить всё</button><button type="button" class="fdone" id="fDone">Готово</button></div>
   </div>
+  <div class="spop" id="syncPop" role="dialog" aria-label="Обмен данными" hidden></div>
+  <div class="npanel" id="npanel" role="dialog" aria-label="Уведомления" hidden><div class="np-in" id="npin"></div></div>
   <nav class="tabbar" role="tablist" aria-label="Разделы">
     <button type="button" class="tbk" id="scrBack" aria-label="Назад"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><em>Назад</em></button>
     <button type="button" role="tab" id="scrMap" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><em>Карта</em></button>
@@ -646,7 +721,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:25,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:28,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -729,7 +804,13 @@ const SEC_C=['Ø426','Ø324','Ø245','Ø178','Ø114'];
 const BIT=[490,393.7,295.3,220.7,155.6], CASD=[426,323.9,244.5,177.8,114.3];
 const D_NAME=['Бурение под направление','Бурение под кондуктор','Бурение под техколонну','Бурение под эксплуатационную колонну','Бурение под хвостовик'];
 const C_NAME=['Крепление направления','Спуск и цементирование кондуктора','Спуск и цементирование техколонны','Спуск и цементирование э/к','Спуск хвостовика'];
-const NPV_R=['Ожидание решения заказчика','Ремонт верхнего привода','Поглощение: ликвидация','Ожидание тампонажного флота','Отказ ВЗД: замена'];
+/* НПВ: типы верхнего уровня и причины (демо) */
+const NPV_T=[{n:'Отказ оборудования',c:'#E08A00',r:['Ремонт верхнего привода','Отказ ВЗД: замена','Ремонт бурового насоса','Отказ ДВС']},
+  {n:'Геологические осложнения',c:'#D0473A',r:['Поглощение: ликвидация','Прихват: ликвидация','ГНВП: глушение']},
+  {n:'Ожидание сервиса',c:'#7A5AF8',r:['Ожидание тампонажного флота','Ожидание партии ГИС','Ожидание телесистемы']},
+  {n:'Организационные',c:'#2F6FD0',r:['Ожидание решения заказчика','Ожидание материалов и долот']},
+  {n:'Погодные условия',c:'#7F93AB',r:['Метель: остановка работ']}];
+const NPV_R=NPV_T.flatMap(t=>t.r), NPV_CAT=Object.fromEntries(NPV_T.flatMap((t,i)=>t.r.map(r=>[r,i])));
 function build(ops,noise,seed){
   const R=rng(seed||1), pts=[{t:0,d:0}], segs=[]; let t=0,d=0;
   ops.forEach((op,i)=>{const ts=t,ds=d;
@@ -768,6 +849,14 @@ ROWS.forEach((r,i)=>{
   WELLS.push(w);
 });
 /* история станка за год (демо): предыдущие скважины до текущей */
+/* загрузка данных: раз в сутки в 07:00 МСК из последних суточных рапортов и отчётов буровых */
+const LOAD={at:new Date(Date.UTC(2026,9,10,4,0)),hour:7,next:new Date(Date.UTC(2026,9,11,4,0))}; // 07:00 МСК = 04:00 UTC
+const SYNC_FAIL={'2095-Э':{d:-1,why:'нет связи с площадкой (спутниковый канал)'},'112':{d:-1,why:'суточный рапорт не заполнен'},'Ю2613':{d:-2,why:'ошибка выгрузки из системы рапортов'}};
+WELLS.forEach(w=>{const f=SYNC_FAIL[w.no]; w.sync=f?{ok:false,at:new Date(LOAD.at.getTime()+f.d*864e5),why:f.why,lag:-f.d}:{ok:true,at:LOAD.at}});
+const msk=d=>new Date(d.getTime()+3*36e5), fmtMsk=(d,y)=>{const m=msk(d); return pad2(m.getUTCDate())+'.'+pad2(m.getUTCMonth()+1)+(y?'.'+String(m.getUTCFullYear()).slice(2):'')+' '+pad2(m.getUTCHours())+':'+pad2(m.getUTCMinutes())};
+function syncState(){const now=new Date(), m=msk(now), lastSched=new Date(Date.UTC(m.getUTCFullYear(),m.getUTCMonth(),m.getUTCDate(),LOAD.hour-3,0)); if(now<lastSched) lastSched.setTime(lastSched.getTime()-864e5);
+  const missed=Math.max(0,Math.round((lastSched-LOAD.at)/864e5)), fails=WELLS.filter(w=>!w.sync.ok);
+  return {missed,fails,lvl:missed?'bad':fails.length?'warn':'ok',lastSched}}
 WELLS.forEach(w=>{const R=rng(5000+w.i*13); w.hist=[]; let t=w.spud;
   while(t>-400){const gap=.4+R()*2.6; const T=Math.round(w.T*(.82+R()*.3)/10)*10, tp=tops(T); const S=build(factOps(tp,R,null,0),.45,Math.floor(R()*1e6)); t-=gap+S.end;
     w.hist.unshift({T,fact:S,t0:t,t1:t+S.end,pad:w.pad});}
@@ -779,6 +868,10 @@ function metersW(w,a,b){let m=0; b=Math.min(b,0);
   for(const h of w.hist){if(h.t1<=a||h.t0>=b) continue; m+=wellDepthT(h.fact,h.t0,Math.min(b,h.t1))-wellDepthT(h.fact,h.t0,Math.max(a,h.t0))}
   if(b>w.spud){const x=Math.max(a,w.spud); m+=Math.min(w.depth,depthAt(w.fact,b-w.spud))-Math.min(w.depth,depthAt(w.fact,x-w.spud))}
   return Math.max(0,m)}
+function npvBy(ws,a,b){const out=NPV_T.map(()=>0); ws.forEach(w=>{const add=(S,t0,lim)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1,lim); if(y>x) out[NPV_CAT[g.op.n]??0]+=(y-x)*24});
+  w.hist.forEach(h=>add(h.fact,h.t0,h.t1)); add(w.fact,w.spud,0)}); return out}
+function npvShare(ws,per){const [a,b]=PER[per].tot, cal=ws.length*(b-a)*24, h=d3.sum(ws,w=>npvTime(w,a,b))*24; return {h,cal,pct:cal?h/cal:0}}
+const npvPctTxt=ws=>{const x=npvShare(ws,'month'); return (x.pct*100).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' %'};
 function npvTime(w,a,b){let s=0; const add=(S,t0,lim)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1,lim); if(y>x) s+=y-x});
   w.hist.forEach(h=>add(h.fact,h.t0,h.t1)); add(w.fact,w.spud,0); return s}
 CUSTOMERS.forEach(c=>{c.wells=WELLS.filter(w=>w.cust===c); c.fields=[...new Set(c.wells.map(w=>w.field))]});
@@ -827,7 +920,7 @@ function setTabs(){[['scrMap','map'],['scrStats','stats'],['scrProf','profile']]
 function setScreen(s){state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
 document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>setScreen('profile');
 function refresh(fit){
-  document.getElementById('back').disabled=!hist.length; document.body.classList.toggle('has-back',hist.length>0);
+  renderSync(); document.getElementById('back').disabled=!hist.length; document.body.classList.toggle('has-back',hist.length>0);
   syncFilters(); renderCrumbs();
   const scr=state.screen, isMap=scr==='map';
   document.getElementById('main').classList.toggle('stats',!isMap);
@@ -913,7 +1006,7 @@ document.getElementById('zout').onclick=()=>svg.transition().duration(350).call(
 document.getElementById('zhome').onclick=()=>go({level:'fields',field:null,cust:null,well:null});
 
 function wGlyph(g){g.append('circle').attr('class','halo').attr('r',13); g.append('circle').attr('class','track').attr('r',14.5); g.append('path').attr('class','arc'); g.append('circle').attr('class','body').attr('r',11);
-  g.append('path').attr('class','glyph').attr('d','M0,-6.5 L4.2,5.5 L-4.2,5.5 Z M-2.6,1 L2.6,1 M-1.4,-2.6 L1.4,-2.6'); g.append('circle').attr('class','rdot').attr('r',4).attr('cx',9).attr('cy',-9);
+  g.append('path').attr('class','glyph').attr('d','M0,-6.5 L4.2,5.5 L-4.2,5.5 Z M-2.6,1 L2.6,1 M-1.4,-2.6 L1.4,-2.6'); g.append('circle').attr('class','rdot').attr('r',4).attr('cx',9).attr('cy',-9); const sg=g.append('g').attr('class','sdot').attr('transform','translate(-10,-10)'); sg.append('circle').attr('r',6); sg.append('path').attr('d','M0,-3V0L2,1.5');
   const l=g.append('g').attr('class','lbl'); l.append('rect').attr('rx',6).attr('height',26); l.append('text').attr('class','a').attr('x',7).attr('y',11); l.append('text').attr('class','b').attr('x',7).attr('y',22)}
 const arcGen=d3.arc().innerRadius(14.5).outerRadius(14.5).startAngle(0);
 const ov=(a,b)=>a.x0<b.x1&&a.x1>b.x0&&a.y0<b.y1&&a.y1>b.y0;
@@ -976,7 +1069,7 @@ function updateOverlay(){
     .attr('transform',d=>`translate(${SPX[d.id][0]},${SPX[d.id][1]})`)
     .classed('sel',d=>lev==='well'&&d.id===state.well).classed('dim',d=>(state.cust&&d.cust.id!==state.cust)||(lev==='well'&&d.id!==state.well&&k>K0*20))
     .each(function(d){const g=d3.select(this); g.select('.body').style('fill',col(d.status)); g.select('.arc').attr('d',arcGen.endAngle(Math.min(1,d.depth/d.T)*2*Math.PI)());
-      g.select('.rdot').style('fill','var('+RES[d.res.l].v+')').style('display',d.res.l==='r'||d.res.l==='o'?null:'none');
+      g.select('.sdot').style('display',d.sync.ok?'none':null); g.select('.rdot').style('fill','var('+RES[d.res.l].v+')').style('display',d.res.l==='r'||d.res.l==='o'?null:'none');
       const lb=g.select('.lbl').style('display',showLbl?null:'none'); if(showLbl){lb.select('.a').text('Скв. '+d.no+' · '+d.cust.n.split(/[\s-]/)[0]); lb.select('.b').text(d.rig+' · '+Math.round(Math.min(1,d.depth/d.target)*100)+' %');
         const ww=Math.max(lb.select('.a').node().getComputedTextLength(),lb.select('.b').node().getComputedTextLength())+14; lb.select('rect').attr('width',ww)}});
   if(showLbl) placeLabels();
@@ -1266,8 +1359,8 @@ const pill=st=>`<span class="pill" style="background:${col(st)}">${ST[st].n}</sp
 const resHTML=w=>`<span class="res"><i style="background:var(${RES[w.res.l].v})"></i>${esc(w.res.t)}</span>`;
 const kpiHTML=(list,cls)=>'<div class="kpis '+(cls||'')+'">'+list.map(k=>`<div class="kpi"><span class="k">${k.k}</span><span class="v ${k.c||''}">${k.v}</span><span class="s">${k.s||''}</span></div>`).join('')+'</div>';
 const avHTML=c=>esc(c.s).replace('\n','<br>');
-function wCard(w){const p=Math.min(1,w.depth/w.target);
-  return `<button type="button" class="wcard" data-w="${w.id}"><div class="hd"><b>Скв. ${esc(w.no)}</b><span>${pill(w.status)}</span></div>
+function wCard(w){const p=Math.min(1,w.depth/w.target), stl=w.sync.ok?'':`<span class="stale" title="Рапорт не получен">⏱ ${fmtMsk(w.sync.at)}</span>`;
+  return `<button type="button" class="wcard" data-w="${w.id}"><div class="hd"><b>Скв. ${esc(w.no)}</b><span>${stl}${pill(w.status)}</span></div>
     <span class="k">Месторождение</span><span class="v">${w.field.n}</span><span class="k">Заказчик</span><span class="v">${esc(w.cust.n)}</span>
     <span class="k">Буровая установка</span><span class="v rig">${esc(w.rig)}</span><span class="k">Куст</span><span class="v">${esc(w.pad)}</span>
     <span class="k">Забой</span><span class="v">${nf0(w.depth)} / ${nf0(w.target)} м · ${Math.round(p*100)} %</span><span class="bar"><span style="width:${p*100}%;${w.bad?'background:var(--r-orange)':''}"></span></span>
@@ -1280,7 +1373,14 @@ function dynHTML(id){return `<div class="sec dyn"><div class="sec-h"><h3>Про�
   <div class="sec-h"><h3 style="font-size:12.5px">Нарастающим итогом</h3><span id="${id}cs"></span></div>
   <div class="cum" id="${id}ch"></div>
   <div class="cleg"><span><i></i>факт</span><span><i class="pl"></i>план</span><span><i class="fc"></i>прогноз по темпу</span><span><i class="gp"></i>отставание</span></div>
-  <div class="verd" id="${id}vd"></div></div>`}
+  <div class="verd" id="${id}vd"></div>
+  <div class="sec-h" style="margin-top:16px"><h3>НПВ</h3><span id="${id}ns"></span></div><div class="npvb" id="${id}npv"></div></div>`}
+function npvHTML(ws,per){const [a,b]=PER[per].tot, sh=npvShare(ws,per), by=npvBy(ws,a,b), tot=d3.sum(by)||0, f1=v=>v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
+  if(!tot) return `<div class="npv-top"><div class="npv-big good">0 %</div><div class="npv-s">НПВ нет · календарное время ${nf0(sh.cal)} ч</div></div>`;
+  const rows=NPV_T.map((t,i)=>({...t,h:by[i]})).filter(x=>x.h>0.05).sort((x,y)=>y.h-x.h);
+  return `<div class="npv-top"><div class="npv-big${sh.pct>.05?' bad':''}">${f1(sh.pct*100)} %</div><div class="npv-s"><b>${nf0(sh.h)} ч</b> из ${nf0(sh.cal)} ч календарного времени станков<br>${f1(sh.h/24)} сут · ${ws.length} ${plural(ws.length,'станок','станка','станков')}</div></div>
+    <div class="npv-bar">${rows.map(x=>`<i style="flex-grow:${x.h};background:${x.c}" title="${esc(x.n)}"></i>`).join('')}</div>
+    <div class="npv-l">${rows.map(x=>`<div class="npv-r"><span class="d" style="background:${x.c}"></span><span class="n">${esc(x.n)}</span><span class="h">${nf0(x.h)} ч</span><span class="p">${Math.round(x.h/tot*100)} %</span></div>`).join('')}</div>`}
 const PNAME={day:'суток',month:'месяца',year:'года'};
 function bulletsHTML(ws){const mx=1.15; return ['day','month','year'].map(k=>{const t=totals(ws,k), ok=Math.round(t.pct*100)>=100;
   return `<button type="button" class="dbr" data-p="${k}" aria-pressed="${state.per===k}"><span class="p">${PER[k].n}</span>
@@ -1339,7 +1439,9 @@ function cumChart(el,ws,per,vd,csEl){const P=cumPeriod(per), rate=d3.sum(ws,w=>w
 function dynBind(id,ws,after,onPer){const draw=()=>{const bul=document.getElementById(id+'bul'); if(!bul) return;
     bul.innerHTML=bulletsHTML(ws);
     bul.querySelectorAll('.dbr').forEach(b=>b.onclick=()=>{state.per=b.dataset.p; if(onPer) onPer(); else draw()});
-    cumChart(document.getElementById(id+'ch'),ws,state.per,document.getElementById(id+'vd'),document.getElementById(id+'cs')); if(after) after()};
+    cumChart(document.getElementById(id+'ch'),ws,state.per,document.getElementById(id+'vd'),document.getElementById(id+'cs'));
+    const nb=document.getElementById(id+'npv'); if(nb){nb.innerHTML=npvHTML(ws,state.per); document.getElementById(id+'ns').textContent=PER[state.per].n.toLowerCase()+' · доля календарного времени'}
+    if(after) after()};
   charts.push(draw); draw()}
 /* мини-тренд: проходка за 30 суток против плана */
 function sparkSVG(ws){const r=d3.sum(ws,w=>w.planDay)||1, v=PER.month.bins.map(b=>d3.sum(ws,w=>metersW(w,b.a,b.b))/(r*(b.b-b.a)));
@@ -1357,7 +1459,7 @@ function renderPanel(){
   if(lev==='fields'){
     const t=totals(scope,'day');
     h=`<div class="pn"><div class="ph"><div class="eyebrow">Все месторождения · ЯНАО</div><h1>Скважин в бурении: ${scope.length}</h1><span class="rule"></span><div class="sub">${new Set(scope.map(w=>w.field)).size} месторождений · ${new Set(scope.map(w=>w.cust)).size} заказчиков · данные на 10.10.26</div></div>
-      ${kpiHTML([{k:'НПВ сейчас',v:String(scope.filter(w=>w.npv).length),c:scope.some(w=>w.npv)?'bad':'',s:'скважин'},{k:'Ресурс',v:scope.filter(w=>w.res.l==='r').length+' / '+scope.filter(w=>w.res.l==='o').length,c:'bad',s:'замечаний / внимание'},{k:'Проходка за сутки',v:nf0(t.fact)+' м',c:t.pct<.95?'bad':'',s:'план '+nf0(t.plan)+' м · '+Math.round(t.pct*100)+' %'}])}
+      ${kpiHTML([{k:'НПВ сейчас',v:String(scope.filter(w=>w.npv).length),c:scope.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(scope)+' времени за месяц'},{k:'Ресурс',v:scope.filter(w=>w.res.l==='r').length+' / '+scope.filter(w=>w.res.l==='o').length,c:'bad',s:'замечаний / внимание'},{k:'Проходка за сутки',v:nf0(t.fact)+' м',c:t.pct<.95?'bad':'',s:'план '+nf0(t.plan)+' м · '+Math.round(t.pct*100)+' %'}])}
       <div class="tabs" role="tablist">${[['fields','Месторождения'],['groups','Заказчики'],['wells','Все скважины']].map(([k,n])=>`<button type="button" role="tab" data-t="${k}" aria-selected="${state.ovtab===k}">${n}</button>`).join('')}</div><div id="ovbody"></div>
       <p class="note">Скважины, заказчики, забои и ресурс — по данным на 10.10.26. История проходки, план и ГГД — демонстрационные до подключения к источнику. Привязка скважин к заказчикам предварительная.</p></div>`;
     panel.innerHTML=h;
@@ -1375,7 +1477,7 @@ function renderPanel(){
   if(lev==='field'){
     const f=FIELDS.find(x=>x.id===state.field), ws=scope;
     h=`<div class="pn"><div class="ph"><div class="eyebrow">Месторождение</div><h1>${f.n}</h1><span class="rule"></span><div class="sub">${coordTxt(f)} · ${ws.length} скв. в бурении</div><div class="note" style="margin-top:4px">Координаты: ${f.src}. Контур и положение кустов на карте условные.</div></div>
-      ${kpiHTML([{k:'Заказчиков',v:String(f.custs.length)},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':''},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}])}
+      ${kpiHTML([{k:'Заказчиков',v:String(f.custs.length)},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}])}
       <div class="sec"><div class="sec-h"><h3>Заказчики на месторождении</h3><span>нажмите — уровень заказчика</span></div><div class="list">${f.custs.filter(c=>ws.some(w=>w.cust===c)).map(c=>custRow(c,ws.filter(w=>w.cust===c))).join('')}</div></div>
       ${dynHTML('fd')}
       <div class="sec"><div class="sec-h"><h3>Скважины</h3><span>${ws.length}</span></div><div class="cards">${ws.map(wCard).join('')}</div></div></div>`;
@@ -1386,7 +1488,7 @@ function renderPanel(){
     const lag=d3.mean(ws,w=>w.tNow-timeAt(w.planS,w.depth))||0;
     h=`<div class="pn"><div class="ph"><div style="display:flex;gap:12px;align-items:center"><span class="av lg">${avHTML(c)}</span><div><div class="eyebrow">Заказчик${fl?' · '+fl.n:''}</div><h1 style="margin:2px 0 0">${esc(c.n)}</h1></div></div><span class="rule" style="margin-top:10px"></span>
       <div class="sub">${esc(c.full)} · ${ws.length} скв. в бурении${fl?' на месторождении':''}</div><div class="chips">${c.fields.map(f=>`<button type="button" class="chip" data-go="field:${f.id}">${f.n}</button>`).join('')}${fl&&c.fields.length>1?`<button type="button" class="chip" id="allF">Все месторождения заказчика</button>`:''}</div></div>
-      ${kpiHTML([{k:'Скважин',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':''},{k:'К графику ГТН',v:signed1(lag)+' сут',c:lag>.5?'bad':'',s:'среднее отклонение'}])}
+      ${kpiHTML([{k:'Скважин',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'К графику ГТН',v:signed1(lag)+' сут',c:lag>.5?'bad':'',s:'среднее отклонение'}])}
       ${dynHTML('cd')}
       <div class="sec"><div class="sec-h"><h3>Скважины: факт к плану</h3><span id="cbh"></span></div><div class="chart" id="cbars"></div></div>
       <div class="sec"><div class="sec-h"><h3>Скважины заказчика</h3><span>${ws.length}</span></div><div class="cards">${ws.map(wCard).join('')}</div></div></div>`;
@@ -1397,7 +1499,7 @@ function renderPanel(){
   if(lev==='well'){
     const w=WELLS.find(x=>x.id===state.well), tab=state.wtab, lag=w.tNow-timeAt(w.planS,w.depth), rem=Math.max(0,w.planS.end-timeAt(w.planS,w.depth));
     h=`<div class="pn"><div class="ph"><div class="eyebrow">${w.field.n} · куст ${esc(w.pad)}</div><h1>Скв. ${esc(w.no)}</h1><span class="rule"></span>
-      <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)} · ${esc(w.cust.n)}</div></div>
+      <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)} · ${esc(w.cust.n)}</div>${w.sync.ok?'':`<div class="syncw"><b>Рапорт не получен при загрузке ${fmtMsk(LOAD.at)}</b>Показаны данные на ${fmtMsk(w.sync.at,1)} МСК · ${esc(w.sync.why)}</div>`}</div>
       <div class="big"><b>${nf0(w.depth)}</b><span>м из ${nf0(w.target)} · ${Math.round(Math.min(1,w.depth/w.target)*100)} %</span></div>
       ${w.bad?`<div class="warnbox">Забой ${nf0(w.depth)} м больше проектного ${nf0(w.target)} м — проверьте данные источника.</div>`:''}
       <div class="sub" style="margin-top:-8px">${w.status==='npv'?'<b style="color:var(--bad)">НПВ:</b> ':''}${esc(w.op.n)} <span class="note">(демо)</span></div>
@@ -1466,7 +1568,7 @@ function renderStats(){
   const fc=x=>`<b class="${x.pct<.95?'dbad':'dgood'}">${Math.round(x.pct*100)} %</b>`;
   el.innerHTML=`<div class="stats-in">
     <div class="sbox w12"><div class="sec-h"><h3>Статистика${state.field?' · '+FIELDS.find(f=>f.id===state.field).n:''}${state.cust?' · '+esc(CUSTOMERS.find(c=>c.id===state.cust).n):''}</h3><span>фильтры из нижнего меню применяются к статистике</span></div>
-      ${kpiHTML([{k:'Скважин в бурении',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение · '+ws.filter(w=>w.status==='casing'||w.status==='finish').length+' крепл./забой'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':''},{k:'Ресурс: замечания',v:String(ws.filter(w=>w.res.l==='r').length),c:'bad',s:ws.filter(w=>w.res.l==='o').length+' внимание · '+ws.filter(w=>w.res.l==='n').length+' нет данных'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}],'k4')}
+      ${kpiHTML([{k:'Скважин в бурении',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение · '+ws.filter(w=>w.status==='casing'||w.status==='finish').length+' крепл./забой'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'Ресурс: замечания',v:String(ws.filter(w=>w.res.l==='r').length),c:'bad',s:ws.filter(w=>w.res.l==='o').length+' внимание · '+ws.filter(w=>w.res.l==='n').length+' нет данных'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}],'k4')}
 </div>
     <div class="sbox w8">${dynHTML('sd')}</div>
     <div class="sbox w4"><div class="sec-h"><h3>Группы заказчиков</h3><span>скв. в бурении</span></div><div class="cards">${GROUPS.map(g=>{const gw=ws.filter(w=>g.cust.includes(w.cust.id)); if(!gw.length) return ''; const gt=totals(gw,per);
@@ -1548,16 +1650,30 @@ function renderChips(){const ch=[], atW=state.level==='well'&&state.well; /* н�
   document.querySelectorAll('.fchip').forEach(c=>c.onclick=()=>{const k=c.dataset.k;
     if(k==='npv'){F.npv=false; refresh(true)} else if(k==='res'){F.res=false; refresh(true)}
     else if(k==='field') go({level:'fields',field:null,cust:null,well:null}); else if(k==='cust') go({level:state.field?'field':'fields',cust:null,well:null}); else go({level:state.cust?'cust':state.field?'field':'fields',well:null})})}
+function renderSync(){const b=document.getElementById('syncBtn'); if(!b) return; const S=syncState();
+  b.className='sync '+S.lvl; b.innerHTML=`<i class="dot"></i><span class="sl">Данные на</span><b>${fmtMsk(LOAD.at)}</b><span class="sm">МСК</span>${S.fails.length?`<em>${S.fails.length}</em>`:''}`;
+  b.setAttribute('aria-label','Данные на '+fmtMsk(LOAD.at,1)+' МСК'+(S.missed?', плановая загрузка не прошла':'')+(S.fails.length?', без обмена: '+S.fails.length+' буровые':''));
+  const P=document.getElementById('syncPop'), ok=WELLS.length-S.fails.length;
+  P.innerHTML=`<div class="fpop-h"><b>Обмен данными</b><button type="button" class="fx" id="syncX" aria-label="Закрыть">×</button></div>
+   <div class="sp-load"><span>Загрузка</span><b>${fmtMsk(LOAD.at,1)} МСК</b><small>раз в сутки в 07:00 из последних суточных рапортов и отчётов буровых</small></div>
+   ${S.missed?`<div class="sp-bad"><b>Плановая загрузка ${fmtMsk(S.lastSched)} не поступила</b>Показаны данные ${S.missed} ${plural(S.missed,'сутки','суток','суток')} назад. Новые появятся после следующей успешной загрузки.</div>`:`<div class="sp-next">Следующая загрузка — ${fmtMsk(new Date(S.lastSched.getTime()+864e5))} МСК</div>`}
+   <div class="sp-prog"><div><b>${ok} из ${WELLS.length}</b> буровых передали данные</div><div class="sp-bar"><i style="width:${ok/WELLS.length*100}%"></i></div></div>
+   ${S.fails.length?`<div class="sp-h">Без обмена · ${S.fails.length}</div><div class="sp-l">${S.fails.map(w=>`<button type="button" class="sp-r" data-sw="${w.id}"><span class="t"><b>Скв. ${esc(w.no)} · ${esc(w.rig)}</b><small>${w.field.n} · ${esc(w.cust.n)}</small><small class="why">${esc(w.sync.why)}</small></span><span class="v"><b>${fmtMsk(w.sync.at)}</b><small>отстаёт на ${w.sync.lag} ${plural(w.sync.lag,'сутки','суток','суток')}</small></span></button>`).join('')}</div>
+   <p class="note" style="margin:0">По этим скважинам показатели рассчитаны по последнему полученному рапорту. На карте они отмечены значком часов.</p>`:'<p class="note" style="margin:0">Все буровые передали данные.</p>'}`;
+  document.getElementById('syncX').onclick=()=>{P.hidden=true};
+  P.querySelectorAll('[data-sw]').forEach(x=>x.onclick=()=>{P.hidden=true; const w=WELLS.find(z=>z.id===x.dataset.sw); if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'well',well:w.id,field:w.field.id,cust:null})})}
+document.getElementById('syncBtn').onclick=e=>{e.stopPropagation(); const P=document.getElementById('syncPop'); P.hidden=!P.hidden};
+document.addEventListener('pointerdown',e=>{const P=document.getElementById('syncPop'); if(P&&!P.hidden&&!e.target.closest('#syncPop')&&!e.target.closest('#syncBtn')) P.hidden=true});
 function renderStrip(){const el=document.getElementById('kstrip'); if(!el) return; if(state.screen!=='map'){el.innerHTML=''; return}
   const sc=scopeWells(), t=totals(sc,'day'), npv=sc.filter(w=>w.npv).length, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
-  el.innerHTML=`<span class="kc"><span>Скважин</span><b>${sc.length}</b></span><button type="button" class="kc btn ${npv?'bad':''}" id="kNpv"><span>НПВ</span><b>${npv}</b></button><button type="button" class="kc btn ${rr?'bad':''}" id="kRes"><span>Ресурс</span><b>${rr}</b></button><span class="kc"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
+  el.innerHTML=`<span class="kc"><span>Скважин</span><b>${sc.length}</b></span><button type="button" class="kc btn ${npv?'bad':''}" id="kNpv"><span>НПВ</span><b>${npv}</b><span>скв. · ${npvPctTxt(sc)} мес.</span></button><button type="button" class="kc btn ${rr?'bad':''}" id="kRes"><span>Ресурс</span><b>${rr}</b></button><span class="kc"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Сводка</b>›</button>`);
   document.getElementById('kNpv').onclick=()=>{F.npv=!F.npv; refresh(true)}; document.getElementById('kRes').onclick=()=>{F.res=!F.res; refresh(true)};
   const ko=document.getElementById('kOpen'); if(ko) ko.onclick=()=>togglePanel(true)}
 addEventListener('resize',()=>{setSheet(sheet,true); layoutInsets()});
 
 /* ======================= профиль и настройки ======================= */
-const PREF_DEF={name:'',role:'Руководитель направления бурения',theme:'system',per:'month',start:'map',glass:false,nNpv:true,nRes:true,nLag:false,compact:false};
+const PREF_DEF={name:'',role:'Руководитель направления бурения',theme:'system',per:'month',start:'map',glass:false,nSum:true,nPush:false,nNpv:true,nRes:true,nLag:false,compact:false};
 let PREFS={...PREF_DEF};
 try{PREFS={...PREF_DEF,...JSON.parse(localStorage.getItem('engs-prefs')||'{}')}}catch(e){}
 function savePrefs(){try{localStorage.setItem('engs-prefs',JSON.stringify(PREFS))}catch(e){}}
@@ -1579,10 +1695,11 @@ function renderProfile(){
       <div class="prow"><span class="l">Период по умолчанию<small>для динамики и статистики</small></span>${seg('per',[['day','Сутки'],['month','Месяц'],['year','Год']])}</div>
       <div class="prow"><span class="l">Стартовый экран</span>${seg('start',[['map','Карта'],['stats','Статистика']])}</div></div>
     <div class="pbox"><h3>Уведомления</h3>
-      ${sw('nNpv','НПВ на скважине','сразу при переходе скважины в НПВ')}${sw('nRes','Замечания по ресурсу оборудования','ДВС, ПУГ и другие узлы сверх нормы')}${sw('nLag','Отставание от ГТН больше 2 суток','ежедневная сводка в 08:00')}
-      <p class="note" style="margin:0">Уведомления начнут приходить после подключения приложения к источнику данных.</p></div>
+      ${sw('nSum','Утренняя сводка','после загрузки в 07:00 МСК: проходка, НПВ, инциденты по месторождениям, заказчикам и скважинам')}${sw('nNpv','НПВ и инциденты','новые, продолжающиеся и завершённые за сутки')}${sw('nRes','Замечания по ресурсу оборудования','ДВС, ПУГ и другие узлы сверх нормы')}${sw('nLag','Отставание от ГТН больше 2 суток','по каждой скважине')}
+      ${sw('nPush','Системные уведомления и счётчик на иконке','показываются при открытии приложения')}
+      <p class="note" style="margin:0" id="pushNote">${'Notification' in window?(Notification.permission==='denied'?'Уведомления запрещены в настройках браузера или iOS — разрешите их для «Пульс 2».':'Пока уведомления формирует само приложение при открытии после загрузки. Рассылка с сервера в 07:05 — следующий шаг.'):'Этот браузер не поддерживает системные уведомления. На iPhone они работают для приложения, установленного на экран «Домой» (iOS 16.4+).'}</p></div>
     <div class="pbox"><h3>Источник данных</h3>
-      <div class="prow"><span class="l">Снимок<small>скважины, заказчики, забои, ресурс оборудования</small></span><b style="color:var(--ink)">10.10.26</b></div>
+      <div class="prow"><span class="l">Загрузка данных<small>ежедневно в 07:00 МСК из суточных рапортов и отчётов буровых</small></span><b style="color:var(--ink);white-space:nowrap">${fmtMsk(LOAD.at,1)}</b></div>
       <div class="prow"><span class="l">История проходки, план, ГТН<small>до подключения к ГТИ и суточным рапортам</small></span><span class="note">демо</span></div>
       <div class="prow"><span class="l">Сбросить настройки</span><button type="button" class="btn2" id="pReset">Сбросить</button></div></div>
     <div class="pbox"><h3>О приложении</h3>
@@ -1594,18 +1711,113 @@ function renderProfile(){
   document.getElementById('pName').oninput=e=>{PREFS.name=e.target.value; upd()};
   document.getElementById('pUpd').onclick=()=>{const st=document.getElementById('updS'); st.textContent='проверяю…'; (window.__pulseCheckUpdate?window.__pulseCheckUpdate():Promise.resolve(null)).then(f=>{st.textContent=f===null?'доступны после установки на экран «Домой»':f?'есть новая версия — нажмите «Обновить» внизу':'у вас последняя версия '+APP.version})};
   document.getElementById('pRole').oninput=e=>{PREFS.role=e.target.value; upd()};
-  el.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{PREFS[b.dataset.k]=!PREFS[b.dataset.k]; b.setAttribute('aria-checked',PREFS[b.dataset.k]); savePrefs(); if(b.dataset.k==='glass'){applyTheme(); setTimeout(()=>{layoutInsets(); updateOverlay()},60)}});
+  el.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{PREFS[b.dataset.k]=!PREFS[b.dataset.k]; b.setAttribute('aria-checked',PREFS[b.dataset.k]); savePrefs(); if(b.dataset.k==='glass'){applyTheme(); setTimeout(()=>{layoutInsets(); updateOverlay()},60)}
+    if(b.dataset.k==='nPush'&&PREFS.nPush){nAskPermission().then(ok=>{if(!ok){PREFS.nPush=false; savePrefs(); b.setAttribute('aria-checked','false'); document.getElementById('pushNote').textContent='Разрешение не получено. Разрешите уведомления для «Пульс 2» в настройках браузера или iOS.'} else nNotifySystem(true)})}
+    if(/^n(Sum|Npv|Res|Lag|Push)$/.test(b.dataset.k)) renderBell()});
   el.querySelectorAll('[data-seg]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=g.dataset.seg; PREFS[k]=b.dataset.v; savePrefs();
     g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); if(k==='theme'){applyTheme(); drawReal&&GEO.ok&&drawReal()} if(k==='per') state.per=PREFS.per}));
   document.getElementById('pReset').onclick=()=>{PREFS={...PREF_DEF}; savePrefs(); applyTheme(); state.per=PREFS.per; renderProfile()};
 }
 applyTheme(); state.per=PREFS.per; state.screen=PREFS.start; setTabs();
 
+
+/* ======================= уведомления: колокольчик, лента, сводка за сутки, оперативная сводка ======================= */
+const NKEY='pulse-notif';
+let NST={r:{},p:{}}, NFIRST=false; try{const o=localStorage.getItem(NKEY); if(o) NST=JSON.parse(o); else NFIRST=true}catch(e){}
+const nSave=()=>{try{localStorage.setItem(NKEY,JSON.stringify(NST))}catch(e){}};
+const dayAt=d=>new Date(LOAD.at.getTime()-d*864e5), dKey=d=>dayAt(d).toISOString().slice(0,10), dLbl=d=>fmtMsk(dayAt(d)).slice(0,5);
+const nf1r=v=>v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
+function daySum(d,ws=WELLS){const a=-1-d,b=-d, fact=d3.sum(ws,w=>metersW(w,a,b)), plan=d3.sum(ws,w=>w.planDay), nh=d3.sum(ws,w=>npvTime(w,a,b))*24, cal=ws.length*24, inc=[];
+  ws.forEach(w=>{const add=(S,t0,cur)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1); if(y<=x) return;
+      const live=cur&&d===0&&w.status==='npv'&&t0+g.t1>=w.spud+w.tNow-1e-6; inc.push({w,op:g.op,h:(y-x)*24,tot:(g.t1-g.t0)*24,live,closed:!live&&t0+g.t1<=b+1e-6,start:t0+g.t0})});
+    w.hist.forEach(h=>add(h.fact,h.t0,false)); add(w.fact,w.spud,true)});
+  if(d===0) ws.filter(w=>w.status==='npv'&&!inc.some(x=>x.w===w&&x.live)).forEach(w=>inc.push({w,op:w.op,h:0,tot:0,live:true,closed:false,start:0}));
+  inc.sort((x,y)=>(y.live-x.live)||(y.h-x.h));
+  return {d,a,b,fact,plan,pct:plan?fact/plan:0,nh,npct:cal?nh/cal:0,inc}}
+function nItems(){const out=[];
+  for(let d=0;d<3;d++){const S=daySum(d), K=dKey(d);
+    if(PREFS.nSum) out.push({id:K+':sum',d,kind:'sum',ic:'☀',t:`Сводка на ${dLbl(d)} 07:00 · ${WELLS.length} скв.`,
+      x:`Проходка ${nf0(S.fact)} м — ${Math.round(S.pct*100)} % плана. НПВ ${nf1r(S.npct*100)} % (${nf1r(S.nh)} ч). Инцидентов: ${S.inc.length}${d===0&&S.inc.some(i=>i.live)?', продолжается '+S.inc.filter(i=>i.live).length:''}.${d===0&&WELLS.some(w=>!w.sync.ok)?' Без обмена: '+WELLS.filter(w=>!w.sync.ok).length+'.':''}`});
+    if(d>0) continue;
+    if(PREFS.nNpv) S.inc.forEach(i=>out.push({id:K+':npv:'+i.w.id+':'+Math.round(i.start*100),d,kind:'well',w:i.w,ic:i.live?'⚠':'✓',lvl:i.live?'bad':'ok',
+      t:i.live?`НПВ · Скв. ${i.w.no} · ${i.w.field.n}`:`Завершено: ${i.op.n} · Скв. ${i.w.no}`,
+      x:i.live?`${i.op.n}. ${i.h?'За сутки '+nf1r(i.h)+' ч, продолжается.':'Продолжается.'} ${i.w.rig} · ${i.w.cust.n}`:`${i.w.field.n} · ${i.w.cust.n}. Потери ${nf1r(i.tot)} ч, работы возобновлены.`}));
+    WELLS.filter(w=>!w.sync.ok).forEach(w=>out.push({id:K+':sync:'+w.id,d,kind:'well',w,ic:'⏱',lvl:'warn',t:`Нет обмена · Скв. ${w.no} · ${w.rig}`,x:`Рапорт не получен. Показатели — на ${fmtMsk(w.sync.at)}. ${w.sync.why}.`}));
+    if(PREFS.nLag) WELLS.map(w=>({w,lag:w.tNow-timeAt(w.planS,w.depth)})).filter(o=>o.lag>2).forEach(o=>out.push({id:K+':lag:'+o.w.id,d,kind:'well',w:o.w,ic:'↘',lvl:'warn',t:`Отставание от ГТН ${nf1r(o.lag)} сут · Скв. ${o.w.no}`,x:`${o.w.field.n} · ${o.w.cust.n} · ${o.w.rig}`}));
+    if(PREFS.nRes){const rs=WELLS.filter(w=>w.res.l==='r'); if(rs.length) out.push({id:K+':res',d,kind:'res',ic:'⚙',lvl:'warn',t:`Ресурс оборудования: ${rs.length} ${plural(rs.length,'замечание','замечания','замечаний')}`,x:rs.slice(0,3).map(w=>w.rig).join(', ')+(rs.length>3?' и ещё '+(rs.length-3):'')})}
+  }
+  if(NFIRST){out.filter(i=>i.d>0).forEach(i=>NST.r[i.id]=1); NFIRST=false; nSave()}
+  return out}
+let NITEMS=[], NV={scr:'feed',d:0,cut:'f',w:null};
+const unread=()=>NITEMS.filter(i=>!NST.r[i.id]).length;
+function renderBell(){NITEMS=nItems(); const n=unread(), e=document.getElementById('bellN'); if(e){e.hidden=!n; e.textContent=n>99?'99+':n}
+  const b=document.getElementById('bellBtn'); if(b) b.setAttribute('aria-label','Уведомления'+(n?', непрочитанных: '+n:''));
+  try{if(PREFS.nPush&&'setAppBadge' in navigator){n?navigator.setAppBadge(n):navigator.clearAppBadge()} else if('clearAppBadge' in navigator) navigator.clearAppBadge()}catch(err){}
+  const P=document.getElementById('npanel'); if(P&&!P.hidden) nRender()}
+function nOpen(scr,extra){Object.assign(NV,{scr:scr||'feed'},extra||{}); document.getElementById('npanel').hidden=false; document.getElementById('syncPop').hidden=true; nRender()}
+function nClose(){document.getElementById('npanel').hidden=true}
+function nRead(id){if(!NST.r[id]){NST.r[id]=1; nSave(); renderBell()}}
+function nAct(it){nRead(it.id); if(it.kind==='sum') nOpen('sum',{d:it.d}); else if(it.kind==='well') nOpen('well',{w:it.w.id,d:it.d}); else if(it.kind==='res'){nClose(); F.res=true; if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'fields',field:null,cust:null,well:null})}}
+const NAVH=(t,sub,back)=>`<div class="np-nav">${back?`<button type="button" class="np-b" data-nb="${back}" aria-label="Назад">‹</button>`:''}<div class="np-t"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</div>${back?'':`<button type="button" class="np-all" id="npAll">Прочитать все</button>`}<button type="button" class="np-b" data-nx aria-label="Закрыть">×</button></div>`;
+function nFeed(){const g=[0,1,2].map(d=>({d,L:NITEMS.filter(i=>i.d===d)})).filter(x=>x.L.length);
+  return NAVH('Уведомления')+(g.length?g.map(x=>`<div class="np-g">${x.d===0?'Последняя загрузка · '+dLbl(0):x.d===1?'Днём раньше · '+dLbl(1):dLbl(x.d)}</div>`+x.L.map(i=>`<button type="button" class="nit ${i.lvl||''}${NST.r[i.id]?'':' new'}" data-ni="${i.id}"><span class="ic ${i.kind==='sum'?'sum':i.lvl||''}">${i.ic}</span><span class="tx"><b>${esc(i.t)}</b><span>${esc(i.x)}</span><time>${dLbl(i.d)} 07:05</time></span></button>`).join('')).join('')
+    :'<p class="note">Уведомлений нет. Включите нужные в «Профиле» → «Уведомления».</p>')}
+function grpRows(by,S){const map=new Map(); WELLS.forEach(w=>{const k=by(w); if(!map.has(k)) map.set(k,[]); map.get(k).push(w)});
+  return [...map].map(([k,ws])=>{const fact=d3.sum(ws,w=>metersW(w,S.a,S.b)), plan=d3.sum(ws,w=>w.planDay), nh=d3.sum(ws,w=>npvTime(w,S.a,S.b))*24, inc=S.inc.filter(i=>ws.includes(i.w)).length, nos=ws.filter(w=>!w.sync.ok).length;
+    return {k,n:ws.length,fact,plan,nh,inc,nos}}).sort((x,y)=>y.plan-x.plan)}
+function nSum(){const S=daySum(NV.d), st=k=>WELLS.filter(w=>w.status===k).length, nos=WELLS.filter(w=>!w.sync.ok);
+  let tbl='';
+  if(NV.cut==='w') tbl=`<div class="np-tr h"><span>Скважина</span><span>факт / план, м</span><span>НПВ, ч</span></div>`+WELLS.map(w=>({w,f:metersW(w,S.a,S.b),nh:npvTime(w,S.a,S.b)*24})).sort((x,y)=>(y.nh-x.nh)||(x.f/x.w.planDay-y.f/y.w.planDay)).map(o=>{const p=o.w.planDay?o.f/o.w.planDay:0;
+      return `<button type="button" class="np-tr" data-nw="${o.w.id}"><span><b>Скв. ${esc(o.w.no)}</b><small>${o.w.field.n} · ${esc(o.w.cust.n)}${o.w.sync.ok?'':' · <i class="warn">нет обмена</i>'}</small></span><span class="${!o.w.sync.ok?'warn':p>=1?'good':'bad'}">${nf0(o.f)} / ${nf0(o.w.planDay)}</span><span class="${o.nh>0?'bad':''}">${o.nh>0?nf1r(o.nh):'—'}</span></button>`}).join('');
+  else{const R=grpRows(NV.cut==='f'?w=>w.field.n:w=>w.cust.n,S); tbl=`<div class="np-tr h"><span>${NV.cut==='f'?'Месторождение':'Заказчик'}</span><span>факт / план, м</span><span>НПВ, ч · инц.</span></div>`+R.map(r=>`<div class="np-tr"><span><b>${esc(r.k)}</b><small>${r.n} скв.${r.nos?' · <i class="warn">без обмена '+r.nos+'</i>':''}</small></span><span class="${r.fact>=r.plan?'good':'bad'}">${nf0(r.fact)} / ${nf0(r.plan)}</span><span class="${r.nh>0?'bad':''}">${r.nh>0?nf1r(r.nh):'—'}${r.inc?' · '+r.inc:''}</span></div>`).join('')}
+  return NAVH('Сводка на '+dLbl(NV.d)+' 07:00','за сутки · '+(WELLS.length-(NV.d===0?nos.length:0))+' из '+WELLS.length+' буровых передали данные','feed')+
+   `<div class="np-k"><div><span>Проходка за сутки</span><b>${nf0(S.fact)} м</b><small class="${S.pct>=1?'good':'bad'}">${Math.round(S.pct*100)} % плана · ${signed0(S.fact-S.plan)} м</small></div>
+    <div><span>Скважин в бурении</span><b>${WELLS.length}</b><small>${st('drill')} бурение · ${st('casing')+st('finish')} крепл. · ${st('npv')} НПВ</small></div>
+    <div><span>НПВ за сутки</span><b class="${S.npct>.05?'bad':''}">${nf1r(S.npct*100)} %</b><small>${nf1r(S.nh)} ч из ${nf0(WELLS.length*24)} ч</small></div>
+    <div><span>Инциденты</span><b class="${S.inc.some(i=>i.live)?'bad':''}">${S.inc.length}</b><small>${S.inc.filter(i=>i.live).length} продолжается · ${S.inc.filter(i=>i.closed).length} завершено</small></div></div>
+   ${S.inc.length?'<div class="np-g">Инциденты и НПВ за сутки</div>'+S.inc.map(i=>`<button type="button" class="np-inc ${i.live?'':'ok'}" data-nw="${i.w.id}"><b>Скв. ${esc(i.w.no)} · ${esc(i.op.n)}</b><span>${i.w.field.n} · ${esc(i.w.cust.n)} · ${i.live?(i.h?nf1r(i.h)+' ч за сутки, ':'')+'продолжается':'завершено, '+nf1r(i.tot)+' ч'}</span></button>`).join(''):''}
+   <div class="seg np-seg">${[['f','Месторождения'],['c','Заказчики'],['w','Скважины']].map(([k,n])=>`<button type="button" data-nc="${k}" aria-pressed="${NV.cut===k}">${n}</button>`).join('')}</div>${tbl}`}
+function nWell(){const w=WELLS.find(x=>x.id===NV.w), S=daySum(NV.d,[w]), a=S.a,b=S.b, dep=Math.min(w.depth,b>=0?w.depth:depthAt(w.fact,b-w.spud)), day=metersW(w,a,b), days=Math.max(.5,b-w.spud);
+  const ops=w.fact.segs.map(g=>({g,x:Math.max(a,w.spud+g.t0),y:Math.min(b,w.spud+g.t1)})).filter(o=>o.y>o.x);
+  const nxt=w.planS.segs.filter(g=>g.d1>dep+1).slice(0,2).map(g=>g.op.n);
+  return NAVH('Оперативная сводка',`Скв. ${esc(w.no)} · ${w.field.n} · на ${dLbl(NV.d)} 07:00`,'sum')+
+   (w.sync.ok||NV.d>0?'':`<div class="syncw" style="margin:0 0 10px"><b>Рапорт не получен при загрузке ${fmtMsk(LOAD.at)}</b>Показаны данные на ${fmtMsk(w.sync.at,1)} МСК · ${esc(w.sync.why)}</div>`)+
+   `<div class="np-k"><div><span>Забой</span><b>${nf0(dep)} м</b></div><div><span>Проходка за сутки</span><b class="${day<w.planDay*.95?'bad':''}">${nf0(day)} м</b><small>план ${nf0(w.planDay)} м</small></div>
+    <div><span>Проходка общая</span><b>${nf0(dep)} м</b><small>из ${nf0(w.target)} м</small></div><div><span>КСБ</span><b>${nf1r(dep/days)} м/сут</b><small>средняя с забуривания</small></div></div>
+   <div class="np-box"><b>${esc(w.rig)}</b> · ${esc(w.cust.n)} · куст ${esc(w.pad)}<small>Бригада, ИТР и контакты появятся после подключения свода.</small></div>
+   <div class="np-g">Работы за сутки</div><table class="np-ops"><tr><th>Начало</th><th>Ч</th><th>Работы</th><th>Забой</th></tr>${ops.map(o=>`<tr><td>${fmtH(dateAt(o.x))}</td><td>${nf1r((o.y-o.x)*24)}</td><td class="${o.g.op.k==='N'?'n':''}">${o.g.op.k==='N'?'НПВ: ':''}${esc(o.g.op.n)}</td><td>${nf0(Math.min(w.depth,depthAt(w.fact,o.y-w.spud)))}</td></tr>`).join('')||'<tr><td colspan="4">нет операций</td></tr>'}</table>
+   <div class="np-g">План на следующие сутки</div><p class="np-p">${nxt.length?nxt.map(esc).join('. ')+'.':'Окончание строительства скважины.'}</p>
+   <button type="button" class="btn2" data-ngo="${w.id}" style="margin-top:8px">Открыть скважину</button>`}
+function nRender(){const el=document.getElementById('npin'); el.innerHTML=NV.scr==='sum'?nSum():NV.scr==='well'?nWell():nFeed(); el.scrollTop=0;
+  el.querySelectorAll('[data-nx]').forEach(b=>b.onclick=nClose); el.querySelectorAll('[data-nb]').forEach(b=>b.onclick=()=>{NV.scr=b.dataset.nb; nRender()});
+  const all=el.querySelector('#npAll'); if(all) all.onclick=()=>{NITEMS.forEach(i=>NST.r[i.id]=1); nSave(); renderBell(); nRender()};
+  el.querySelectorAll('[data-ni]').forEach(b=>b.onclick=()=>nAct(NITEMS.find(i=>i.id===b.dataset.ni)));
+  el.querySelectorAll('[data-nc]').forEach(b=>b.onclick=()=>{NV.cut=b.dataset.nc; const t=el.scrollTop; nRender(); el.scrollTop=t});
+  el.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{NV.w=b.dataset.nw; NV.scr='well'; nRender()});
+  el.querySelectorAll('[data-ngo]').forEach(b=>b.onclick=()=>{const w=WELLS.find(x=>x.id===b.dataset.ngo); nClose(); if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'well',well:w.id,field:w.field.id,cust:null})})}
+document.getElementById('bellBtn').onclick=e=>{e.stopPropagation(); const P=document.getElementById('npanel'); if(P.hidden) nOpen('feed'); else nClose()};
+/* системные уведомления: при открытии приложения, если включено в «Профиле» */
+function nAskPermission(){if(!('Notification' in window)) return Promise.resolve(false); if(Notification.permission==='granted') return Promise.resolve(true); if(Notification.permission==='denied') return Promise.resolve(false);
+  return Notification.requestPermission().then(p=>p==='granted').catch(()=>false)}
+function nNotifySystem(force){if(!PREFS.nPush||!('Notification' in window)||Notification.permission!=='granted') return;
+  const fresh=NITEMS.filter(i=>i.d===0&&!NST.r[i.id]&&(force||!NST.p[i.id])); if(!fresh.length) return;
+  const show=(t,o)=>{if(navigator.serviceWorker&&navigator.serviceWorker.controller) return navigator.serviceWorker.ready.then(r=>r.showNotification(t,o)).catch(()=>{try{new Notification(t,o)}catch(e){}}); try{new Notification(t,o)}catch(e){}};
+  const main=fresh.slice(0,3), rest=fresh.length-main.length;
+  main.forEach(i=>show(i.t,{body:i.x,tag:i.id,data:{id:i.id},icon:'icons/icon-192.png',badge:'icons/icon-192.png',lang:'ru'}));
+  if(rest>0) show('Пульс 2: ещё '+rest+' '+plural(rest,'уведомление','уведомления','уведомлений'),{body:'Откройте колокольчик в приложении',tag:'pulse-more',data:{id:''},icon:'icons/icon-192.png'});
+  fresh.forEach(i=>NST.p[i.id]=1); nSave()}
+function nOpenById(id){const it=NITEMS.find(i=>i.id===id); if(it) nAct(it); else nOpen('feed')}
+if(navigator.serviceWorker) navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='pulse-open') nOpenById(e.data.id)});
+document.addEventListener('pointerdown',e=>{const P=document.getElementById('npanel'); if(P&&!P.hidden&&!e.target.closest('#npanel')&&!e.target.closest('#bellBtn')) nClose()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape') nClose()});
+
 /* ======================= старт ======================= */
 drawBase(); updateSrc(); sizeMap(); refresh(false); layoutInsets(); if(state.screen==='map') fitMap(0); loadRealGeo();
 new ResizeObserver(()=>{const w=wrapEl.clientWidth,h=wrapEl.clientHeight; if(w&&(Math.abs(w-MW)>2||Math.abs(h-MH)>2)){sizeMap(); layoutInsets(); fitMap(0); updateOverlay(); charts.forEach(f=>f())}}).observe(wrapEl);
 let pw=panel.clientWidth; new ResizeObserver(()=>{if(Math.abs(panel.clientWidth-pw)>4){pw=panel.clientWidth; charts.forEach(f=>f())}}).observe(panel);
-window.__app={go,state:()=>state,WELLS,setScreen};
+renderBell(); setTimeout(()=>nNotifySystem(false),1200);
+{const q=new URLSearchParams(location.search).get('n'); if(q!==null) setTimeout(()=>nOpenById(q),400)}
+window.__app={go,state:()=>state,WELLS,setScreen,nOpen,PREFS:()=>PREFS};
 })();
 
 /* ===== установка как приложение: офлайн-кеш и обновления (только при открытии с сайта) ===== */
