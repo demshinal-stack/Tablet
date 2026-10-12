@@ -714,6 +714,117 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
   .top{flex-wrap:nowrap!important}
   .top .sync{margin-left:auto}
 }
+
+/* ===== Статистика v2: как идём → требует внимания → разрез ===== */
+.sv{max-width:1080px;margin:0 auto;padding:14px 14px 28px;display:flex;flex-direction:column;gap:0;font-size:14px}
+.sv .c-bad{color:var(--bad)!important} .sv .c-warn{color:var(--warn)!important} .sv .c-ok{color:var(--good)!important}
+.sv-hd{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:2px 2px 10px}
+.sv-hd h3{margin:0;font-family:var(--f-display);font-size:18px;color:var(--ink);font-weight:600}
+.sv-hd small{color:var(--muted);font-size:12px;text-align:right}
+.sv-seg{display:flex;background:var(--band);border-radius:10px;padding:3px;gap:2px}
+.sv-seg button{flex:1;border:0;background:none;border-radius:8px;padding:6px 4px;font-size:12.5px;color:var(--muted);cursor:pointer;font-weight:500;white-space:nowrap}
+.sv-seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,25,55,.16)}
+.sv-sec{margin-top:16px;min-width:0}
+.sv-l{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:0 2px 7px}
+.sv-l b{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);font-weight:600;display:flex;align-items:center}
+.sv-l small{color:var(--muted);font-size:11.5px}
+.sv-l button{border:0;background:none;color:var(--accent);font-size:12.5px;cursor:pointer;padding:0;font-weight:600}
+.sv .dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;flex:none}
+.sv-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;min-width:0}
+.sv-ok{padding:14px;color:var(--good);font-weight:500}
+.sv-pad{padding:12px}
+.sv-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:8px}
+.sv-tile{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 11px 9px;display:flex;flex-direction:column;gap:1px;min-width:0;position:relative}
+.sv-tile:focus-visible{outline:2px solid var(--mint)}
+.sv-tile .k{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600;white-space:nowrap}
+.sv-tile .v{font-family:var(--f-display);font-size:20px;color:var(--ink);line-height:1.25;white-space:nowrap}
+.sv-tile.bad .v{color:var(--bad)}
+.sv-tile .s{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-tile .d{font-size:11.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-tile svg{display:block;margin-top:5px;width:100%;height:26px}
+.sv-tile::after{content:"›";position:absolute;right:10px;top:6px;color:var(--muted);font-size:17px}
+.sv .up{color:var(--good)} .sv .dn{color:var(--bad)} .sv .nt{color:var(--muted);font-weight:500}
+.sv .cells{display:flex;flex-wrap:wrap;gap:2px;margin-top:6px;height:26px;align-content:flex-end}
+.sv .cells i{width:9px;height:9px;border-radius:2px}
+.sv-cols{display:grid;grid-template-columns:minmax(0,1fr);gap:0 16px}
+@media (min-width:1000px){.sv-cols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.sv-att{display:flex;flex-direction:column;gap:7px}
+.sv-ac{all:unset;box-sizing:border-box;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 11px 9px 14px;position:relative;display:block}
+.sv-ac::before{content:"";position:absolute;left:0;top:8px;bottom:8px;width:4px;border-radius:0 3px 3px 0;background:var(--warn)}
+.sv-ac.bad::before{background:var(--bad)}
+.sv-ac .h{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.sv-ac .h b{color:var(--ink);font-size:14px;white-space:nowrap;flex:none}
+.sv-ac .h small{color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.sv-ac .m{display:block;color:var(--ink);font-size:13.5px;margin-top:1px}
+.sv-ac .m.bad{color:var(--bad)}
+.sv-ac .tg{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.sv-ac .tg span{font-size:11px;border-radius:6px;padding:1px 7px;background:var(--band);color:var(--body)}
+.sv-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:8px -14px;padding:0 14px}
+.sv-chips::-webkit-scrollbar{display:none}
+.sv-chips button{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--body);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer}
+.sv-chips button b{margin-left:5px;color:var(--ink)}
+.sv-chips button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.sv-chips button[aria-pressed="true"] b{color:var(--prog)}
+.sv-rig{all:unset;box-sizing:border-box;display:block;width:100%;padding:11px 12px;cursor:pointer}
+div.sv-rig{cursor:default}
+.sv-rig .bar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px}
+.sv-rig .lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:8px;font-size:12px;color:var(--body)}
+.sv-rig .lg i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px}
+.sv-rig .lg b{color:var(--ink)}
+.sv-fc{display:block;padding:11px 12px}
+.sv-fc .t{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+.sv-fc .t b{font-family:var(--f-display);font-size:17px;color:var(--ink);font-weight:600}
+.sv-fc .t span{font-size:12px;color:var(--muted)}
+.sv-fc .bb{display:block;position:relative;height:10px;border-radius:5px;background:var(--band);margin:9px 0 5px;overflow:hidden}
+.sv-fc .bb i{position:absolute;top:0;bottom:0;left:0;border-radius:5px}
+.sv-fc .bb .f1{background:var(--prog)} .sv-fc .bb .f2{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--prog) 55%,transparent) 0 4px,transparent 4px 7px)}
+.sv-fc .bb .pl{position:absolute;top:0;bottom:0;width:2px;background:var(--ink)}
+.sv-fc .n{display:block;font-size:12px;color:var(--muted)}
+.sv-sc{overflow:hidden}
+.sv-h,.sv-r{display:grid;grid-template-columns:minmax(0,1fr) 76px 42px 60px;gap:6px;align-items:center;padding:8px 10px}
+@media (min-width:700px){.sv-h,.sv-r{grid-template-columns:minmax(0,1fr) 140px 70px 80px;gap:14px;padding-inline:14px}}
+.sv-h{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line);padding-block:7px}
+.sv-h span:not(:first-child),.sv-r>span:not(:first-child){text-align:right}
+.sv-r{border:0;border-top:1px solid var(--line);cursor:pointer;background:none;width:100%;font:inherit;color:inherit;text-align:left}
+.sv-h+.sv-r{border-top:0}
+.sv-r.tot{background:var(--band);cursor:default}
+.sv-r .nm{min-width:0}
+.sv-r .nm b{display:block;color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-r .nm small{color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.sv-r.grp .nm b::before{content:"›";display:inline-block;width:12px;color:var(--muted);transition:transform .2s}
+.sv-r.grp.open .nm b::before{transform:rotate(90deg)}
+.sv-r.w{background:var(--band);padding-left:24px}
+.sv-r.w .nm b{font-weight:500}
+.sv .mb{display:flex;flex-direction:column;align-items:flex-end;gap:3px;min-width:0}
+.sv .mb b{font-size:12.5px;color:var(--ink);font-weight:600;white-space:nowrap}
+.sv .mb small{color:var(--muted);font-size:11px;white-space:nowrap}
+.sv .mb i{position:relative;display:block;width:100%;height:5px;border-radius:3px;background:var(--line)}
+.sv .mb i u{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--prog)}
+.sv .mb i s{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--ink);left:83.3%}
+.sv .vv{font-size:12.5px;font-weight:600;color:var(--ink)}
+.sv-why{font-size:12px;color:var(--muted);margin:6px 2px 0}
+.sv-mh{display:flex;flex-direction:column;padding:2px 2px 10px}
+.sv-mh .k{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--accent);font-weight:600}
+.sv-mh .v{font-family:var(--f-display);font-size:28px;color:var(--ink);line-height:1.2;margin-top:2px}
+.sv-mh .v.sm{font-size:21px}
+.sv-mh .s{color:var(--muted);font-size:13px}
+.sv-ch{padding:8px 6px 4px}
+.sv-ch svg{display:block;width:100%;height:auto;max-height:260px}
+.sv-ch text{font-size:10px;fill:var(--muted);font-family:var(--f-body)}
+.sv-rk{display:flex;flex-direction:column;overflow:hidden}
+.sv-rr{all:unset;box-sizing:border-box;cursor:pointer;display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:10px;align-items:center;padding:9px 12px;border-top:1px solid var(--line)}
+.sv-rr:first-child{border-top:0}
+.sv-rr.nogo{cursor:default}
+.sv-rr .nm{min-width:0}
+.sv-rr .nm b{display:flex;align-items:center;color:var(--ink);font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-rr .nm small{color:var(--muted);font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:10px}
+.sv-sum>div{padding:10px 11px;border-left:1px solid var(--line);min-width:0;display:flex;flex-direction:column}
+.sv-sum>div:first-child{border-left:0}
+.sv-sum .k{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.sv-sum .v{font-family:var(--f-display);font-size:16px;color:var(--ink)}
+.sv-sum .s{font-size:11px;color:var(--muted)}
+.sv-pad .sec.dyn{margin:0}
 </style>
 </head>
 <body>
@@ -766,7 +877,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:36,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:37,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -936,7 +1047,7 @@ function series(ws,per){const P=PER[per]; return P.bins.map(b=>({l:b.l,fact:d3.s
 function totals(ws,per){const [a,b]=PER[per].tot; const fact=d3.sum(ws,w=>metersW(w,a,b)), plan=d3.sum(ws,w=>w.planDay)*(b-a); return {fact,plan,pct:plan?fact/plan:0,d:fact-plan,npv:d3.sum(ws,w=>npvTime(w,a,b))*24}}
 
 /* ======================= состояние и фильтры ======================= */
-let state={screen:'map',level:'fields',field:null,cust:null,well:null,wtab:'drill',per:'month',ovtab:'fields'};
+let state={screen:'map',level:'fields',field:null,cust:null,well:null,wtab:'drill',per:'month',ovtab:'fields',sv:null};
 let F={npv:false,res:false};
 const hist=[];
 function visible(w){ if(F.npv&&!w.npv) return false; if(F.res&&w.res.l!=='r'&&w.res.l!=='o') return false; return true}
@@ -966,7 +1077,7 @@ function go(patch,noPush){ if(!noPush) hist.push({...state}); if(patch.level==='
 const goBack=()=>{const P=document.getElementById('npanel'); if(P&&!P.hidden){nBack(); return} const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
 document.getElementById('back').onclick=goBack; document.getElementById('scrBack').onclick=goBack;
 function setTabs(){[['scrMap','map'],['scrStats','stats']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s)); const a=document.getElementById('scrProf'); a.setAttribute('aria-pressed',state.screen==='profile'); document.getElementById('havaT').textContent=initials(PREFS.name)}
-function setScreen(s){if(typeof nClose==='function') nClose(); state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
+function setScreen(s){if(typeof nClose==='function') nClose(); state.screen=s; state.sv=null; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
 document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>{if(state.screen==='profile'){goBack(); return} if(typeof nClose==='function') nClose(); if(typeof closeFilters==='function') closeFilters(); hist.push({...state}); setScreen('profile')};
 function refresh(fit){
   renderSync(); document.getElementById('back').disabled=!hist.length; updBack();
@@ -1636,26 +1747,138 @@ function renderTitle(){const el=document.getElementById('maptitle'); let e,t,s; 
   el.innerHTML=`<div class="e">${esc(e)}</div><div class="t">${esc(t)}</div><div class="s">${esc(s)}</div>`}
 
 /* ======================= статистика ======================= */
+/* ======================= статистика: как идём → требует внимания → разрез ======================= */
+const SC={dim:'field',sort:'pct',open:{},bf:'all'};
+const SV_LAG=2, SV_LAGB=5;
+const svLag=w=>w.tNow-timeAt(w.planS,w.depth);
+const svPrevAB=per=>{const [a,b]=PER[per].tot; return [a-(b-a),a]};
+const svPrevLbl={day:'к вчера',month:'к пред. '+Math.round(PER.month.tot[1]-PER.month.tot[0])+' сут',year:'к прош. году'};
+function svTot(ws,a,b){const fact=d3.sum(ws,w=>metersW(w,a,b)), plan=d3.sum(ws,w=>w.planDay)*(b-a); return {fact,plan,pct:plan?fact/plan:0}}
+function svAgg(ws,per){const t=totals(ws,per), n=npvShare(ws,per), lags=ws.map(svLag), lagN=lags.filter(x=>x>SV_LAG).length;
+  return {fact:t.fact,plan:t.plan,pct:t.pct,own:n.opct,all:n.pct,h:n.h,lagN,maxLag:Math.max(0,...lags),resR:ws.filter(w=>w.res.l==='r').length,resO:ws.filter(w=>w.res.l==='o').length,resN:ws.filter(w=>w.res.l==='n').length,n:ws.length}}
+const svHP=p=>p<.9?'c-bad':p<.98?'c-warn':'', svHN=v=>v>.05?'c-bad':v>.02?'c-warn':'';
+function svDelta(cur,prev,inv,pp,per){const d=(cur-prev)*100; if(!isFinite(d)||Math.abs(d)<(pp?.05:.5)) return `<span class="d nt">≈ ${svPrevLbl[per]}</span>`; const good=inv?d<0:d>0;
+  return `<span class="d ${good?'up':'dn'}">${d>0?'▲':'▼'} ${pp?nf1(Math.abs(d)):Math.round(Math.abs(d))} п.п. ${svPrevLbl[per]}</span>`}
+function svSpark(vals,colr,ref){const w=150,h=26,mx=Math.max(...vals,ref||0),mn=Math.min(...vals,ref??Infinity),sx=i=>i/(vals.length-1)*w,sy=v=>h-3-(v-mn)/((mx-mn)||1)*(h-7);
+  const d=vals.map((v,i)=>(i?'L':'M')+sx(i).toFixed(1)+' '+sy(v).toFixed(1)).join(''), L=vals.length-1;
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true">${ref!=null?`<line x1="0" x2="${w}" y1="${sy(ref)}" y2="${sy(ref)}" stroke="var(--muted)" stroke-dasharray="3 3" vector-effect="non-scaling-stroke" stroke-opacity=".6"/>`:''}<path d="${d}L${w} ${h}L0 ${h}Z" fill="${colr}" fill-opacity=".12"/><path d="${d}" fill="none" stroke="${colr}" stroke-width="1.6" vector-effect="non-scaling-stroke"/><circle cx="${sx(L)}" cy="${sy(vals[L])}" r="2.6" fill="${colr}"/></svg>`}
+function svCells(ws,f){return `<span class="cells">${ws.map(w=>`<i style="background:${f(w)}" title="Скв. ${esc(w.no)}"></i>`).join('')}</span>`}
+function svTiles(ws,per){const a=svAgg(ws,per), [pa,pb]=svPrevAB(per), pt=svTot(ws,pa,pb), pn=npvShareAB(ws,pa,pb), B=PER[per].bins;
+  const sp=svSpark(B.map(b=>{const t=svTot(ws,b.a,b.b); return t.pct}),'var(--prog)',1), sn=svSpark(B.map(b=>npvShareAB(ws,b.a,b.b).opct),'var(--st-npv)',.05);
+  return `<div class="sv-tiles">
+   <button type="button" class="sv-tile" data-sv="metric:prohod"><span class="k">Проходка</span><span class="v">${nf0(a.fact)} м</span><span class="s">${Math.round(a.pct*100)} % плана · ${nf0(a.plan)} м</span>${svDelta(a.pct,pt.pct,false,false,per)}${sp}</button>
+   <button type="button" class="sv-tile ${a.own>.05?'bad':''}" data-sv="metric:npv"><span class="k">НПВ собств.</span><span class="v">${pct1(a.own)}</span><span class="s">весь ${pct1(a.all)} · ${nf0(a.h)} ч</span>${svDelta(a.own,pn.opct,true,true,per)}${sn}</button>
+   <button type="button" class="sv-tile ${a.lagN?'bad':''}" data-sv="metric:lag"><span class="k">Отстают от ГТН</span><span class="v">${a.lagN} скв.</span><span class="s">${a.lagN?'макс. '+nf1(a.maxLag)+' сут · ':''}из ${a.n}</span><span class="d nt">каждая клетка — скважина</span>${svCells(ws.slice().sort((x,y)=>svLag(y)-svLag(x)),w=>{const l=svLag(w); return l>SV_LAGB?'var(--bad)':l>SV_LAG?'var(--warn)':'color-mix(in srgb,var(--prog) 55%,transparent)'})}</button>
+   <button type="button" class="sv-tile ${a.resR?'bad':''}" data-sv="metric:res"><span class="k">Ресурс</span><span class="v">${a.resR} замеч.</span><span class="s">${a.resO} внимание · ${a.resN} нет данных</span><span class="d nt">каждая клетка — скважина</span>${svCells(ws.slice().sort((x,y)=>'rong'.indexOf(x.res.l)-'rong'.indexOf(y.res.l)),w=>`var(${RES[w.res.l].v})`)}</button>
+  </div>`}
+function svAttention(w){const r=[], nd=npvShare([w],'day'), nm=npvShare([w],'month'), l=svLag(w);
+  if(w.status==='npv') r.push({k:'npv',sev:'bad',t:'НПВ сейчас · '+nf1(nd.h)+' ч за сутки'}); else if(nm.opct>.06) r.push({k:'npv',sev:'warn',t:'НПВ за месяц '+pct1(nm.opct)});
+  if(l>SV_LAG) r.push({k:'lag',sev:l>SV_LAGB?'bad':'warn',t:'Отстаёт от ГТН на '+nf1(l)+' сут'});
+  if(w.res.l==='r') r.push({k:'res',sev:'bad',t:'Ресурс: '+w.res.t});
+  if(!w.sync.ok) r.push({k:'sync',sev:'warn',t:'Нет рапорта, данные на '+fmtMsk(w.sync.at)});
+  return r}
+const svAttList=ws=>ws.map(w=>({w,r:svAttention(w)})).filter(x=>x.r.length).sort((a,b)=>(b.r.filter(x=>x.sev==='bad').length-a.r.filter(x=>x.sev==='bad').length)||(b.r.length-a.r.length));
+function svAttCard(x){const bad=x.r.some(r=>r.sev==='bad'), m=x.r[0];
+  return `<button type="button" class="sv-ac ${bad?'bad':''}" data-svw="${x.w.id}"><span class="h"><b>Скв. ${esc(x.w.no)}</b><small>${x.w.field.n} · ${esc(x.w.cust.n)}</small></span><span class="m ${m.sev==='bad'?'bad':''}">${esc(m.t)}</span>${x.r.length>1?`<span class="tg">${x.r.slice(1).map(r=>`<span>${esc(r.t)}</span>`).join('')}</span>`:''}</button>`}
+function svGroups(ws,dim){if(dim==='rig') return ws.map(w=>({id:w.id,n:w.rig,sub:'скв. '+w.no+' · '+w.field.n,ws:[w],w}));
+  const L=dim==='field'?FIELDS:CUSTOMERS; return L.map(g=>({id:g.id,n:g.n,ws:ws.filter(w=>(dim==='field'?w.field:w.cust)===g)})).filter(g=>g.ws.length).map(g=>({...g,sub:g.ws.length+' скв.'}))}
+function svRow(g,cls,per){const a=svAgg(g.ws,per), one=g.ws.length===1;
+  const act=cls.includes('tot')?'disabled':g.w?`data-svw="${g.w.id}"`:`data-scx="${g.id}"`;
+  return `<button type="button" class="sv-r ${cls}" ${act}><span class="nm"><b>${esc(g.n)}</b><small>${esc(g.sub)}</small></span>
+    <span class="mb"><b class="${svHP(a.pct)}">${Math.round(a.pct*100)} %</b><i><u style="width:${Math.min(1,a.pct/1.2)*100}%;${a.pct<.9?'background:var(--bad)':''}"></u><s></s></i></span>
+    <span class="vv ${svHN(a.own)}">${nf1(a.own*100)}</span>
+    <span class="vv ${a.maxLag>SV_LAGB?'c-bad':a.lagN?'c-warn':a.maxLag>.5?'':'c-ok'}">${a.lagN?(one?'':a.lagN+' / ')+'+'+nf1(a.maxLag):a.maxLag>.5?'+'+nf1(a.maxLag):'✓'}</span></button>`}
+function svScore(ws,per){const gs=svGroups(ws,SC.dim).map(g=>({...g,a:svAgg(g.ws,per)}));
+  const srt={pct:(x,y)=>x.a.pct-y.a.pct,npv:(x,y)=>y.a.own-x.a.own,lag:(x,y)=>y.a.maxLag-x.a.maxLag,vol:(x,y)=>y.a.plan-x.a.plan}[SC.sort]; gs.sort(srt);
+  let h=`<div class="sv-seg" role="group" aria-label="Разрез">${[['field','Месторождения'],['cust','Заказчики'],['rig','Станки']].map(([d,n])=>`<button type="button" data-scd="${d}" aria-pressed="${SC.dim===d}">${n}</button>`).join('')}</div>
+   <div class="sv-chips">${[['pct','Хуже по плану'],['npv','Больше НПВ'],['lag','Отставание'],['vol','По объёму']].map(([k,n])=>`<button type="button" data-scs="${k}" aria-pressed="${SC.sort===k}">${n}</button>`).join('')}</div>
+   <div class="sv-card sv-sc"><div class="sv-h"><span>${SC.dim==='field'?'Месторождение':SC.dim==='cust'?'Заказчик':'Станок'}</span><span>% плана</span><span>НПВ %</span><span>ГТН</span></div>`;
+  h+=svRow({n:'Все',sub:ws.length+' скв. · '+PER[per].n.toLowerCase(),ws},'tot',per);
+  gs.forEach(g=>{const op=!g.w&&SC.open[SC.dim+g.id]; h+=svRow(g,(g.w?'flat ':'grp ')+(op?'open':''),per);
+    if(op) g.ws.slice().sort((x,y)=>totals([x],per).pct-totals([y],per).pct).forEach(w=>{h+=svRow({n:'Скв. '+w.no,sub:w.rig+' · '+ST[w.status].n.toLowerCase(),ws:[w],w},'w',per)})});
+  return h+`</div><p class="sv-why">НПВ — собственное, % календарного времени. ГТН: сколько скважин отстаёт больше чем на 2 сут / максимум, сут. Нажмите строку — раскроются скважины.</p>`}
+function svRigs(ws,clickable){const c={}; ws.forEach(w=>c[w.status]=(c[w.status]||0)+1); const ks=Object.keys(ST).filter(s=>c[s]);
+  return `<div class="sv-card"><${clickable?'button type="button" data-sv="rigs"':'div'} class="sv-rig"><span class="bar">${ks.map(s=>`<i style="flex:${c[s]};background:${col(s)}"></i>`).join('')}</span><span class="lg">${ks.map(s=>`<span><i style="background:${col(s)}"></i>${ST[s].n} <b>${c[s]}</b></span>`).join('')}</span></${clickable?'button':'div'}></div>`}
+function svForecast(ws){const [a,b]=PER.month.tot, el=b-a, dim=new Date(SNAP.getFullYear(),SNAP.getMonth()+1,0).getDate(), t=totals(ws,'month'), pl=d3.sum(ws,w=>w.planDay)*dim, fc=el>0?t.fact/el*dim:0, mx=Math.max(pl,fc,1)*1.04;
+  return `<div class="sv-card sv-fc"><span class="t"><b class="${svHP(fc/pl)}">${Math.round(fc/pl*100)} % плана</b><span>прогноз на ${dim}.${pad2(SNAP.getMonth()+1)} при текущем темпе</span></span><span class="bb"><i class="f2" style="width:${fc/mx*100}%"></i><i class="f1" style="width:${t.fact/mx*100}%"></i><span class="pl" style="left:${pl/mx*100}%"></span></span><span class="n">факт ${nf0(t.fact)} · прогноз ${nf0(fc)} · план ${nf0(pl)} м</span></div>`}
+function svBars(vals,labels,fmt,thr,badf){const W=340,H=150,ml=34,mr=6,mt=12,mb=20,iw=W-ml-mr,ih=H-mt-mb,n=vals.length,bw=iw/n;
+  const mx=Math.max(...vals,thr||0)*1.15||1, y=v=>mt+ih-v/mx*ih; let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Динамика">`;
+  [0,1,2,3].forEach(i=>{const t=mx/3.45*i; s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(t)}" y2="${y(t)}" stroke="var(--line)"/><text x="${ml-5}" y="${y(t)+3.5}" text-anchor="end">${fmt(t)}</text>`});
+  const step=Math.ceil(n/8);
+  vals.forEach((v,i)=>{const x=ml+i*bw+bw*.16, w=bw*.68, last=i===n-1; s+=`<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${w.toFixed(1)}" height="${(mt+ih-y(v)).toFixed(1)}" rx="1.5" fill="${badf(v)?'var(--bad)':'var(--prog)'}" fill-opacity="${last?1:.6}"/>`;
+    if((n-1-i)%step===0) s+=`<text x="${(x+w/2).toFixed(1)}" y="${H-5}" text-anchor="middle" ${last?'style="fill:var(--ink);font-weight:600"':''}>${labels[i]}</text>`});
+  if(thr!=null) s+=`<line x1="${ml}" x2="${W-mr}" y1="${y(thr)}" y2="${y(thr)}" stroke="var(--bad)" stroke-dasharray="4 3" stroke-width="1.2"/><text x="${ml+4}" y="${y(thr)-4}" text-anchor="start" style="fill:var(--bad)">порог ${Math.round(thr*100)} %</text>`;
+  return s+'</svg>'}
+function svPerSeg(per){return `<div class="sv-seg" role="group" aria-label="Период">${['day','month','year'].map(p=>`<button type="button" data-svp="${p}" aria-pressed="${per===p}">${PER[p].n}</button>`).join('')}</div>`}
+function svScopeName(){return state.cust?CUSTOMERS.find(c=>c.id===state.cust).n:state.field?FIELDS.find(f=>f.id===state.field).n:'все месторождения'}
+
+const SVS={
+ home(ws,per){const L=svAttList(ws);
+  return `<div class="sv-hd"><h3>Статистика</h3><small>${esc(svScopeName())}${F.npv||F.res?' · фильтр':''}</small></div>${svPerSeg(per)}
+   <section class="sv-sec"><div class="sv-l"><b>Как идём</b><small>${PER[per].sub}</small></div>${svTiles(ws,per)}</section>
+   <div class="sv-cols">
+    <section class="sv-sec"><div class="sv-l"><b>Требует внимания · ${L.length}</b>${L.length>3?'<button type="button" data-sv="att">Все ›</button>':''}</div>${L.length?`<div class="sv-att">${L.slice(0,3).map(svAttCard).join('')}</div>`:'<div class="sv-card sv-ok">Все скважины в норме</div>'}</section>
+    <div><section class="sv-sec"><div class="sv-l"><b>Станки сейчас</b><button type="button" data-sv="rigs">Все ›</button></div>${svRigs(ws,true)}</section>
+    <section class="sv-sec"><div class="sv-l"><b>Месяц · прогноз</b></div>${svForecast(ws)}</section></div>
+   </div>
+   <section class="sv-sec"><div class="sv-l"><b>Разрез</b><small>${PER[per].n.toLowerCase()}</small></div>${svScore(ws,per)}</section>
+   <p class="sv-why">Состав скважин, заказчиков, забоев и ресурса — по данным на 10.10.26. История проходки, план, ГТН и НПВ — демонстрационные до подключения к источнику.</p>`},
+ metric(ws,per,sv){const a=svAgg(ws,per), m=sv.m, dim=sv.dim||'field', B=PER[per].bins;
+  const head={prohod:['Проходка · '+PER[per].n.toLowerCase(),nf0(a.fact)+' м',Math.round(a.pct*100)+' % плана ('+nf0(a.plan)+' м)'],
+   npv:['НПВ собственное · '+PER[per].n.toLowerCase(),pct1(a.own),'весь НПВ '+pct1(a.all)+' · '+nf0(a.h)+' ч'],
+   lag:['Отставание от ГТН',`<span class="${a.lagN?'c-bad':'c-ok'}">${a.lagN} скв.</span>`,a.lagN?'максимум '+nf1(a.maxLag)+' сут · всего '+a.n+' скв.':'все скважины в графике'],
+   res:['Ресурс оборудования',`<span class="${a.resR?'c-bad':''}">${a.resR} замеч.</span>`,a.resO+' требуют внимания · '+a.resN+' нет данных']}[m];
+  const gs=svGroups(ws,dim).map(g=>({...g,a:svAgg(g.ws,per)}));
+  const val={prohod:g=>[g.a.pct,Math.round(g.a.pct*100)+' %',svHP(g.a.pct),Math.min(1,g.a.pct/1.2)],npv:g=>[-g.a.own,pct1(g.a.own),svHN(g.a.own),Math.min(1,g.a.own/.08)],
+   lag:g=>[-g.a.maxLag,g.a.maxLag>.5?'+'+nf1(g.a.maxLag)+' сут':'в графике',g.a.maxLag>SV_LAGB?'c-bad':g.a.lagN?'c-warn':g.a.maxLag>.5?'':'c-ok',Math.max(0,Math.min(1,g.a.maxLag/4))],
+   res:g=>[-(g.a.resR*2+g.a.resO),g.a.resR||g.a.resO?(g.a.resR?g.a.resR+' замеч. ':'')+(g.a.resO?g.a.resO+' вним.':''):g.w?RES[g.w.res.l].n:'норма',g.a.resR?'c-bad':g.a.resO?'c-warn':'c-ok',Math.min(1,(g.a.resR*2+g.a.resO)/4)]}[m];
+  gs.sort((x,y)=>val(x)[0]-val(y)[0]);
+  let body='';
+  if(m==='prohod') body=`<div class="sv-card sv-pad">${dynHTML('svd')}</div>`;
+  if(m==='npv'){const x=npvShare(ws,per), mxT=Math.max(...x.by,1);
+    body=`<div class="sv-card sv-ch">${svBars(B.map(b=>npvShareAB(ws,b.a,b.b).opct),B.map(b=>b.l),v=>Math.round(v*100)+'%',.05,v=>v>.05)}</div><p class="sv-why">Доля собственного НПВ в календарном времени, ${PER[per].sub}.</p>
+     <section class="sv-sec"><div class="sv-l"><b>По типам</b><button type="button" data-npvopen="1">Подробно ›</button></div><div class="sv-card sv-rk">${NPV_T.map((t,i)=>({t,h:x.by[i]})).filter(o=>o.h>0).sort((p,q)=>q.h-p.h).map(o=>`<div class="sv-rr nogo"><span class="nm"><b><i class="dot" style="background:${o.t.c}"></i>${o.t.n}</b><small>${o.t.own?'собственное':'не собственное'} · ${nf1(o.h)} ч</small></span><span class="mb"><b>${x.h?Math.round(o.h/x.h*100):0} %</b><i><u style="width:${o.h/mxT*100}%;background:${o.t.c}"></u></i></span></div>`).join('')||'<div class="sv-rr nogo"><span class="nm"><b>НПВ за период нет</b></span></div>'}</div></section>`}
+  if(m==='lag'){const L=ws.map(w=>({w,l:svLag(w)})).sort((p,q)=>q.l-p.l), mx=Math.max(1,...L.map(o=>Math.abs(o.l)));
+    body=`<div class="sv-card sv-rk">${L.slice(0,8).map(o=>`<button type="button" class="sv-rr" data-svw="${o.w.id}"><span class="nm"><b>Скв. ${esc(o.w.no)}</b><small>${o.w.field.n} · ${esc(o.w.rig)}</small></span><span class="mb"><b class="${o.l>SV_LAGB?'c-bad':o.l>SV_LAG?'c-warn':o.l>.5?'':'c-ok'}">${o.l>0?'+':'−'}${nf1(Math.abs(o.l))} сут</b><i><u style="width:${Math.max(0,o.l)/mx*100}%;background:${o.l>SV_LAGB?'var(--bad)':o.l>SV_LAG?'var(--warn)':'var(--muted)'}"></u></i></span></button>`).join('')}</div><p class="sv-why">Плюс — скважина позади графика ГТН на столько суток; в «отстающие» попадают больше 2 сут, красным — больше 5. Показаны 8 с наибольшим отставанием.</p>`}
+  if(m==='res'){const L=ws.filter(w=>w.res.l==='r'||w.res.l==='o').sort((p,q)=>'ro'.indexOf(p.res.l)-'ro'.indexOf(q.res.l));
+    body=`<div class="sv-att">${L.map(w=>`<button type="button" class="sv-ac ${w.res.l==='r'?'bad':''}" data-svw="${w.id}"><span class="h"><b>Скв. ${esc(w.no)}</b><small>${w.field.n} · ${esc(w.rig)}</small></span><span class="m ${w.res.l==='r'?'bad':''}">${esc(w.res.t)}</span></button>`).join('')||'<div class="sv-card sv-ok">Замечаний нет</div>'}</div>`}
+  const ttl={prohod:'Кто отстаёт от плана',npv:'Где больше НПВ',lag:'Где отставание',res:'Где замечания'}[m];
+  return `<div class="sv-mh"><span class="k">${head[0]}</span><span class="v">${head[1]}</span><span class="s">${head[2]}</span></div>
+   ${m==='prohod'||m==='npv'?svPerSeg(per):''}<section class="sv-sec">${body}</section>
+   <section class="sv-sec"><div class="sv-l"><b>${ttl}</b></div><div class="sv-seg" role="group">${[['field','Месторожд.'],['cust','Заказчики'],['rig','Станки']].map(([d,n])=>`<button type="button" data-svd="${d}" aria-pressed="${dim===d}">${n}</button>`).join('')}</div>
+   <div class="sv-card sv-rk" style="margin-top:8px">${gs.map(g=>{const v=val(g); return `<button type="button" class="sv-rr" ${g.w?`data-svw="${g.w.id}"`:`data-sv="group:${dim}:${g.id}"`}><span class="nm"><b>${esc(g.n)}</b><small>${esc(g.sub)}</small></span><span class="mb"><b class="${v[2]}">${v[1]}</b><i><u style="width:${v[3]*100}%;${v[2]==='c-bad'?'background:var(--bad)':v[2]==='c-warn'?'background:var(--warn)':''}"></u>${m==='prohod'?'<s></s>':''}</i></span></button>`}).join('')}</div></section>`},
+ group(ws,per,sv){const g=(sv.dim==='field'?FIELDS:CUSTOMERS).find(x=>x.id===sv.id), gw=ws.filter(w=>(sv.dim==='field'?w.field:w.cust)===g), a=svAgg(gw,per);
+  return `<div class="sv-mh"><span class="k">${sv.dim==='field'?'Месторождение':'Заказчик'}</span><span class="v sm">${esc(g.n)}</span><span class="s">${gw.length} скв. · ${PER[per].n.toLowerCase()}</span></div>${svPerSeg(per)}
+   <div class="sv-card sv-sum"><div><span class="k">Проходка</span><span class="v ${svHP(a.pct)}">${Math.round(a.pct*100)} %</span><span class="s">${nf0(a.fact)} м</span></div><div><span class="k">НПВ собств.</span><span class="v ${svHN(a.own)}">${pct1(a.own)}</span><span class="s">весь ${pct1(a.all)}</span></div><div><span class="k">ГТН</span><span class="v">${a.lagN} скв.</span><span class="s">${a.lagN?'макс. +'+nf1(a.maxLag)+' сут':'в графике'}</span></div></div>
+   <section class="sv-sec"><div class="sv-l"><b>Скважины</b><button type="button" data-svmap="${sv.dim}:${g.id}">На карте ›</button></div><div class="sv-card sv-sc"><div class="sv-h"><span>Скважина</span><span>% плана</span><span>НПВ %</span><span>ГТН</span></div>${gw.slice().sort((x,y)=>totals([x],per).pct-totals([y],per).pct).map(w=>svRow({n:'Скв. '+w.no,sub:w.rig+' · '+ST[w.status].n.toLowerCase(),ws:[w],w},'flat',per)).join('')}</div></section>`},
+ att(ws){const L=svAttList(ws), cnt=k=>L.filter(x=>x.r.some(r=>r.k===k)).length, Fl=SC.bf==='all'?L:L.filter(x=>x.r.some(r=>r.k===SC.bf));
+  return `<div class="sv-hd"><h3>Требует внимания</h3><small>${L.length} из ${ws.length} скв.</small></div>
+   <div class="sv-chips">${[['all','Все',L.length],['lag','ГТН',cnt('lag')],['npv','НПВ',cnt('npv')],['res','Ресурс',cnt('res')],['sync','Нет рапорта',cnt('sync')]].map(([k,n,c])=>`<button type="button" data-svb="${k}" aria-pressed="${SC.bf===k}">${n}<b>${c}</b></button>`).join('')}</div>
+   <div class="sv-att">${Fl.map(svAttCard).join('')}</div>`},
+ rigs(ws){const by={}; ws.forEach(w=>(by[w.status]=by[w.status]||[]).push(w));
+  return `<div class="sv-mh"><span class="k">Станки сейчас</span><span class="v sm">${ws.length} станков</span><span class="s">по данным на ${fmtMsk(LOAD.at)} МСК</span></div><section class="sv-sec">${svRigs(ws,false)}</section>
+   ${Object.keys(ST).filter(s=>by[s]).map(s=>`<section class="sv-sec"><div class="sv-l"><b><i class="dot" style="background:${col(s)}"></i>${ST[s].n} · ${by[s].length}</b></div><div class="sv-card sv-rk">${by[s].map(w=>{const d=totals([w],'day'); return `<button type="button" class="sv-rr" data-svw="${w.id}"><span class="nm"><b>${esc(w.rig)}</b><small>скв. ${esc(w.no)} · ${w.field.n}</small></span><span class="mb"><b>${nf0(d.fact)} м</b><small>за сутки · ${Math.round(d.pct*100)} %</small></span></button>`}).join('')}</div></section>`).join('')}
+   <p class="sv-why">ВМР и переезды появятся, когда подключим состояния станков из рапортов.</p>`}
+};
+function svOpen(sv){hist.push({...state}); state.sv=sv; refresh(false); document.getElementById('statwrap').scrollTop=0}
+function svWell(id){const w=WELLS.find(x=>x.id===id); hist.push({...state}); state.screen='map'; setTabs(); go({level:'well',well:w.id,field:w.field.id,cust:null},true)}
 function renderStats(){
-  const el=document.getElementById('statwrap'), ws=scopeWells(), per=state.per, td=totals(ws,'day'), tm=totals(ws,'month'), ty=totals(ws,'year');
-  const fc=x=>`<b class="${x.pct<.95?'dbad':'dgood'}">${Math.round(x.pct*100)} %</b>`;
-  el.innerHTML=`<div class="stats-in">
-    <div class="sbox w12"><div class="sec-h"><h3>Статистика${state.field?' · '+FIELDS.find(f=>f.id===state.field).n:''}${state.cust?' · '+esc(CUSTOMERS.find(c=>c.id===state.cust).n):''}</h3><span>фильтры из нижнего меню применяются к статистике</span></div>
-      ${kpiHTML([{k:'Скважин в бурении',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение · '+ws.filter(w=>w.status==='casing'||w.status==='finish').length+' крепл./забой'},npvKpi(ws),{k:'Ресурс: замечания',v:String(ws.filter(w=>w.res.l==='r').length),c:'bad',s:ws.filter(w=>w.res.l==='o').length+' внимание · '+ws.filter(w=>w.res.l==='n').length+' нет данных'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}],'k4')}
-</div>
-    <div class="sbox w8">${dynHTML('sd')}</div>
-    <div class="sbox w4"><div class="sec-h"><h3>Группы заказчиков</h3><span>скв. в бурении</span></div><div class="cards">${GROUPS.map(g=>{const gw=ws.filter(w=>g.cust.includes(w.cust.id)); if(!gw.length) return ''; const gt=totals(gw,per);
-      return `<div class="group" style="background:${g.dark?'var(--chrome)':'var(--pale)'}"><h4 style="${g.dark?'color:var(--chrome-ink)':''}"><span>${g.n}</span><span>${gw.length} скв.</span></h4>${CUSTOMERS.filter(c=>g.cust.includes(c.id)&&gw.some(w=>w.cust===c)).map(c=>`<button type="button" data-go="cust:${c.id}" style="${g.dark?'color:var(--chrome-ink);background:rgba(255,255,255,.1)':''}"><span>${esc(c.n)}</span><b>${gw.filter(w=>w.cust===c).length}</b></button>`).join('')}<div class="note" style="${g.dark?'color:var(--chrome-mut)':''}">${PER[per].n}: ${Math.round(gt.pct*100)} % плана</div></div>`}).join('')}</div></div>
-    <div class="sbox"><div class="sec-h"><h3>Заказчики: факт к плану</h3><span>${PER[per].n.toLowerCase()} · нажмите строку</span></div><div class="chart" id="scust"></div></div>
-    <div class="sbox"><div class="sec-h"><h3>Месторождения: факт к плану</h3><span>${PER[per].n.toLowerCase()} · нажмите строку</span></div><div class="chart" id="sfield"></div></div>
-    <div class="sbox w12"><div class="sec-h"><h3>Скважины</h3><span>по отставанию от ГТН · нажмите строку</span></div><div class="tbl"><table><thead><tr><th>Скважина</th><th>Месторождение</th><th>Заказчик</th><th>Статус</th><th>Забой / проект</th><th>%</th><th>К ГТН, сут</th><th>Сутки: факт / план</th><th>Месяц: факт / план</th><th>Ресурс</th></tr></thead><tbody>
-      ${ws.map(w=>({w,lag:w.tNow-timeAt(w.planS,w.depth),d:totals([w],'day'),m:totals([w],'month')})).sort((a,b)=>b.lag-a.lag).map(({w,lag,d,m})=>`<tr class="click" data-w="${w.id}"><td><b>${esc(w.no)}</b><br><span class="note">${esc(w.rig)}</span></td><td>${w.field.n}</td><td>${esc(w.cust.n)}</td><td>${pill(w.status)}</td><td>${nf0(w.depth)} / ${nf0(w.target)}</td><td>${Math.round(Math.min(1,w.depth/w.target)*100)}</td><td class="${lag>.5?'dbad':lag<-.5?'dgood':''}">${signed1(lag)}</td><td>${nf0(d.fact)} / ${nf0(d.plan)}</td><td class="${m.pct<.95?'dbad':''}">${nf0(m.fact)} / ${nf0(m.plan)}</td><td style="text-align:left;min-width:220px;white-space:normal">${resHTML(w)}</td></tr>`).join('')}</tbody></table></div></div>
-    <div class="sbox w12"><p class="note">Состав скважин, заказчиков, забоев и ресурса — по данным на 10.10.26. История проходки, план и ГТН — демонстрационные до подключения к источнику. Привязка скважин к заказчикам предварительная.</p></div></div>`;
-  bindGo(el);
-  el.querySelectorAll('tr[data-w]').forEach(r=>r.onclick=()=>{const w=WELLS.find(x=>x.id===r.dataset.w); state.screen='map'; setTabs(); go({level:'well',well:w.id,field:w.field.id})});
-  charts=[]; dynBind('sd',ws,null,()=>renderStats());
-  hbars(document.getElementById('scust'),CUSTOMERS.filter(c=>ws.some(w=>w.cust===c)).map(c=>{const x=totals(ws.filter(w=>w.cust===c),per); return {label:c.n,fact:x.fact,plan:x.plan,go:()=>{state.screen='map'; setTabs(); go({level:'cust',cust:c.id,field:null,well:null})}}}).sort((a,b)=>b.plan-a.plan));
-  hbars(document.getElementById('sfield'),FIELDS.filter(f=>ws.some(w=>w.field===f)).map(f=>{const x=totals(ws.filter(w=>w.field===f),per); return {label:f.n,fact:x.fact,plan:x.plan,go:()=>{state.screen='map'; setTabs(); go({level:'field',field:f.id,cust:null,well:null})}}}).sort((a,b)=>b.plan-a.plan));
+  const el=document.getElementById('statwrap'), ws=scopeWells(), per=state.per, sv=state.sv||{t:'home'};
+  if(stopWB){stopWB(); stopWB=null}
+  el.innerHTML=`<div class="sv">${SVS[sv.t](ws,per,sv)}</div>`;
+  charts=[]; if(sv.t==='metric'&&sv.m==='prohod') dynBind('svd',ws,null,()=>renderStats());
+  el.onclick=e=>{const b=e.target.closest('button'); if(!b||b.disabled||!el.contains(b)) return; const d=b.dataset;
+    if(d.svp){state.per=d.svp; renderStats(); return}
+    if(d.scd){SC.dim=d.scd; renderStats(); return}
+    if(d.scs){SC.sort=d.scs; renderStats(); return}
+    if(d.scx){const k=SC.dim+d.scx; SC.open[k]=!SC.open[k]; renderStats(); return}
+    if(d.svb){SC.bf=d.svb; renderStats(); return}
+    if(d.svd){state.sv={...state.sv,dim:d.svd}; renderStats(); return}
+    if(d.npvopen){npvOpen(ws,per); return}
+    if(d.svw){svWell(d.svw); return}
+    if(d.svmap){const [dm,id]=d.svmap.split(':'); hist.push({...state}); state.screen='map'; state.sv=null; setTabs(); go(dm==='field'?{level:'field',field:id,cust:null,well:null}:{level:'cust',cust:id,field:null,well:null},true); return}
+    if(d.sv){const [t,x,y]=d.sv.split(':'); if(t==='metric') svOpen({t,m:x,dim:'field'}); else if(t==='group') svOpen({t,dim:x,id:y}); else svOpen({t}); el.scrollTop=0; document.querySelector('.app').scrollTop=0}
+  };
 }
 
 /* ======================= плавающая панель и шторка ======================= */
