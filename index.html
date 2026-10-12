@@ -640,6 +640,10 @@ button.np-tr{cursor:pointer} .np-tr.h{font-size:10.5px;color:var(--muted);border
 .opsum svg{width:34px;height:34px;padding:6px;border-radius:10px;background:var(--accent);color:var(--surface)}
 .opsum b{display:block;color:var(--ink);font-weight:600;font-size:14px} .opsum small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .opsum i{font-style:normal;font-size:20px;color:var(--accent)}
 .opsum:hover{border-color:var(--accent)}
+.npvw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:8px;align-items:center;width:100%;text-align:left;margin:4px 0 12px;padding:9px 12px;border:1px solid var(--line);background:var(--band);border-radius:14px;cursor:pointer;font:inherit;color:inherit}
+.npvw:hover{border-color:var(--accent)} .npvw span{min-width:0;display:flex;flex-direction:column} .npvw small{font-size:10.5px;color:var(--muted)} .npvw b{font-family:var(--f-display);font-weight:500;font-size:17px;color:var(--ink)} .npvw b.bad{color:var(--bad)}
+.npvw em{font-style:normal;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .npvw i{font-style:normal;color:var(--accent);font-size:20px}
+.wcard .npvbad{color:var(--bad)} .row .r .cnpv{display:block;font-size:11px;color:var(--muted)}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -761,7 +765,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:33,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:34,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -914,6 +918,7 @@ function npvBy(ws,a,b){const out=NPV_T.map(()=>0); ws.forEach(w=>{const add=(S,t
 function npvShare(ws,per){const [a,b]=PER[per].tot; return npvShareAB(ws,a,b)}
 function npvShareAB(ws,a,b){const cal=ws.length*(b-a)*24, by=npvBy(ws,a,b), h=d3.sum(by), own=d3.sum(by.filter((x,i)=>NPV_T[i].own)); return {h,own,by,cal,pct:cal?h/cal:0,opct:cal?own/cal:0}}
 const pct1=v=>(v*100).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' %';
+const npvKpi=ws=>{const x=npvShare(ws,'month'), n=ws.filter(w=>w.npv).length; return {k:'НПВ за месяц',v:pct1(x.opct),c:x.opct>.05?'bad':'',s:'собств. · весь '+pct1(x.pct)+(n?' · сейчас '+n+' скв.':'')}};
 const npvPctTxt=ws=>{const x=npvShare(ws,'month'); return 'собств. '+pct1(x.opct)+' · весь '+pct1(x.pct)};
 function npvTime(w,a,b){let s=0; const add=(S,t0,lim)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1,lim); if(y>x) s+=y-x});
   w.hist.forEach(h=>add(h.fact,h.t0,h.t1)); add(w.fact,w.spud,0); return s}
@@ -1430,7 +1435,7 @@ function wCard(w){const p=Math.min(1,w.depth/w.target), stl=w.sync.ok?'':`<span 
     <span class="k">Буровая установка</span><span class="v rig">${esc(w.rig)}</span><span class="k">Куст</span><span class="v">${esc(w.pad)}</span>
     <span class="k">Забой</span><span class="v">${nf0(w.depth)} / ${nf0(w.target)} м · ${Math.round(p*100)} %</span><span class="bar"><span style="width:${p*100}%;${w.bad?'background:var(--r-orange)':''}"></span></span>
     <span class="k">Пришла с</span><span class="v">${esc(w.from||'—')}</span><span class="k">Переедет на</span><span class="v">${w.next?esc(w.next)+(w.nextNote?' · '+esc(w.nextNote):''):'—'}</span>
-    <span class="k">Ресурс оборуд.</span><span class="v">${resHTML(w)}</span><span class="spkrow"><span>Проходка 30 сут</span>${sparkSVG([w])}<b class="${Math.round(totals([w],'month').pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(totals([w],'month').pct*100)} %</b></span></button>`}
+    <span class="k">Ресурс оборуд.</span><span class="v">${resHTML(w)}</span><span class="k">НПВ за месяц</span><span class="v">${(()=>{const x=npvShare([w],"month"); return `<b class="${x.opct>.05?"npvbad":""}">${pct1(x.opct)}</b> собств. · ${pct1(x.pct)} весь`})()}</span><span class="spkrow"><span>Проходка 30 сут</span>${sparkSVG([w])}<b class="${Math.round(totals([w],'month').pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(totals([w],'month').pct*100)} %</b></span></button>`}
 function bindW(root){root.querySelectorAll('[data-w]').forEach(b=>b.addEventListener('click',()=>{const w=WELLS.find(x=>x.id===b.dataset.w); go({level:'well',well:w.id,field:state.field||w.field.id})}))}
 function bindGo(root){root.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{const [l,id]=b.dataset.go.split(':'); if(state.screen==='stats'){state.screen='map'; setTabs()} if(l==='field') go({level:'field',field:id,cust:null,well:null}); else if(l==='cust') go({level:'cust',cust:id,well:null})}))}
 function dynHTML(id){return `<div class="sec dyn"><div class="sec-h"><h3>Проходка: факт и план</h3><span>нажмите период</span></div>
@@ -1516,14 +1521,14 @@ function sectionsHTML(w){const wts=[]; w.planS.segs.forEach(g=>{wts[g.op.s]=(wts
     const df=Math.max(0,Math.min(1,(w.depth-w.tp[s])/(w.tp[s+1]-w.tp[s]))); const cs=w.fact.segs.filter(g=>g.op.k==='C'&&g.op.s===s); let cp=0; if(cs.length){const a=cs[0].t0,b=cs[cs.length-1].t1; cp=w.tNow>=b?1:w.tNow<=a?0:(w.tNow-a)/(b-a)} return (wd*df+wc*cp)/(wd+wc)});
   return '<div class="pg">'+per.map((p,s)=>`<span class="${p>0&&p<.999&&w.status!=='npv'?'act':''}" style="flex-grow:${wts[s]}"><em style="width:${(p*100).toFixed(1)}%"></em></span>`).join('')+'</div>'}
 function custRow(c,ws){const t=totals(ws,'month');
-  return `<button type="button" class="row" data-go="cust:${c.id}"><span class="av">${avHTML(c)}</span><span style="min-width:0"><div class="t">${esc(c.n)}</div><div class="s">${ws.length} скв. · ${ws.map(w=>w.no).join(', ')}</div></span><span class="r">${ws.some(w=>w.npv)?'<span class="pill" style="background:var(--st-npv)">НПВ</span>':''}<b class="${Math.round(t.pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(t.pct*100)} %</b>плана мес.${sparkSVG(ws)}</span></button>`}
+  return `<button type="button" class="row" data-go="cust:${c.id}"><span class="av">${avHTML(c)}</span><span style="min-width:0"><div class="t">${esc(c.n)}</div><div class="s">${ws.length} скв. · ${ws.map(w=>w.no).join(', ')}</div></span><span class="r">${ws.some(w=>w.npv)?'<span class="pill" style="background:var(--st-npv)">НПВ</span>':''}<b class="${Math.round(t.pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(t.pct*100)} %</b>плана мес.<small class="cnpv">НПВ ${pct1(npvShare(ws,'month').opct)}</small>${sparkSVG(ws)}</span></button>`}
 function renderPanel(){
   if(stopWB){stopWB(); stopWB=null} charts=[]; const lev=state.level; let h='';
   const scope=scopeWells();
   if(lev==='fields'){
     const t=totals(scope,'day');
     h=`<div class="pn"><div class="ph"><div class="eyebrow">Все месторождения · ЯНАО</div><h1>Скважин в бурении: ${scope.length}</h1><span class="rule"></span><div class="sub">${new Set(scope.map(w=>w.field)).size} месторождений · ${new Set(scope.map(w=>w.cust)).size} заказчиков · данные на 10.10.26</div></div>
-      ${kpiHTML([{k:'НПВ сейчас',v:String(scope.filter(w=>w.npv).length),c:scope.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(scope)+' времени за месяц'},{k:'Ресурс',v:scope.filter(w=>w.res.l==='r').length+' / '+scope.filter(w=>w.res.l==='o').length,c:'bad',s:'замечаний / внимание'},{k:'Проходка за сутки',v:nf0(t.fact)+' м',c:t.pct<.95?'bad':'',s:'план '+nf0(t.plan)+' м · '+Math.round(t.pct*100)+' %'}])}
+      ${kpiHTML([npvKpi(scope),{k:'Ресурс',v:scope.filter(w=>w.res.l==='r').length+' / '+scope.filter(w=>w.res.l==='o').length,c:'bad',s:'замечаний / внимание'},{k:'Проходка за сутки',v:nf0(t.fact)+' м',c:t.pct<.95?'bad':'',s:'план '+nf0(t.plan)+' м · '+Math.round(t.pct*100)+' %'}])}
       <div class="tabs" role="tablist">${[['fields','Месторождения'],['groups','Заказчики'],['wells','Все скважины']].map(([k,n])=>`<button type="button" role="tab" data-t="${k}" aria-selected="${state.ovtab===k}">${n}</button>`).join('')}</div><div id="ovbody"></div>
       <p class="note">Скважины, заказчики, забои и ресурс — по данным на 10.10.26. История проходки, план и ГГД — демонстрационные до подключения к источнику. Привязка скважин к заказчикам предварительная.</p></div>`;
     panel.innerHTML=h;
@@ -1541,7 +1546,7 @@ function renderPanel(){
   if(lev==='field'){
     const f=FIELDS.find(x=>x.id===state.field), ws=scope;
     h=`<div class="pn"><div class="ph"><div class="eyebrow">Месторождение</div><h1>${f.n}</h1><span class="rule"></span><div class="sub">${coordTxt(f)} · ${ws.length} скв. в бурении</div><div class="note" style="margin-top:4px">Координаты: ${f.src}. Контур и положение кустов на карте условные.</div></div>
-      ${kpiHTML([{k:'Заказчиков',v:String(f.custs.length)},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}])}
+      ${kpiHTML([{k:'Заказчиков',v:String(f.custs.length)},npvKpi(ws),{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}])}
       <div class="sec"><div class="sec-h"><h3>Заказчики на месторождении</h3><span>нажмите — уровень заказчика</span></div><div class="list">${f.custs.filter(c=>ws.some(w=>w.cust===c)).map(c=>custRow(c,ws.filter(w=>w.cust===c))).join('')}</div></div>
       ${dynHTML('fd')}
       <div class="sec"><div class="sec-h"><h3>Скважины</h3><span>${ws.length}</span></div><div class="cards">${ws.map(wCard).join('')}</div></div></div>`;
@@ -1552,7 +1557,7 @@ function renderPanel(){
     const lag=d3.mean(ws,w=>w.tNow-timeAt(w.planS,w.depth))||0;
     h=`<div class="pn"><div class="ph"><div style="display:flex;gap:12px;align-items:center"><span class="av lg">${avHTML(c)}</span><div><div class="eyebrow">Заказчик${fl?' · '+fl.n:''}</div><h1 style="margin:2px 0 0">${esc(c.n)}</h1></div></div><span class="rule" style="margin-top:10px"></span>
       <div class="sub">${esc(c.full)} · ${ws.length} скв. в бурении${fl?' на месторождении':''}</div><div class="chips">${c.fields.map(f=>`<button type="button" class="chip" data-go="field:${f.id}">${f.n}</button>`).join('')}${fl&&c.fields.length>1?`<button type="button" class="chip" id="allF">Все месторождения заказчика</button>`:''}</div></div>
-      ${kpiHTML([{k:'Скважин',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'К графику ГТН',v:signed1(lag)+' сут',c:lag>.5?'bad':'',s:'среднее отклонение'}])}
+      ${kpiHTML([{k:'Скважин',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение'},npvKpi(ws),{k:'К графику ГТН',v:signed1(lag)+' сут',c:lag>.5?'bad':'',s:'среднее отклонение'}])}
       ${dynHTML('cd')}
       <div class="sec"><div class="sec-h"><h3>Скважины: факт к плану</h3><span id="cbh"></span></div><div class="chart" id="cbars"></div></div>
       <div class="sec"><div class="sec-h"><h3>Скважины заказчика</h3><span>${ws.length}</span></div><div class="cards">${ws.map(wCard).join('')}</div></div></div>`;
@@ -1565,6 +1570,7 @@ function renderPanel(){
     h=`<div class="pn"><div class="ph"><div class="eyebrow">${w.field.n} · куст ${esc(w.pad)}</div><h1>Скв. ${esc(w.no)}</h1><span class="rule"></span>
       <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)} · ${esc(w.cust.n)}</div>${w.sync.ok?'':`<div class="syncw"><b>Рапорт не получен при загрузке ${fmtMsk(LOAD.at)}</b>Показаны данные на ${fmtMsk(w.sync.at,1)} МСК · ${esc(w.sync.why)}</div>`}</div>
       <div class="big"><b>${nf0(w.depth)}</b><span>м из ${nf0(w.target)} · ${Math.round(Math.min(1,w.depth/w.target)*100)} %</span></div>
+      ${(()=>{const X=["day","month","year"].map(k=>npvShare([w],k)); return `<button type="button" class="npvw" id="npvW">${[["Сутки",0],["Месяц",1],["Год",2]].map(([n,i])=>`<span><small>НПВ · ${n.toLowerCase()}</small><b class="${X[i].opct>.05?"bad":""}">${pct1(X[i].opct)}</b><em>весь ${pct1(X[i].pct)} · ${nf1(X[i].h)} ч</em></span>`).join("")}<i>›</i></button>`})()}
       ${w.bad?`<div class="warnbox">Забой ${nf0(w.depth)} м больше проектного ${nf0(w.target)} м — проверьте данные источника.</div>`:''}
       <div class="sub" style="margin-top:-8px">${w.status==='npv'?'<b style="color:var(--bad)">НПВ:</b> ':''}${esc(w.op.n)} <span class="note">(демо)</span></div>
       ${sectionsHTML(w)}
@@ -1602,7 +1608,7 @@ function renderPanel(){
         <div class="rig-l">${rows.map(r=>`<div class="rl${r.cur?' cur':''}"><span class="pad">${esc(String(r.pad)).slice(0,4)}</span><span class="m"><b>${esc(r.no)}${r.cur?'<em>сейчас</em>':''}</b><small>${fmtR(r.d0)} – ${r.d1?fmtR(r.d1):'по н. в.'} · ${nf1(r.days)} сут</small></span><span class="v">${nf0(r.T)} м</span></div>`).join('')}</div></div>`}
     h+='</div>'; panel.innerHTML=h; bindGo(panel);
     panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{state.wtab=b.dataset.wt; renderPanel()});
-    document.getElementById('opSum').onclick=()=>nOpen('well',{w:w.id,d:0});
+    document.getElementById('opSum').onclick=()=>nOpen('well',{w:w.id,d:0}); document.getElementById('npvW').onclick=()=>npvOpen([w],'month');
     if(tab==='drill'){const cv=document.getElementById('wbc'); cv._V={t:w.tNow}; const stop=wellbore(cv,w);
       const R=document.getElementById('rpR'), go=document.getElementById('rpGo'), ico=document.getElementById('rpIco'); let play=false, raf=0, last=0, spd=1;
       const DUR=16; // секунд на весь путь при 1×
@@ -1634,7 +1640,7 @@ function renderStats(){
   const fc=x=>`<b class="${x.pct<.95?'dbad':'dgood'}">${Math.round(x.pct*100)} %</b>`;
   el.innerHTML=`<div class="stats-in">
     <div class="sbox w12"><div class="sec-h"><h3>Статистика${state.field?' · '+FIELDS.find(f=>f.id===state.field).n:''}${state.cust?' · '+esc(CUSTOMERS.find(c=>c.id===state.cust).n):''}</h3><span>фильтры из нижнего меню применяются к статистике</span></div>
-      ${kpiHTML([{k:'Скважин в бурении',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение · '+ws.filter(w=>w.status==='casing'||w.status==='finish').length+' крепл./забой'},{k:'НПВ сейчас',v:String(ws.filter(w=>w.npv).length),c:ws.some(w=>w.npv)?'bad':'',s:'скв. · '+npvPctTxt(ws)+' времени за месяц'},{k:'Ресурс: замечания',v:String(ws.filter(w=>w.res.l==='r').length),c:'bad',s:ws.filter(w=>w.res.l==='o').length+' внимание · '+ws.filter(w=>w.res.l==='n').length+' нет данных'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}],'k4')}
+      ${kpiHTML([{k:'Скважин в бурении',v:String(ws.length),s:ws.filter(w=>w.status==='drill').length+' бурение · '+ws.filter(w=>w.status==='casing'||w.status==='finish').length+' крепл./забой'},npvKpi(ws),{k:'Ресурс: замечания',v:String(ws.filter(w=>w.res.l==='r').length),c:'bad',s:ws.filter(w=>w.res.l==='o').length+' внимание · '+ws.filter(w=>w.res.l==='n').length+' нет данных'},{k:'Средний прогресс',v:Math.round((d3.mean(ws,w=>Math.min(1,w.depth/w.target))||0)*100)+' %',s:'забой / проект'}],'k4')}
 </div>
     <div class="sbox w8">${dynHTML('sd')}</div>
     <div class="sbox w4"><div class="sec-h"><h3>Группы заказчиков</h3><span>скв. в бурении</span></div><div class="cards">${GROUPS.map(g=>{const gw=ws.filter(w=>g.cust.includes(w.cust.id)); if(!gw.length) return ''; const gt=totals(gw,per);
