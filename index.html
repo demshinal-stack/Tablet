@@ -576,6 +576,8 @@ html.glass .spop{background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(25
 /* колокольчик и лента уведомлений */
 .bell{position:relative;width:34px;height:34px;border-radius:50%;border:1px solid var(--chrome-line);background:rgba(255,255,255,.06);color:var(--chrome-ink);display:grid;place-items:center;cursor:pointer;flex:none}
 .bell svg{width:18px;height:18px}
+.hava{width:34px;height:34px;border-radius:50%;flex:none;cursor:pointer;padding:0;border:1px solid var(--chrome-line);background:color-mix(in srgb,var(--chrome-ink) 16%,transparent);color:var(--chrome-ink);display:grid;place-items:center;font:600 12.5px/1 var(--f-display,inherit);letter-spacing:.02em;transition:box-shadow .2s,background .2s}
+.hava[aria-pressed="true"]{background:var(--prog);color:#00234B;border-color:transparent;box-shadow:0 0 0 2px var(--chrome),0 0 0 4px var(--prog)}
 .bell em{position:absolute;top:-4px;right:-5px;min-width:18px;height:18px;border-radius:9px;background:#FF6B5E;color:#fff;font-style:normal;font-size:10.5px;font-weight:700;display:grid;place-items:center;padding:0 4px;border:2px solid var(--chrome)}
 .bell em[hidden]{display:none}
 .npanel{position:fixed;z-index:136;pointer-events:auto;right:12px;top:calc(env(safe-area-inset-top,0px) + 58px);bottom:calc(var(--tabh,64px) + 12px);width:min(440px,calc(100vw - 24px));background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 44px rgba(0,25,55,.32);display:flex;flex-direction:column;overflow:hidden;color:var(--body)}
@@ -723,6 +725,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
     <nav class="crumbs" id="crumbs" aria-label="Уровни"></nav>
     <button type="button" class="sync" id="syncBtn" aria-haspopup="dialog" aria-controls="syncPop"></button>
     <button type="button" class="bell" id="bellBtn" aria-label="Уведомления" aria-haspopup="dialog" aria-controls="npanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 1 1 12 0c0 5 2 6.5 2 6.5H4S6 14 6 9z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg><em id="bellN" hidden></em></button>
+    <button type="button" class="hava" id="scrProf" aria-label="Профиль и настройки" aria-pressed="false"><span id="havaT">ЭН</span></button>
   </header>
   <div class="filters" id="filters">
     <div class="frow" id="frow"><span id="fchips"></span><span class="kstrip" id="kstrip"></span></div>
@@ -758,14 +761,13 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
     <button type="button" role="tab" id="scrMap" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.5l6-2.5 6 2.5 6-2.5v13.5l-6 2.5-6-2.5-6 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg><em>Карта</em></button>
 <button type="button" id="scrFilt" aria-expanded="false" aria-controls="fpop"><span class="tbi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg><b id="fN" hidden></b></span><em>Фильтры</em></button>
         <button type="button" role="tab" id="scrStats" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 20h16M7 16v-5M12 16V6M17 16v-8"/></svg><em>Статистика</em></button>
-    <button type="button" role="tab" id="scrProf" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="8.5" r="3.8"/><path d="M4.5 20c1.3-3.6 4.2-5.4 7.5-5.4s6.2 1.8 7.5 5.4" stroke-linecap="round"/></svg><em>Профиль</em></button>
   </nav>
 </div>
 
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:34,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:35,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -964,9 +966,9 @@ function go(patch,noPush){ if(!noPush) hist.push({...state}); if(patch.level==='
   refresh(true)}
 const goBack=()=>{const P=document.getElementById('npanel'); if(P&&!P.hidden){nBack(); return} const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
 document.getElementById('back').onclick=goBack; document.getElementById('scrBack').onclick=goBack;
-function setTabs(){[['scrMap','map'],['scrStats','stats'],['scrProf','profile']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s))}
+function setTabs(){[['scrMap','map'],['scrStats','stats']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s)); const a=document.getElementById('scrProf'); a.setAttribute('aria-pressed',state.screen==='profile'); document.getElementById('havaT').textContent=initials(PREFS.name)}
 function setScreen(s){if(typeof nClose==='function') nClose(); state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
-document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>setScreen('profile');
+document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>{if(state.screen==='profile'){goBack(); return} if(typeof nClose==='function') nClose(); if(typeof closeFilters==='function') closeFilters(); hist.push({...state}); setScreen('profile')};
 function refresh(fit){
   renderSync(); document.getElementById('back').disabled=!hist.length; updBack();
   syncFilters(); renderCrumbs();
@@ -1779,7 +1781,7 @@ function renderProfile(){
       <div class="prow"><span class="l">Обновления<small id="updS">${'serviceWorker' in navigator&&location.protocol.startsWith('http')&&!location.hostname.endsWith('claude.ai')?'проверяются при каждом открытии':'доступны после установки на экран «Домой»'}</small></span><button type="button" class="btn2" id="pUpd">Проверить</button></div>
       <p class="note" style="margin:0">Установка на iPhone и iPad: откройте адрес приложения в Safari → «Поделиться» → «На экран „Домой“». На компьютере: Chrome или Edge → значок установки в адресной строке.</p></div>
   </div>`;
-  const upd=()=>{savePrefs(); document.getElementById('pava').textContent=initials(PREFS.name); document.getElementById('pnm').textContent=PREFS.name||'Имя не указано'; document.getElementById('prl').textContent=PREFS.role+' · ЭНГС'};
+  const upd=()=>{savePrefs(); document.getElementById('pava').textContent=document.getElementById('havaT').textContent=initials(PREFS.name); document.getElementById('pnm').textContent=PREFS.name||'Имя не указано'; document.getElementById('prl').textContent=PREFS.role+' · ЭНГС'};
   document.getElementById('pName').oninput=e=>{PREFS.name=e.target.value; upd()};
   document.getElementById('pUpd').onclick=()=>{const st=document.getElementById('updS'); st.textContent='проверяю…'; (window.__pulseCheckUpdate?window.__pulseCheckUpdate():Promise.resolve(null)).then(f=>{st.textContent=f===null?'доступны после установки на экран «Домой»':f?'есть новая версия — нажмите «Обновить» внизу':'у вас последняя версия '+APP.version})};
   document.getElementById('pRole').oninput=e=>{PREFS.role=e.target.value; upd()};
