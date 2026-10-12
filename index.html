@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="Пульс 2">
 <meta name="application-name" content="Пульс 2">
 <meta name="theme-color" content="#FFFFFF" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#001A38" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#081323" media="(prefers-color-scheme: dark)">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap">
@@ -1008,6 +1008,12 @@ body.mode-rep .top .crumbs{display:none!important}
   .tabbar .rprof .ava2{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;border:1px solid var(--line);color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,transparent)}
   .tabbar .rprof.on{color:var(--accent)} .tabbar .rprof.on .ava2{background:var(--prog);color:#00234B;border-color:transparent}
 }
+
+.filters[hidden]{display:none!important}
+
+/* тёмная тема: «Глубокий синий» — темнее и приглушённее */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050C17;--surface:#0C1A2E;--chrome:#081323;--band:#10223A;--line:#1E3350;--grid:#12253F;--land:#0C1C33;--land-2:#0A1729;--sea:#040A14;--yanao:#12263F;--field:#0F3646;--water:#12304F;--water-ln:#2C5684;--grat:#10223A;--muted:#97A9C2;--body:#D4DDEA;--c1:#4A6690;--c2:#253D5E;--chrome-line:#1E3350;--pale:#10223A;--chrome-mut:#97A9C2;--other:#253D5E;--t4:#253D5E;--r-none:#3D5375}}
+:root[data-theme="dark"]{--bg:#050C17;--surface:#0C1A2E;--chrome:#081323;--band:#10223A;--line:#1E3350;--grid:#12253F;--land:#0C1C33;--land-2:#0A1729;--sea:#040A14;--yanao:#12263F;--field:#0F3646;--water:#12304F;--water-ln:#2C5684;--grat:#10223A;--muted:#97A9C2;--body:#D4DDEA;--c1:#4A6690;--c2:#253D5E;--chrome-line:#1E3350;--pale:#10223A;--chrome-mut:#97A9C2;--other:#253D5E;--t4:#253D5E;--r-none:#3D5375}
 </style>
 </head>
 <body>
@@ -1071,7 +1077,7 @@ body.mode-rep .top .crumbs{display:none!important}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:56,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:58,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2236,7 +2242,7 @@ let PREFS={...PREF_DEF};
 try{PREFS={...PREF_DEF,...JSON.parse(localStorage.getItem('engs-prefs')||'{}')}}catch(e){}
 function savePrefs(){try{localStorage.setItem('engs-prefs',JSON.stringify(PREFS))}catch(e){}}
 function applyTheme(){const r=document.documentElement; if(PREFS.theme==='system') delete r.dataset.theme; else r.dataset.theme=PREFS.theme;
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{if(PREFS.theme==='system') m.content=m.media.includes('dark')?'#001A38':'#FFFFFF'; else m.content=PREFS.theme==='dark'?'#001A38':'#FFFFFF'});
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{if(PREFS.theme==='system') m.content=m.media.includes('dark')?'#081323':'#FFFFFF'; else m.content=PREFS.theme==='dark'?'#081323':'#FFFFFF'});
   r.classList.toggle('glass',!!PREFS.glass&&!matchMedia('(prefers-reduced-transparency: reduce)').matches)}
 function initials(n){const p=(n||'').trim().split(/\s+/).filter(Boolean); return p.length?(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase():'ЭН'}
 function renderProfile(){
