@@ -968,6 +968,15 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
   body.mode-map.pnl-col:not(.maponly) .phandle{display:grid;place-items:center;position:fixed;z-index:25;right:0;top:50%;transform:translateY(-50%);width:26px;height:96px;border:1px solid var(--line);border-right:0;border-radius:var(--r-l) 0 0 var(--r-l);background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:-4px 0 14px rgba(0,25,55,.15);cursor:grab;touch-action:none;padding:0;pointer-events:auto}
   .phandle i{width:4px;height:38px;border-radius:2px;background:var(--muted);opacity:.6}
 }
+
+/* телефон: значение фильтра не показываем — оно есть в шторке, а снять фильтр можно через «Назад» и «Фильтры» */
+@media (max-width:900px), (orientation:landscape) and (max-height:600px){#fchips,.hchips{display:none!important}}
+
+@media (orientation:landscape) and (max-height:600px){
+  body.mode-map.pnl-col:not(.maponly) .phandle{width:14px;height:56px;border-radius:8px 0 0 8px;box-shadow:-2px 0 8px rgba(0,25,55,.14)}
+  .phandle i{width:3px;height:22px;border-radius:2px}
+  .phandle::before{content:"";position:absolute;inset:-14px -6px -14px -20px}
+}
 </style>
 </head>
 <body>
@@ -1029,7 +1038,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:48,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:52,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1302,6 +1311,14 @@ function regionBounds(){const pts=[]; FIELDS.forEach(f=>pts.push(f.bounds[0],f.b
 function sizeMap(){MW=wrapEl.clientWidth; MH=wrapEl.clientHeight; if(!MW) return; svg.attr('viewBox',`0 0 ${MW} ${MH}`);
   const b=regionBounds(); K0=Math.min((MW-60)/(b[1][0]-b[0][0]),(MH-160)/(b[1][1]-b[0][1])); zoom.scaleExtent([K0*.75,K0*400]);
   const ex=[[58,61],[92,61],[58,74.8],[92,74.8],[75,61],[75,74.8]].map(c=>P(c[0],c[1])); zoom.translateExtent([[d3.min(ex,q=>q[0]),d3.min(ex,q=>q[1])],[d3.max(ex,q=>q[0]),d3.max(ex,q=>q[1])]])}
+/* горизонтальный телефон: вписать центры месторождений так, чтобы кружки не сливались (≥4, если возможно) */
+function fitLand(ws,dur){const fs=FIELDS.filter(f=>ws.some(w=>w.field===f)), pts=fs.map(f=>f.c), b=bboxPts(pts), I=INS;
+  const x0=I.l+40, x1=MW-I.r-40, y0=I.t+34, y1=MH-I.b-58, aw=Math.max(80,x1-x0), ah=Math.max(80,y1-y0);
+  const w=Math.max(1,b[1][0]-b[0][0]), h=Math.max(1,b[1][1]-b[0][1]), cx=(b[0][0]+b[1][0])/2, cy=(b[0][1]+b[1][1])/2;
+  const groups=k=>{const gs=[]; pts.forEach(p=>{const q=[p[0]*k,p[1]*k]; const g=gs.find(g=>Math.hypot(g.p[0]-q[0],g.p[1]-q[1])<92); if(g){g.pts.push(q); g.p=[d3.mean(g.pts,z=>z[0]),d3.mean(g.pts,z=>z[1])]} else gs.push({pts:[q],p:q.slice()})}); let dm=1e9; gs.forEach((a,i)=>gs.forEach((c,j)=>{if(j>i) dm=Math.min(dm,Math.hypot(a.p[0]-c.p[0],a.p[1]-c.p[1]))})); return gs.length>=need&&dm>=66?99:gs.length};
+  const need=Math.min(4,fs.length); let k=Math.min(aw/w,ah/h), k0=k; for(let i=0;i<24&&groups(k)!==99;i++) k*=1.05; if(groups(k)!==99) k=k0;
+  const T=d3.zoomIdentity.translate(x0+aw/2,y0+ah/2).scale(k).translate(-cx,-cy);
+  if(dur===0) svg.call(zoom.transform,T); else svg.transition().duration(900).ease(d3.easeCubicInOut).call(zoom.transform,T)}
 function fitBounds(b,pad,dur){
   const w=Math.max(1,b[1][0]-b[0][0]), h=Math.max(1,b[1][1]-b[0][1]);
   const I=INS, tEl=document.getElementById('maptitle'), tH=(tEl&&tEl.offsetParent&&!isPhoneSheet())?tEl.offsetHeight+10:0;
@@ -1315,7 +1332,7 @@ const bboxPts=pts=>[[d3.min(pts,p=>p[0]),d3.min(pts,p=>p[1])],[d3.max(pts,p=>p[0
 function fitMap(dur){
   if(state.level==='well'){const w=WELLS.find(x=>x.id===state.well), e=6; fitBounds([[w.pos[0]-e,w.pos[1]-e],[w.pos[0]+e,w.pos[1]+e]],40,dur); return}
   const ws=scopeWells(), all=WELLS.filter(w=>(!state.field||w.field.id===state.field)&&(!state.cust||w.cust.id===state.cust));
-  if(state.level==='fields'&&!state.field){if(LANDP()&&ws.length){fitBounds(bboxPts(ws.map(w=>w.pos)),26,dur); return} fitBounds(regionBounds(),20,dur); return}
+  if(state.level==='fields'&&!state.field){if(LANDP()&&ws.length){fitLand(ws,dur); return} fitBounds(regionBounds(),20,dur); return}
   if(state.level==='field'){const f=FIELDS.find(x=>x.id===state.field); fitBounds(f.bounds,36,dur); return}
   const pts=(ws.length?ws:all).map(w=>w.pos); let b=bboxPts(pts); const cx=(b[0][0]+b[1][0])/2, cy=(b[0][1]+b[1][1])/2, h=Math.max((b[1][0]-b[0][0])/2,(b[1][1]-b[0][1])/2,10);
   fitBounds([[Math.min(b[0][0],cx-h),Math.min(b[0][1],cy-h)],[Math.max(b[1][0],cx+h),Math.max(b[1][1],cy+h)]],60,dur);
@@ -1582,7 +1599,9 @@ function wellbore(canvas,w){
   const RM=matchMedia('(prefers-reduced-motion: reduce)');
   const C=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
   const cs={}; ['land','land-2','muted','ink','fact','surface','st-npv','body'].forEach(k=>cs[k]=C(k));
-  const steelHi='#E8EDF2', steelLo='#6B7A90', mud='#24384F', cement='#AFC0D6', cut='#C9A46A', flow='#00DCC8';
+  const LT=(()=>{const m=(cs.surface||'').match(/#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i); return m?(parseInt(m[1],16)*.3+parseInt(m[2],16)*.59+parseInt(m[3],16)*.11)>150:false})();
+  /* светлая тема: тёмная сталь, синий раствор, тёплый цемент — чтобы не сливалось с бежево-серым фоном пластов */
+  const steelHi=LT?'#B4C0CF':'#E8EDF2', steelLo=LT?'#2F3E52':'#6B7A90', mud=LT?'#6A8DB3':'#24384F', cement=LT?'#B8986A':'#AFC0D6', cut=LT?'#7A4E22':'#C9A46A', flow=LT?'#008F80':'#00DCC8';
   function frame(now){
     const W=canvas.clientWidth, H=canvas.clientHeight, dpr=Math.min(2,devicePixelRatio||1);
     if(!W){raf=requestAnimationFrame(frame); return}
@@ -1631,7 +1650,9 @@ function wellboreDir(canvas,w){
   const RM=matchMedia('(prefers-reduced-motion: reduce)'), Tj=w.traj;
   const C=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
   const cs={}; ['land','land-2','muted','ink','fact','surface','st-npv','body','plan','accent'].forEach(k=>cs[k]=C(k));
-  const steelHi='#E8EDF2', steelLo='#6B7A90', mud='#24384F', cement='#AFC0D6', cut='#C9A46A', flow='#00DCC8';
+  const LT=(()=>{const m=(cs.surface||'').match(/#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i); return m?(parseInt(m[1],16)*.3+parseInt(m[2],16)*.59+parseInt(m[3],16)*.11)>150:false})();
+  /* светлая тема: тёмная сталь, синий раствор, тёплый цемент — чтобы не сливалось с бежево-серым фоном пластов */
+  const steelHi=LT?'#B4C0CF':'#E8EDF2', steelLo=LT?'#2F3E52':'#6B7A90', mud=LT?'#6A8DB3':'#24384F', cement=LT?'#B8986A':'#AFC0D6', cut=LT?'#7A4E22':'#C9A46A', flow=LT?'#008F80':'#00DCC8';
   const end=Tj.at(w.T), xMax=Math.max(1,end.x), zMax=end.z;
   function frame(now){
     const W=canvas.clientWidth, H=canvas.clientHeight, dpr=Math.min(2,devicePixelRatio||1);
@@ -2076,7 +2097,7 @@ function layoutInsets(){
   INS={t:top,l:rail?tb.right:0,r:0,b:rail?0:innerHeight-tb.top};
   if(only){INS.t=LP?top:Math.max(fl.height?fl.bottom:0,hd.bottom)+6}
   else if(isPhoneSheet()) INS.b=tabH()+sheetPx(sheet); else if(!col) INS.r=(panelBox.offsetWidth||440)+20;
-  if(LP&&!only){const ks=document.getElementById('kstrip').getBoundingClientRect(); if(ks.width) INS.l=ks.right+8; if(col) INS.r=34}
+  if(LP&&!only){const ks=document.getElementById('kstrip').getBoundingClientRect(); if(ks.width) INS.l=ks.right+8; if(col) INS.r=18}
   document.body.classList.toggle('pnl-col',col);
   root.style.setProperty('--ztop',(col&&!isPhoneSheet()?top+54:top)+'px');
   root.style.setProperty('--insL',INS.l+'px'); root.style.setProperty('--insR',INS.r+'px'); root.style.setProperty('--insB',INS.b+'px');
@@ -2165,7 +2186,13 @@ function renderStrip(){const el=document.getElementById('kstrip'); if(!el) retur
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Сводка</b>›</button>`);
   document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),'month');
   const ko=document.getElementById('kOpen'); if(ko) ko.onclick=()=>togglePanel(true)}
-addEventListener('resize',()=>{setSheet(sheet,true); layoutInsets()});
+let LP_prev=LANDP();
+addEventListener('resize',()=>{const lp=LANDP();
+  if(lp!==LP_prev){const open=LP_prev?!panelBox.classList.contains('collapsed'):sheet!=='min'; LP_prev=lp;
+    if(state.screen==='map'){setTimeout(()=>{sizeMap(); if(lp) panelBox.classList.toggle('collapsed',!open); else setSheet(open?(sheet==='min'?'mid':sheet):'min',true);
+      document.body.classList.toggle('pnl-open',open); renderStrip(); layoutInsets(); setTimeout(()=>{layoutInsets(); fitMap(0); updateOverlay()},60)},80)}
+    return}
+  setSheet(sheet,true); layoutInsets()});
 
 /* ======================= профиль и настройки ======================= */
 const PREF_DEF={mode:'ops',name:'',role:'Руководитель направления бурения',theme:'system',per:'month',start:'map',glass:false,nSum:true,nPush:false,nNpv:true,nRes:true,nLag:false,compact:false};
