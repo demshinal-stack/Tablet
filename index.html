@@ -999,6 +999,15 @@ body.mode-rep .top .crumbs{display:none!important}
   body.mode-rep .app>.top{position:relative}
   body.mode-rep .rephead b{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:34vw;pointer-events:none}
 }
+
+.tabbar .rprof{display:none}
+@media (orientation:landscape) and (max-height:600px){
+  .top .hava{display:none!important}
+  .tabbar .rprof{display:flex;order:97;flex-direction:column;align-items:center;gap:3px;background:none;border:0;color:var(--muted);cursor:pointer;padding:6px 2px;font:inherit}
+  .tabbar .rprof em{font-style:normal;font-size:11px;font-weight:500}
+  .tabbar .rprof .ava2{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-size:10.5px;font-weight:700;border:1px solid var(--line);color:var(--ink);background:color-mix(in srgb,var(--ink) 8%,transparent)}
+  .tabbar .rprof.on{color:var(--accent)} .tabbar .rprof.on .ava2{background:var(--prog);color:#00234B;border-color:transparent}
+}
 </style>
 </head>
 <body>
@@ -1055,13 +1064,14 @@ body.mode-rep .top .crumbs{display:none!important}
   <button type="button" role="tab" class="rt" id="rtHome" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><em>Отчёты</em></button>
     <button type="button" role="tab" class="rt" id="rtTable" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M9.5 9.5v10"/></svg><em>Сводка</em></button>
     <button type="button" role="tab" class="rt" id="rtSet" aria-selected="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg><em>Настройки</em></button>
+      <button type="button" class="rprof" id="rtProf" aria-label="Профиль и настройки"><span class="ava2" id="rtProfT">ЭН</span><em>Профиль</em></button>
   </nav>
 </div>
 
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:54,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:56,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1260,10 +1270,11 @@ function go(patch,noPush){ if(document.body.classList.contains('maponly')&&patch
   refresh(true)}
 const goBack=()=>{const P=document.getElementById('npanel'); if(P&&!P.hidden){nBack(); return} if(state.mode==='rep'&&state.screen!=='profile'){if(window.REP&&REP.canBack()) REP.back(); return} const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
 document.getElementById('back').onclick=goBack; document.getElementById('scrBack').onclick=goBack;
-function setTabs(){const rt=state.mode==='rep'&&state.screen!=='profile'&&window.REP?REP.tab():null; [['rtHome','home'],['rtTable','table'],['rtSet','set']].forEach(([id,t])=>{const e=document.getElementById(id); if(e) e.setAttribute('aria-selected',rt===t)});[['scrMap','map'],['scrStats','stats']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s)); const a=document.getElementById('scrProf'); a.setAttribute('aria-pressed',state.screen==='profile'); document.getElementById('havaT').textContent=initials(PREFS.name)}
+function setTabs(){const rt=state.mode==='rep'&&state.screen!=='profile'&&window.REP?REP.tab():null; [['rtHome','home'],['rtTable','table'],['rtSet','set']].forEach(([id,t])=>{const e=document.getElementById(id); if(e) e.setAttribute('aria-selected',rt===t)});[['scrMap','map'],['scrStats','stats']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s)); const a=document.getElementById('scrProf'); a.setAttribute('aria-pressed',state.screen==='profile'); document.getElementById('havaT').textContent=initials(PREFS.name); const rp_=document.getElementById('rtProfT'); if(rp_) rp_.textContent=initials(PREFS.name); const rb_=document.getElementById('rtProf'); if(rb_) rb_.classList.toggle('on',state.screen==='profile')}
 function setMode(m){if(typeof nClose==='function') nClose(); state.mode=m; PREFS.mode=m; savePrefs(); if(state.screen==='profile') state.screen=PREFS.start==='stats'?'stats':'map'; setTabs(); refresh(true); const a=document.querySelector('.app'); if(a) a.scrollTop=0}
 function repTab(t){if(typeof nClose==='function') nClose(); if(state.screen==='profile') state.screen='map'; if(window.REP) REP.go(t); refresh(false)}
 document.querySelectorAll('#modeSeg [data-mode]').forEach(b=>b.onclick=()=>{if(state.mode!==b.dataset.mode||state.screen==='profile') setMode(b.dataset.mode)});
+document.getElementById('rtProf').onclick=()=>document.getElementById('scrProf').click();
 document.getElementById('rtHome').onclick=()=>repTab('home'); document.getElementById('rtTable').onclick=()=>repTab('table'); document.getElementById('rtSet').onclick=()=>repTab('set');
 function setScreen(s){if(typeof nClose==='function') nClose(); state.screen=s; state.sv=null; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
 document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>{if(state.screen==='profile'){goBack(); return} if(typeof nClose==='function') nClose(); if(typeof closeFilters==='function') closeFilters(); hist.push({...state}); setScreen('profile')};
@@ -2484,7 +2495,7 @@ function bars3(v,d,up,opt){opt=opt||{}; const ps=CMP(), W=opt.W||340, H=opt.H||2
   let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Сравнение трёх периодов" preserveAspectRatio="xMidYMax meet">`;
   cols.forEach((c,i)=>{const X=cx(i)-bw/2;
     if(c.x==null) s+=`<rect x="${X}" y="${base-2}" width="${bw}" height="2" fill="${c.c}"/><text x="${cx(i)}" y="${base-10}" text-anchor="middle" font-size="10.5" fill="var(--muted)">нет данных</text>`;
-    else{ if(c.sp){const [a,b]=c.sp, r=c.x-a-b; let yy=base; [[b,1],[a,.62],[r,.32]].forEach(([q,op])=>{if(q<=0) return; const h=q/mx*(base-top0); s+=`<rect x="${X}" y="${(yy-h).toFixed(1)}" width="${bw}" height="${h.toFixed(1)}" fill="${c.c}" fill-opacity="${op}"/>`; if(!opt.compact&&h>18) s+=`<text x="${cx(i)}" y="${(yy-h/2+4).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--ink)" style="paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round">${nf(q,0)}</text>`; yy-=h})}
+    else{ if(c.sp){const [a,b]=c.sp, sc=c.x/((a+b)||1); let yy=base; [[b,1],[a,.62]].forEach(([q,op])=>{if(q<=0) return; const h=q*sc/mx*(base-top0); s+=`<rect x="${X}" y="${(yy-h).toFixed(1)}" width="${bw}" height="${h.toFixed(1)}" fill="${c.c}" fill-opacity="${op}"/>`; if(!opt.compact&&h>18) s+=`<text x="${cx(i)}" y="${(yy-h/2+4).toFixed(1)}" text-anchor="middle" font-size="10" fill="var(--ink)" style="paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round">${nf(q,0)}</text>`; yy-=h})}
       else s+=`<rect x="${X}" y="${y(c.x).toFixed(1)}" width="${bw}" height="${(base-y(c.x)).toFixed(1)}" rx="5" fill="${c.c}"/>`;
       s+=`<text x="${cx(i)}" y="${(y(c.x)-6).toFixed(1)}" text-anchor="middle" font-size="${fs}" font-weight="600" fill="var(--ink)">${nf(c.x,d)}</text>`}
     s+=`<text x="${cx(i)}" y="${base+17}" text-anchor="middle" font-size="11" fill="${i===2?'var(--ink)':'var(--muted)'}" font-weight="${i===2?600:400}">${PER[c.p].sh}</text>`});
@@ -2836,7 +2847,7 @@ const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:OR
     let left=`<div class="mh"><div class="k">${I.n} · ${PER[I.load?'p93':ps[2]].n}</div><div class="v">${nf(I.load?v.f:cur,I.d)}<small>${I.u}</small></div>
       <div class="ds">${I.load?'<span class="dp">факт · '+PER.p93.n+'</span><span class="dp">без сравнения</span>':dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)+dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div></div>`;
     if(I.margin){const m=cur/val(REV,ps[2])*100, mb=val(v,ps[1])!=null?val(v,ps[1])/val(REV,ps[1])*100:null; left+=`<div class="card" style="padding:10px 12px;margin-top:10px;display:flex;justify-content:space-between;gap:8px;align-items:baseline"><span style="color:var(--muted);font-size:12.5px">Рентабельность по EBITDA</span><span><b style="color:var(--ink);font-family:var(--f-display)">${nf(m,1)} %</b> ${mb!=null?`<span class="dp ${m>=mb?'g':'b'}"><em>${PER[ps[1]].sh}</em>${nf(mb,1)} %</span>`:''}</span></div>`}
-    if(I.load) left+=`<div class="sec"><div class="card vizc">${loadViz(LV,true,S.lf)}</div></div>`; else left+=`<div class="sec"><div class="card chart">${bars3(v,I.d,I.up,{split:I.split})}${I.split?`<div class="split"><span><i style="background:var(--muted)"></i>суточная ставка</span><span><i style="background:var(--muted);opacity:.62"></i>под ключ</span><span><i style="background:var(--muted);opacity:.32"></i>прочие</span></div>`:''}</div></div>`;
+    if(I.load) left+=`<div class="sec"><div class="card vizc">${loadViz(LV,true,S.lf)}</div></div>`; else left+=`<div class="sec"><div class="card chart">${bars3(v,I.d,I.up,{split:I.split})}${I.split?`<div class="split"><span><i style="background:var(--muted)"></i>суточная ставка</span><span><i style="background:var(--muted);opacity:.62"></i>под ключ</span></div>`:''}</div></div>`;
     if(I.npv) left+=`<div class="sec"><div class="lbl"><b>По типам</b><small>${nf(NPVTOT,0)} млн ₽</small></div><div class="card vizc">${npvTypes(NV,true)}</div></div>`;
     if(I.per) left+=`<div class="sec"><div class="lbl"><b>${I.per.n}</b><small>${I.per.u}</small></div><div class="card chart">${bars3(I.per,I.per.d,I.up,{H:190})}</div></div>`;
     let right='';
