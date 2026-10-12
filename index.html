@@ -928,6 +928,33 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
   body.has-back .tabbar .tbk{margin:6px 0 0!important}
   .tabbar .tbk::after{top:-4px!important;bottom:auto!important}
 }
+
+/* телефон: масштаб — жестами, кнопки «+ / −» убраны */
+@media (max-width:900px), (orientation:landscape) and (max-height:600px){.zoomctl{display:none!important} body.maponly .mshow{display:none!important}}
+
+/* показатели на карте: 5 плиток в один экран (телефон — 2 строки) */
+.kstrip{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:6px;flex:1 1 auto;min-width:0}
+.kstrip:empty{display:none!important}
+.kstrip .kc{max-width:none;min-width:0;overflow:hidden}
+.kstrip .kc>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kstrip .kc.kw b,.kstrip .kc b{white-space:nowrap}
+.kc.kw.bad b{color:var(--bad)}
+@media (max-width:900px){
+  body.mode-map .filters{overflow:visible!important}
+  body.mode-map .frow{flex-wrap:wrap;overflow:visible}
+  .kstrip{grid-template-columns:repeat(6,minmax(0,1fr));flex-basis:100%}
+  .kstrip .kc{grid-column:span 2}
+  .kstrip .kc.kw{grid-column:span 3}
+  .kstrip .kc.open{display:none}
+  .kstrip .kc>span:first-child{font-size:9px;letter-spacing:.05em}
+}
+@media (orientation:landscape) and (max-height:600px){
+  .kstrip{grid-template-columns:1fr!important;flex-basis:auto}
+  .kstrip .kc,.kstrip .kc.kw{grid-column:auto!important}
+  .kstrip .kc{padding:4px 10px 5px}
+  .kstrip .kc b{font-size:14px}
+  .kstrip .kc.open{display:inline-flex;justify-self:start}
+}
 </style>
 </head>
 <body>
@@ -988,7 +1015,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:44,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:47,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2105,9 +2132,12 @@ document.getElementById('syncBtn').onclick=e=>{e.stopPropagation(); if(state.mod
 document.addEventListener('pointerdown',e=>{const P=document.getElementById('syncPop'); if(P&&!P.hidden&&!e.target.closest('#syncPop')&&!e.target.closest('#syncBtn')) P.hidden=true});
 function renderStrip(){const el=document.getElementById('kstrip'); if(!el) return; if(state.screen!=='map'){el.innerHTML=''; return}
   const sc=scopeWells(), t=totals(sc,'day'), npv=sc.filter(w=>w.npv).length, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
-  el.innerHTML=`<span class="kc"><span>Скважин</span><b>${sc.length}</b></span><button type="button" class="kc btn ${npv?'bad':''}" id="kNpv"><span>НПВ</span><b>${pct1(npvShare(sc,'month').opct)}</b><span>${npv} скв. сейчас ›</span></button><button type="button" class="kc btn ${rr?'bad':''}" id="kRes"><span>Ресурс</span><b>${rr}</b></button><span class="kc"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
+  const rigs=new Set(sc.map(w=>w.rig)).size, cus=new Set(sc.map(w=>w.cust)).size;
+  el.innerHTML=`<span class="kc"><span>Буровые уст.</span><b>${rigs}</b></span><span class="kc"><span>Заказчики</span><b>${cus}</b></span><span class="kc"><span>Скважины</span><b>${sc.length}</b></span>`+
+    `<span class="kc kw ${t.pct<.95?'bad':''}"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
+    `<button type="button" class="kc kw btn ${npv?'bad':''}" id="kNpv"><span>НПВ за месяц</span><b>${pct1(npvShare(sc,'month').opct)}</b><span>${npv} скв. сейчас ›</span></button>`+
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Сводка</b>›</button>`);
-  document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),'month'); document.getElementById('kRes').onclick=()=>{F.res=!F.res; refresh(true)};
+  document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),'month');
   const ko=document.getElementById('kOpen'); if(ko) ko.onclick=()=>togglePanel(true)}
 addEventListener('resize',()=>{setSheet(sheet,true); layoutInsets()});
 
