@@ -699,6 +699,12 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 @media (orientation:landscape) and (max-height:600px){.updt{left:calc(var(--rail,66px) + 12px);transform:none;bottom:12px}}
 .about{display:flex;gap:14px;align-items:center}
 .about img{width:56px;height:56px;border-radius:13px;flex:none}
+/* телефон: без хлебных крошек — в шапке логотип, свежесть данных и колокольчик */
+@media (max-width:900px), (orientation:landscape) and (max-height:600px){
+  .top .crumbs{display:none!important}
+  .top{flex-wrap:nowrap!important}
+  .top .sync{margin-left:auto}
+}
 </style>
 </head>
 <body>
@@ -751,7 +757,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:30,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:31,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
