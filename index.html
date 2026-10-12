@@ -53,6 +53,8 @@
   --sea:#021A33; --land:#082B4F; --land-2:#06233F; --yanao:#0B335C; --water:#0E3A64; --water-ln:#2A6AA8; --field:#0A4A5E; --field-ln:#00DCC8;
   --city:#AFC0D6; --grat:#0C3158; --plan:#AFC0D6; --fact:#00DCC8; --lks:#3AA89C; color-scheme:dark }
 
+/* цвет прогресса — один для светлой и тёмной темы */
+:root{--prog:#00BFAE}
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;width:100%;height:100%;height:100vh;height:100dvh;overflow:hidden;position:fixed;top:0;left:0;overscroll-behavior:none}
 body{background:var(--bg);color:var(--body);font-family:var(--f-body);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
@@ -221,7 +223,7 @@ body.pnl-open .maptitle{display:none}
 .wcard .hd{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:2px}
 .wcard .hd b{font-family:var(--f-display);font-weight:500;color:var(--ink);font-size:15px}
 .wcard .bar{grid-column:1/-1;height:5px;border-radius:3px;background:var(--grid);overflow:hidden;margin:4px 0}
-.wcard .bar span{display:block;height:100%;background:var(--fact)}
+.wcard .bar span{display:block;height:100%;background:var(--prog)}
 .res{display:inline-flex;align-items:center;gap:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .res i{width:9px;height:9px;border-radius:50%;flex:none}
 .cards{display:flex;flex-direction:column;gap:8px}
@@ -239,7 +241,7 @@ body.pnl-open .maptitle{display:none}
 .pg{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--grid)}
 .pg span{position:relative;display:block;height:100%;border-right:2px solid var(--surface);flex-basis:0}
 .pg span:last-child{border-right:0}
-.pg em{position:absolute;left:0;top:0;bottom:0;background:var(--fact)}
+.pg em{position:absolute;left:0;top:0;bottom:0;background:var(--prog)}
 .pg span.act em{background-image:repeating-linear-gradient(-45deg,rgba(255,255,255,.35) 0 5px,transparent 5px 10px);background-size:14px 14px;animation:stripes .9s linear infinite}
 @keyframes stripes{to{background-position:14px 0}}
 .pg-l{display:flex;font-size:10.5px;color:var(--muted)}
@@ -378,8 +380,8 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .dbr .pc{grid-area:pc;font-weight:600;font-size:15px;text-align:right;min-width:56px}
 .dbr .pc small{display:block;font-size:11px;font-weight:400;color:var(--muted);white-space:nowrap}
 .dbar{grid-area:b;position:relative;height:9px;border-radius:5px;background:var(--grid)}
-.dbar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--fact)}
-.dbar b{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--plan)}
+.dbar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--prog)}
+.dbar b{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1.5px;border-radius:2px;background:var(--ink)}
 .dgoodc{color:var(--good)!important} .dbadc{color:var(--bad)!important}
 .cum{position:relative;margin-top:4px}
 .cum svg{display:block;width:100%;overflow:visible;touch-action:pan-y}
@@ -600,7 +602,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:22,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:23,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
