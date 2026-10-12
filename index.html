@@ -454,6 +454,22 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .rl .m b em{font-style:normal;font-size:10.5px;font-weight:600;color:#00234B;background:var(--mint);border-radius:6px;padding:1px 6px}
 .rl .m small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rl .v{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap}
+.ggro{display:grid;gap:6px;margin:8px 0 6px}
+.gg-h{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.gg-h b{font-weight:600;color:var(--ink);font-size:14px} .gg-h span{font-size:12px;color:var(--muted)}
+.gg-now{margin-left:auto;border:1px solid var(--line);background:var(--band);color:var(--ink);border-radius:8px;padding:3px 9px;font-size:12px;cursor:pointer}
+.gg-v{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.gg-v div{background:var(--band);border-radius:10px;padding:7px 9px;min-width:0;display:flex;flex-direction:column}
+.gg-v span{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.gg-v span i{width:10px;height:3px;border-radius:2px;display:inline-block}
+.gg-v b{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap}
+.gg-v small{font-size:11px;color:var(--muted)}
+.gg-op{font-size:12.5px;color:var(--body);background:var(--band);border-radius:10px;padding:6px 10px}
+.gg-op.npv{color:var(--bad)}
+.chart .ggoal{fill:var(--accent);font-size:11.5px;font-weight:600;paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+.ggcur{cursor:ew-resize}
+#ggd svg{cursor:ew-resize}
+#ggd{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -565,7 +581,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:18,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:19,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -981,21 +997,50 @@ function chartFP(el,data,opts={}){
     .on('pointerenter',(ev,d)=>{bars.style('opacity',v=>v===d?1:.35); if(ro) ro.innerHTML=`<b>${d.l}</b>: факт ${nf0(d.fact)} м · план ${nf0(d.plan)} м · <span class="${d.fact>=d.plan?'dgood':'dbad'}">${signed0(d.fact-d.plan)} м</span>`})
     .on('pointerleave',()=>{bars.style('opacity',d=>d.last?.6:1); if(ro) ro.innerHTML=ro.dataset.cur||''});
 }
-function chartGGD(el,w,h=220){
-  el.innerHTML=''; const W=el.clientWidth||400, H=h, m={t:8,r:10,b:24,l:46};
-  const s=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
-  const xm=Math.max(w.planS.end,w.tNow)*1.05, x=d3.scaleLinear().domain([0,xm]).range([m.l,W-m.r]), y=d3.scaleLinear().domain([0,w.T*1.04]).range([m.t,H-m.b]);
+function chartGGD(el,w,h=236){
+  el.innerHTML=''; el.classList.add('nogest'); const W=el.clientWidth||400, H=h, m={t:30,r:12,b:24,l:46};
+  const wrap=d3.select(el), ro=wrap.append('div').attr('class','ggro');
+  const s=wrap.append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H).style('touch-action','pan-y');
+  const xm=Math.max(w.planS.end,w.tNow)*1.06, x=d3.scaleLinear().domain([0,xm]).range([m.l,W-m.r]), y=d3.scaleLinear().domain([0,w.T*1.06]).range([m.t,H-m.b]);
   y.ticks(5).forEach(v=>{s.append('line').attr('class','gl').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(v)).attr('y2',y(v)); s.append('text').attr('x',m.l-5).attr('y',y(v)+3).attr('text-anchor','end').text(nf0(v))});
-  x.ticks(6).forEach(v=>{s.append('text').attr('x',x(v)).attr('y',H-8).attr('text-anchor','middle').text(fmtD(dateAt(w.spud+v)))});
+  x.ticks(W<420?5:7).forEach(v=>{s.append('text').attr('x',x(v)).attr('y',H-8).attr('text-anchor','middle').text(fmtD(dateAt(w.spud+v)))});
   const ln=d3.line().x(p=>x(p.t)).y(p=>y(p.d));
   w.fact.segs.filter(g=>g.op.k==='N'&&g.t0<w.tNow).forEach(g=>s.append('rect').attr('x',x(g.t0)).attr('width',Math.max(1.5,x(Math.min(g.t1,w.tNow))-x(g.t0))).attr('y',m.t).attr('height',H-m.t-m.b).style('fill','var(--st-npv)').style('opacity',.15));
+  // цель: проектный забой и плановая дата окончания
+  const tE=w.planS.end, dEnd=dateAt(w.spud+tE);
+  s.append('line').attr('x1',m.l).attr('x2',W-m.r).attr('y1',y(w.T)).attr('y2',y(w.T)).style('stroke','var(--accent)').style('stroke-width',1).style('opacity',.55);
   s.append('path').attr('d',ln(w.lksS.pts)).style('fill','none').style('stroke','var(--lks)').style('stroke-width',2).style('stroke-dasharray','1.5 4').style('stroke-linecap','round');
   s.append('path').attr('d',ln(w.planS.pts)).style('fill','none').style('stroke','var(--plan)').style('stroke-width',1.8).style('stroke-dasharray','7 4');
   const fp=w.fact.pts.filter(p=>p.t<=w.tNow).concat([{t:w.tNow,d:w.depth}]);
   s.append('path').attr('d',ln(fp)).style('fill','none').style('stroke','var(--fact)').style('stroke-width',2.8).style('stroke-linejoin','round');
-  s.append('line').attr('x1',x(w.tNow)).attr('x2',x(w.tNow)).attr('y1',m.t).attr('y2',H-m.b).style('stroke','var(--muted)').style('stroke-dasharray','3 3');
-  s.append('circle').attr('cx',x(w.tNow)).attr('cy',y(w.depth)).attr('r',5).style('fill','var(--fact)').style('stroke','var(--surface)').style('stroke-width',2);
-  s.append('text').attr('x',Math.min(x(w.tNow)+8,W-70)).attr('y',y(w.depth)-8).style('fill','var(--ink)').style('font-weight',600).text(nf0(w.depth)+' м');
+  const gx=x(tE), gy=y(w.T);
+  s.append('path').attr('d',`M${gx},${gy-7}L${gx+7},${gy}L${gx},${gy+7}L${gx-7},${gy}Z`).style('fill','var(--accent)').style('stroke','var(--surface)').style('stroke-width',2);
+  s.append('text').attr('class','ggoal').attr('x',m.l+6).attr('y',gy-7).text(`Цель: ${nf0(w.T)} м к ${fmtD(dEnd)}`);
+  // текущий забой
+  s.append('circle').attr('cx',x(w.tNow)).attr('cy',y(w.depth)).attr('r',4).style('fill','var(--fact)').style('stroke','var(--surface)').style('stroke-width',2);
+  // подвижный курсор
+  const cg=s.append('g').attr('class','ggcur');
+  const cl=cg.append('line').attr('y1',m.t-12).attr('y2',H-m.b).style('stroke','var(--ink)').style('stroke-width',1.4);
+  const dots=['plan','lks','fact'].map(k=>cg.append('circle').attr('r',k==='fact'?5.5:4).style('fill',`var(--${k})`).style('stroke','var(--surface)').style('stroke-width',2));
+  const knob=cg.append('g'); knob.append('rect').attr('x',-17).attr('y',-11).attr('width',34).attr('height',22).attr('rx',11).style('fill','var(--ink)');
+  knob.append('path').attr('d','M-8,0l4,-4v8zM8,0l-4,-4v8z').style('fill','var(--surface)');
+  const fop=t=>{const g=w.fact.segs.find(g=>t>=g.t0&&t<g.t1); return g?g.op:null};
+  function set(t){t=Math.max(0,Math.min(xm,t)); w._cur=t; const X=x(t);
+    const dp=depthAt(w.planS,t), dl=depthAt(w.lksS,t), past=t<=w.tNow+1e-6, df=past?Math.min(w.depth,depthAt(w.fact,t)):null;
+    cl.attr('x1',X).attr('x2',X); knob.attr('transform',`translate(${Math.max(m.l+17,Math.min(W-m.r-17,X))},${m.t-14})`);
+    dots[0].attr('cx',X).attr('cy',y(dp)); dots[1].attr('cx',X).attr('cy',y(dl)); dots[2].attr('cx',X).attr('cy',y(df??0)).style('display',past?null:'none');
+    const lagD=past?t-timeAt(w.planS,df):null, dm=past?df-dp:null, op=past?fop(t):null, now=Math.abs(t-w.tNow)<.05;
+    ro.html(`<div class="gg-h"><b>${fmtDY(dateAt(w.spud+t))}</b><span>${nf1(t)} сут от забуривания${now?' · сейчас':past?'':' · прогноз по ГТН'}</span>${now?'':'<button type="button" class="gg-now">к сегодня</button>'}</div>
+      <div class="gg-v"><div><span><i style="background:var(--fact)"></i>Факт</span><b>${past?nf0(df)+' м':'—'}</b></div>
+      <div><span><i style="background:var(--plan)"></i>ГТН</span><b>${nf0(dp)} м</b></div>
+      <div><span><i style="background:var(--lks)"></i>ЛКС</span><b>${nf0(dl)} м</b></div>
+      <div><span>К ГТН</span><b class="${past?(dm<-1?'dbadc':'dgoodc'):''}">${past?signed0(dm)+' м':'—'}</b><small>${!past?'':Math.abs(lagD)<.05?'по графику':(lagD>0?'отстаём ':'опережаем ')+nf1(Math.abs(lagD))+' сут'}</small></div></div>
+      ${op?`<div class="gg-op${op.k==='N'?' npv':''}">${op.k==='N'?'НПВ: ':''}${esc(op.n)}</div>`:''}`);
+    const nb=ro.select('.gg-now').node(); if(nb) nb.onclick=()=>set(w.tNow)}
+  const pick=ev=>{const R=s.node().getBoundingClientRect(); set(x.invert((ev.clientX-R.left)/R.width*W))};
+  let drag=false;
+  s.on('pointerdown',ev=>{drag=true; s.node().setPointerCapture(ev.pointerId); pick(ev)}).on('pointermove',ev=>{if(drag||ev.pointerType==='mouse'&&ev.buttons) pick(ev)}).on('pointerup pointercancel',()=>{drag=false});
+  set(w._cur!=null?w._cur:w.tNow);
 }
 function hbars(el,rows){ /* строки «факт к плану» в том же виде, что шкалы проходки: подпись сверху, полоса снизу, процент справа */
   const mx=(d3.max(rows,r=>Math.max(r.fact,r.plan))||1)*1.08;
@@ -1297,7 +1342,7 @@ document.getElementById('popen').onclick=()=>togglePanel(true);
 (function(){const b=document.getElementById('pbody'); let y0=null,h0=0,mode=null,topT=0,lock=0;
   const fin=()=>{state.pinned=sheet!=='min'; renderStrip()};
   b.addEventListener('scroll',()=>{if(b.scrollTop>0) topT=0; else if(!topT) topT=Date.now()},{passive:true});
-  b.addEventListener('touchstart',e=>{if(!isPhoneSheet()||e.touches.length>1) return; y0=e.touches[0].clientY; mode=null},{passive:true});
+  b.addEventListener('touchstart',e=>{if(!isPhoneSheet()||e.touches.length>1||e.target.closest('.nogest')){y0=null; return} y0=e.touches[0].clientY; mode=null},{passive:true});
   b.addEventListener('touchmove',e=>{if(y0==null) return; const y=e.touches[0].clientY, d=y-y0;
     if(mode==null){ if(Math.abs(d)<5) return;
       mode=(sheet!=='max'&&d<0)?'grow':(sheet==='max'&&d>0&&b.scrollTop<=0)?'shrink':'scroll';
