@@ -508,6 +508,32 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
   .tabbar .tbk::after{left:12px;right:12px;top:auto;bottom:-4px;width:auto;height:1px}
   body.has-back .tabbar button:not(.tbk){max-width:none}
 }
+
+/* ===== Liquid Glass (Профиль → Оформление): стекло только на том, что парит над картой ===== */
+html.glass{--g-base:color-mix(in srgb,var(--surface) 58%,transparent);--g-edge:rgba(255,255,255,.26);--g-hi:rgba(255,255,255,.45);--g-shadow:rgba(0,10,30,.35);--g-blur:blur(18px) saturate(185%)}
+@media (prefers-color-scheme: light){html.glass:not([data-theme="dark"]){--g-base:color-mix(in srgb,#fff 52%,transparent);--g-edge:rgba(255,255,255,.85);--g-hi:rgba(255,255,255,.95);--g-shadow:rgba(0,35,75,.18)}}
+html.glass[data-theme="light"]{--g-base:color-mix(in srgb,#fff 52%,transparent);--g-edge:rgba(255,255,255,.85);--g-hi:rgba(255,255,255,.95);--g-shadow:rgba(0,35,75,.18)}
+html.glass .tabbar,html.glass body.mode-map .panel:not(.smax),html.glass body.mode-map .kc,html.glass .zoomctl button,html.glass .legendov,html.glass .maptitle,html.glass .fpop{
+  background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 55%),var(--g-base)!important;
+  -webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);
+  border:1px solid var(--g-edge)!important;box-shadow:inset 0 1px 0 var(--g-hi),inset 0 -1px 1px rgba(255,255,255,.08),0 10px 30px var(--g-shadow)!important}
+html.glass .fpop{--g-base:color-mix(in srgb,var(--surface) 80%,transparent)}
+html.glass .zoomctl button{border-radius:50%}
+/* шапка над картой — растворяется книзу */
+html.glass body.mode-map .top{background:linear-gradient(180deg,color-mix(in srgb,var(--chrome) 78%,transparent),color-mix(in srgb,var(--chrome) 35%,transparent));-webkit-backdrop-filter:blur(14px) saturate(160%);backdrop-filter:blur(14px) saturate(160%)}
+/* шторка и плитки внутри — полупрозрачные */
+html.glass body.mode-map .panel:not(.smax) :is(.kpis,.dbr[aria-pressed="true"],.verd,.gg-v div,.gg-op,.rig-k div,.rig-move){background:color-mix(in srgb,var(--pale) 60%,transparent)}
+/* телефон вертикально: плавающая капсула меню и шторка над ней */
+@media (max-width:900px) and (orientation:portrait), (max-width:900px) and (min-height:601px){
+  html.glass .app{--tabh:calc(84px + max(0px, env(safe-area-inset-bottom, 0px) - 20px))}
+  html.glass .tabbar{left:10px;right:10px;width:auto;bottom:calc(10px + max(0px, env(safe-area-inset-bottom, 0px) - 20px));padding:6px;border-radius:34px}
+  html.glass .tabbar button{border-radius:26px;padding:6px 1px}
+  html.glass .tabbar button[aria-selected="true"]{background:radial-gradient(90% 120% at 50% 0%,rgba(255,255,255,.26),rgba(255,255,255,.06));box-shadow:inset 0 1px 0 rgba(255,255,255,.45),inset 0 0 0 1px rgba(255,255,255,.14),0 2px 10px rgba(0,0,0,.15)}
+  html.glass body.mode-map .panel:not(.smax){left:8px;right:8px;bottom:calc(var(--tabh) + 2px);border-radius:26px}
+  html.glass body.mode-map .panel.smax{bottom:var(--tabh)}
+}
+html.glass body.mode-page .tabbar{--g-base:color-mix(in srgb,var(--surface) 80%,transparent)}
+.newb{font-size:9.5px;font-weight:700;color:#00234B;background:var(--mint);border-radius:5px;padding:1px 5px;margin-left:6px;vertical-align:1px;font-family:var(--f-body)}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -620,7 +646,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:24,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:25,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1460,7 +1486,7 @@ function renderStats(){
 /* ======================= плавающая панель и шторка ======================= */
 let INS={t:0,r:0,b:0,l:0}, sheet='mid';
 const isPhoneSheet=()=>matchMedia('(max-width:900px)').matches&&!matchMedia('(orientation:landscape) and (max-height:600px)').matches;
-function tabH(){const tb=document.querySelector('.tabbar').getBoundingClientRect(); return tb.height>tb.width?0:tb.height}
+function tabH(){const tb=document.querySelector('.tabbar').getBoundingClientRect(); return tb.height>tb.width?0:Math.max(tb.height,innerHeight-tb.top)}
 function sheetPx(s){const top=document.querySelector('.top').getBoundingClientRect().bottom||60; return s==='min'?96:s==='max'?Math.max(200,Math.round((isPhoneSheet()?panelBox.getBoundingClientRect().bottom:innerHeight-tabH())-top)):Math.round(innerHeight*.44)}
 let SHEET_HOME='min';
 function setSheet(s,silent){if(s!=='max') SHEET_HOME=s; sheet=s; panelBox.classList.toggle('smax',s==='max'); document.documentElement.style.setProperty('--sheetH',sheetPx(s)+'px'); if(!silent) setTimeout(()=>{layoutInsets(); updateOverlay()},280)}
@@ -1531,14 +1557,15 @@ function renderStrip(){const el=document.getElementById('kstrip'); if(!el) retur
 addEventListener('resize',()=>{setSheet(sheet,true); layoutInsets()});
 
 /* ======================= профиль и настройки ======================= */
-const PREF_DEF={name:'',role:'Руководитель направления бурения',theme:'system',per:'month',start:'map',nNpv:true,nRes:true,nLag:false,compact:false};
+const PREF_DEF={name:'',role:'Руководитель направления бурения',theme:'system',per:'month',start:'map',glass:false,nNpv:true,nRes:true,nLag:false,compact:false};
 let PREFS={...PREF_DEF};
 try{PREFS={...PREF_DEF,...JSON.parse(localStorage.getItem('engs-prefs')||'{}')}}catch(e){}
 function savePrefs(){try{localStorage.setItem('engs-prefs',JSON.stringify(PREFS))}catch(e){}}
-function applyTheme(){const r=document.documentElement; if(PREFS.theme==='system') delete r.dataset.theme; else r.dataset.theme=PREFS.theme}
+function applyTheme(){const r=document.documentElement; if(PREFS.theme==='system') delete r.dataset.theme; else r.dataset.theme=PREFS.theme;
+  r.classList.toggle('glass',!!PREFS.glass&&!matchMedia('(prefers-reduced-transparency: reduce)').matches)}
 function initials(n){const p=(n||'').trim().split(/\s+/).filter(Boolean); return p.length?(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase():'ЭН'}
 function renderProfile(){
-  const el=document.getElementById('profwrap'), sw=(k,l,s)=>`<div class="prow"><span class="l">${l}${s?'<small>'+s+'</small>':''}</span><button type="button" class="sw" role="switch" data-k="${k}" aria-checked="${!!PREFS[k]}" aria-label="${l}"></button></div>`;
+  const el=document.getElementById('profwrap'), sw=(k,l,s)=>`<div class="prow"><span class="l">${l}${s?'<small>'+s+'</small>':''}</span><button type="button" class="sw" role="switch" data-k="${k}" aria-checked="${!!PREFS[k]}" aria-label="${l.replace(/<[^>]+>/g,'').trim()}"></button></div>`;
   const seg=(k,opts)=>`<div class="seg" data-seg="${k}">${opts.map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${PREFS[k]===v}">${n}</button>`).join('')}</div>`;
   el.innerHTML=`<div class="prof">
     <div class="pbox" style="flex-direction:row;align-items:center;gap:14px"><span class="ava" id="pava">${initials(PREFS.name)}</span><div><div class="eyebrow">Профиль</div><div id="pnm" style="font-family:var(--f-display);font-size:18px;color:var(--ink)">${esc(PREFS.name||'Имя не указано')}</div><div class="note" id="prl">${esc(PREFS.role)} · ЭНГС</div></div></div>
@@ -1546,7 +1573,8 @@ function renderProfile(){
       <div class="prow"><label for="pName">Имя</label><input type="text" id="pName" value="${esc(PREFS.name)}" placeholder="Фамилия И. О."></div>
       <div class="prow"><label for="pRole">Должность</label><input type="text" id="pRole" value="${esc(PREFS.role)}"></div></div>
     <div class="pbox"><h3>Оформление</h3>
-      <div class="prow"><span class="l">Тема</span>${seg('theme',[['system','Как в системе'],['light','Светлая'],['dark','Тёмная']])}</div></div>
+      <div class="prow"><span class="l">Тема</span>${seg('theme',[['system','Как в системе'],['light','Светлая'],['dark','Тёмная']])}</div>
+      ${sw('glass','Liquid Glass <span class="newb">новое</span>','стеклянные меню, шторки и панели над картой')}</div>
     <div class="pbox"><h3>Данные и экраны</h3>
       <div class="prow"><span class="l">Период по умолчанию<small>для динамики и статистики</small></span>${seg('per',[['day','Сутки'],['month','Месяц'],['year','Год']])}</div>
       <div class="prow"><span class="l">Стартовый экран</span>${seg('start',[['map','Карта'],['stats','Статистика']])}</div></div>
@@ -1566,7 +1594,7 @@ function renderProfile(){
   document.getElementById('pName').oninput=e=>{PREFS.name=e.target.value; upd()};
   document.getElementById('pUpd').onclick=()=>{const st=document.getElementById('updS'); st.textContent='проверяю…'; (window.__pulseCheckUpdate?window.__pulseCheckUpdate():Promise.resolve(null)).then(f=>{st.textContent=f===null?'доступны после установки на экран «Домой»':f?'есть новая версия — нажмите «Обновить» внизу':'у вас последняя версия '+APP.version})};
   document.getElementById('pRole').oninput=e=>{PREFS.role=e.target.value; upd()};
-  el.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{PREFS[b.dataset.k]=!PREFS[b.dataset.k]; b.setAttribute('aria-checked',PREFS[b.dataset.k]); savePrefs()});
+  el.querySelectorAll('.sw').forEach(b=>b.onclick=()=>{PREFS[b.dataset.k]=!PREFS[b.dataset.k]; b.setAttribute('aria-checked',PREFS[b.dataset.k]); savePrefs(); if(b.dataset.k==='glass'){applyTheme(); setTimeout(()=>{layoutInsets(); updateOverlay()},60)}});
   el.querySelectorAll('[data-seg]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.onclick=()=>{const k=g.dataset.seg; PREFS[k]=b.dataset.v; savePrefs();
     g.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); if(k==='theme'){applyTheme(); drawReal&&GEO.ok&&drawReal()} if(k==='per') state.per=PREFS.per}));
   document.getElementById('pReset').onclick=()=>{PREFS={...PREF_DEF}; savePrefs(); applyTheme(); state.per=PREFS.per; renderProfile()};
