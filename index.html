@@ -514,7 +514,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:15,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:16,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1143,7 +1143,7 @@ function renderPanel(){
   if(lev==='well'){
     const w=WELLS.find(x=>x.id===state.well), tab=state.wtab, lag=w.tNow-timeAt(w.planS,w.depth), rem=Math.max(0,w.planS.end-timeAt(w.planS,w.depth));
     h=`<div class="pn"><div class="ph"><div class="eyebrow">${w.field.n} · куст ${esc(w.pad)}</div><h1>Скв. ${esc(w.no)}</h1><span class="rule"></span>
-      <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)}</div><div class="chips"><button type="button" class="chip" data-go="cust:${w.cust.id}">${esc(w.cust.n)}</button><button type="button" class="chip" data-go="field:${w.field.id}">${w.field.n}</button></div></div>
+      <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)} · ${esc(w.cust.n)}</div></div>
       <div class="big"><b>${nf0(w.depth)}</b><span>м из ${nf0(w.target)} · ${Math.round(Math.min(1,w.depth/w.target)*100)} %</span></div>
       ${w.bad?`<div class="warnbox">Забой ${nf0(w.depth)} м больше проектного ${nf0(w.target)} м — проверьте данные источника.</div>`:''}
       <div class="sub" style="margin-top:-8px">${w.status==='npv'?'<b style="color:var(--bad)">НПВ:</b> ':''}${esc(w.op.n)} <span class="note">(демо)</span></div>
