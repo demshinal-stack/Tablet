@@ -955,6 +955,19 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
   .kstrip .kc b{font-size:14px}
   .kstrip .kc.open{display:inline-flex;justify-self:start}
 }
+
+.phandle{display:none}
+.kc.ktitle{display:none}
+@media (orientation:landscape) and (max-height:600px){
+  body.mode-map .maptitle{display:none!important}
+  .kstrip .kc.ktitle{display:block!important;background:color-mix(in srgb,var(--surface) 86%,transparent)}
+  .kstrip .kc.ktitle>span:first-child{color:var(--accent)}
+  .kstrip .kc.ktitle>span:first-child{display:block}
+  .kstrip .kc.ktitle b{display:block;font-size:13px;white-space:normal!important;line-height:1.25}
+  .kstrip .kc.open{display:none!important}
+  body.mode-map.pnl-col:not(.maponly) .phandle{display:grid;place-items:center;position:fixed;z-index:25;right:0;top:50%;transform:translateY(-50%);width:26px;height:96px;border:1px solid var(--line);border-right:0;border-radius:var(--r-l) 0 0 var(--r-l);background:color-mix(in srgb,var(--surface) 90%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:-4px 0 14px rgba(0,25,55,.15);cursor:grab;touch-action:none;padding:0;pointer-events:auto}
+  .phandle i{width:4px;height:38px;border-radius:2px;background:var(--muted);opacity:.6}
+}
 </style>
 </head>
 <body>
@@ -984,6 +997,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
       <div class="maptip" id="maptip"></div>
     </section>
     <aside class="card panel" id="panel" aria-live="polite"><div class="grab" id="grab"><span class="bar"></span><span class="gt">Сводка</span><button type="button" id="pcol" aria-label="Свернуть панель">Скрыть <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M3 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg></button></div><div class="pbody" id="pbody"></div></aside>
+    <button type="button" class="phandle" id="phandle" aria-label="Показать сводку"><i></i></button>
     <button type="button" class="mshow" id="mshow">Показать данные</button>
     <button type="button" class="popen" id="popen"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M7 1L3 5l4 4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>Показать панель</button>
     <section class="card statwrap" id="statwrap" hidden></section>
@@ -1015,7 +1029,7 @@ body.mode-map.maponly .zoomctl{top:var(--ptop,150px);right:12px}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:47,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:48,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1301,7 +1315,7 @@ const bboxPts=pts=>[[d3.min(pts,p=>p[0]),d3.min(pts,p=>p[1])],[d3.max(pts,p=>p[0
 function fitMap(dur){
   if(state.level==='well'){const w=WELLS.find(x=>x.id===state.well), e=6; fitBounds([[w.pos[0]-e,w.pos[1]-e],[w.pos[0]+e,w.pos[1]+e]],40,dur); return}
   const ws=scopeWells(), all=WELLS.filter(w=>(!state.field||w.field.id===state.field)&&(!state.cust||w.cust.id===state.cust));
-  if(state.level==='fields'&&!state.field){fitBounds(regionBounds(),20,dur); return}
+  if(state.level==='fields'&&!state.field){if(LANDP()&&ws.length){fitBounds(bboxPts(ws.map(w=>w.pos)),26,dur); return} fitBounds(regionBounds(),20,dur); return}
   if(state.level==='field'){const f=FIELDS.find(x=>x.id===state.field); fitBounds(f.bounds,36,dur); return}
   const pts=(ws.length?ws:all).map(w=>w.pos); let b=bboxPts(pts); const cx=(b[0][0]+b[1][0])/2, cy=(b[0][1]+b[1][1])/2, h=Math.max((b[1][0]-b[0][0])/2,(b[1][1]-b[0][1])/2,10);
   fitBounds([[Math.min(b[0][0],cx-h),Math.min(b[0][1],cy-h)],[Math.max(b[1][0],cx+h),Math.max(b[1][1],cy+h)]],60,dur);
@@ -2052,6 +2066,7 @@ function tabH(){const tb=document.querySelector('.tabbar').getBoundingClientRect
 function sheetPx(s){const top=document.querySelector('.top').getBoundingClientRect().bottom||60; return s==='min'?96:s==='max'?Math.max(200,Math.round((isPhoneSheet()?panelBox.getBoundingClientRect().bottom:innerHeight-tabH())-top)):Math.round(innerHeight*.44)}
 let SHEET_HOME='min';
 function setSheet(s,silent){if(s!=='max') SHEET_HOME=s; sheet=s; panelBox.classList.toggle('smax',s==='max'); document.documentElement.style.setProperty('--sheetH',sheetPx(s)+'px'); if(!silent) setTimeout(()=>{layoutInsets(); updateOverlay()},280)}
+function LANDP(){return matchMedia('(orientation:landscape) and (max-height:600px)').matches}
 function layoutInsets(){
   if(state.screen!=='map') return;
   const root=document.documentElement, fl=document.getElementById('filters').getBoundingClientRect(), hd=document.querySelector('.top').getBoundingClientRect();
@@ -2061,7 +2076,8 @@ function layoutInsets(){
   INS={t:top,l:rail?tb.right:0,r:0,b:rail?0:innerHeight-tb.top};
   if(only){INS.t=LP?top:Math.max(fl.height?fl.bottom:0,hd.bottom)+6}
   else if(isPhoneSheet()) INS.b=tabH()+sheetPx(sheet); else if(!col) INS.r=(panelBox.offsetWidth||440)+20;
-  if(LP&&!only){const ks=document.getElementById('kstrip').getBoundingClientRect(); if(ks.width) INS.l=ks.right+8}
+  if(LP&&!only){const ks=document.getElementById('kstrip').getBoundingClientRect(); if(ks.width) INS.l=ks.right+8; if(col) INS.r=34}
+  document.body.classList.toggle('pnl-col',col);
   root.style.setProperty('--ztop',(col&&!isPhoneSheet()?top+54:top)+'px');
   root.style.setProperty('--insL',INS.l+'px'); root.style.setProperty('--insR',INS.r+'px'); root.style.setProperty('--insB',INS.b+'px');
 }
@@ -2070,6 +2086,12 @@ function panelOpen(){return isPhoneSheet()?sheet!=='min':!panelBox.classList.con
 function togglePanel(open){state.pinned=open; setPanel(open); layoutInsets(); setTimeout(()=>{layoutInsets(); updateOverlay()},320)}
 document.getElementById('pcol').onclick=()=>togglePanel(false);
 document.getElementById('popen').onclick=()=>togglePanel(true);
+(function(){const h=document.getElementById('phandle'), g=document.getElementById('grab'); let x0=null,mv=false;
+  h.addEventListener('pointerdown',e=>{x0=e.clientX; mv=false; h.setPointerCapture(e.pointerId)});
+  h.addEventListener('pointermove',e=>{if(x0!=null&&x0-e.clientX>24&&!mv){mv=true; togglePanel(true)}});
+  h.addEventListener('pointerup',()=>{if(x0!=null&&!mv) togglePanel(true); x0=null});
+  let gx=null; g.addEventListener('pointerdown',e=>{if(!LANDP()) return; gx=e.clientX});
+  addEventListener('pointerup',e=>{if(gx!=null&&e.clientX-gx>40) togglePanel(false); gx=null});})();
 (function(){const g=document.getElementById('grab'); let y0=null,h0=0,moved=0;
   g.addEventListener('pointerdown',e=>{if(!isPhoneSheet()||e.target.closest('button')) return; y0=e.clientY; h0=panelBox.offsetHeight; moved=0; panelBox.style.transition='none'; g.setPointerCapture(e.pointerId)});
   g.addEventListener('pointermove',e=>{if(y0==null) return; const d=e.clientY-y0; moved=Math.max(moved,Math.abs(d)); const h=Math.max(80,Math.min(sheetPx('max'),h0-d)); document.documentElement.style.setProperty('--sheetH',h+'px')});
@@ -2133,7 +2155,11 @@ document.addEventListener('pointerdown',e=>{const P=document.getElementById('syn
 function renderStrip(){const el=document.getElementById('kstrip'); if(!el) return; if(state.screen!=='map'){el.innerHTML=''; return}
   const sc=scopeWells(), t=totals(sc,'day'), npv=sc.filter(w=>w.npv).length, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
   const rigs=new Set(sc.map(w=>w.rig)).size, cus=new Set(sc.map(w=>w.cust)).size;
-  el.innerHTML=`<span class="kc"><span>Буровые уст.</span><b>${rigs}</b></span><span class="kc"><span>Заказчики</span><b>${cus}</b></span><span class="kc"><span>Скважины</span><b>${sc.length}</b></span>`+
+  let te,tt; if(state.level==='fields'){te='Ямало-Ненецкий АО'; const nf_=new Set(sc.map(w=>w.field)).size; tt=nf_+' '+plural(nf_,'месторождение','месторождения','месторождений')}
+  else if(state.level==='field'){te='Месторождение'; tt=FIELDS.find(x=>x.id===state.field).n}
+  else if(state.level==='cust'){te='Заказчик'; tt=CUSTOMERS.find(x=>x.id===state.cust).n}
+  else {const w=WELLS.find(x=>x.id===state.well); te=w.field.n; tt='Скв. '+w.no}
+  el.innerHTML=`<span class="kc ktitle"><span>${esc(te)}</span><b>${esc(tt)}</b></span><span class="kc"><span>Буровые уст.</span><b>${rigs}</b></span><span class="kc"><span>Заказчики</span><b>${cus}</b></span><span class="kc"><span>Скважины</span><b>${sc.length}</b></span>`+
     `<span class="kc kw ${t.pct<.95?'bad':''}"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
     `<button type="button" class="kc kw btn ${npv?'bad':''}" id="kNpv"><span>НПВ за месяц</span><b>${pct1(npvShare(sc,'month').opct)}</b><span>${npv} скв. сейчас ›</span></button>`+
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Сводка</b>›</button>`);
