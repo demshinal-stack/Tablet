@@ -412,6 +412,48 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .hb .pc{grid-area:pc;font-weight:600;font-size:15px;text-align:right;min-width:62px}
 .hb .pc small{display:block;font-size:11px;font-weight:400;color:var(--muted);white-space:nowrap}
 .hb .dbar{grid-area:b}
+.rigc{border:1px solid var(--line);border-radius:14px;padding:14px;display:grid;gap:14px;background:var(--surface)}
+.rig-h{display:flex;gap:12px;align-items:center}
+.rig-ico{flex:none;width:44px;height:44px;border-radius:12px;background:var(--pale);color:var(--accent);display:grid;place-items:center}
+.rig-ico svg{width:24px;height:24px}
+.rig-n{min-width:0;display:flex;flex-direction:column}
+.rig-n b{font-family:var(--f-display);font-weight:500;font-size:17px;color:var(--ink);line-height:1.2}
+.rig-n span{font-size:12px;color:var(--muted)}
+.rig-move{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:6px;align-items:start;background:var(--band);border-radius:10px;padding:10px 12px}
+.rig-move div{min-width:0;display:flex;flex-direction:column}
+.rig-move span{font-size:10.5px;color:var(--muted);letter-spacing:.02em}
+.rig-move b{font-weight:600;color:var(--ink);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rig-move small{font-size:11px;color:var(--muted)}
+.rig-move i{font-style:normal;color:var(--muted);align-self:center}
+.rig-res{border-radius:10px;padding:10px 12px;background:color-mix(in srgb,var(--rc) 10%,transparent);border:1px solid color-mix(in srgb,var(--rc) 30%,transparent);display:grid;gap:6px}
+.rr-h{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.rr-h .dot{width:8px;height:8px;border-radius:50%;background:var(--rc)}
+.rr-h b{font-weight:600;color:var(--ink)} .rr-h em{font-style:normal;margin-left:auto;color:var(--rc);font-weight:600}
+.rr-t{font-size:13px;color:var(--body);line-height:1.4}
+.rr-bar{position:relative;height:7px;border-radius:4px;background:var(--grid)}
+.rr-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--rc)}
+.rr-bar b{position:absolute;top:-3px;bottom:-3px;width:2px;margin-left:-1px;background:var(--ink);opacity:.6}
+.rr-s{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.rig-k{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:8px}
+.rig-k div{background:var(--pale);border-radius:12px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.rig-k span{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);font-weight:600;line-height:1.25}
+.rig-k b{font-family:var(--f-display);font-weight:500;font-size:20px;color:var(--ink);white-space:nowrap}
+.rig-k b em{font-style:normal;font-size:13px;color:var(--muted)}
+.rig-k small{font-size:11.5px;color:var(--muted)}
+.rig-tl{position:relative;height:16px;border-radius:5px;background:var(--grid);margin-top:10px;overflow:hidden}
+.rig-tl i{position:absolute;top:2px;bottom:2px;background:color-mix(in srgb,var(--ink) 34%,transparent);border-radius:3px}
+.rig-tl i.b{background:color-mix(in srgb,var(--ink) 52%,transparent)} .rig-tl i.cur{background:var(--mint)}
+.rig-tm{position:relative;height:16px;font-size:10.5px;color:var(--muted)}
+.rig-tm span{position:absolute;top:2px;transform:translateX(-2px)}
+.rig-l{margin-top:4px}
+.rl{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 2px;border-top:1px solid var(--grid)}
+.rl .pad{width:38px;height:38px;border-radius:10px;background:var(--band);color:var(--muted);font-size:11.5px;font-weight:600;display:grid;place-items:center}
+.rl.cur .pad{background:var(--mint);color:#00234B}
+.rl .m{min-width:0;display:flex;flex-direction:column}
+.rl .m b{font-weight:600;color:var(--ink);font-size:13.5px;display:flex;align-items:center;gap:6px}
+.rl .m b em{font-style:normal;font-size:10.5px;font-weight:600;color:#00234B;background:var(--mint);border-radius:6px;padding:1px 6px}
+.rl .m small{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rl .v{font-weight:600;color:var(--ink);font-size:14px;white-space:nowrap}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -523,7 +565,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:17,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:18,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -1162,10 +1204,29 @@ function renderPanel(){
     if(tab==='ggd') h+=`<div class="sec"><div class="sec-h"><h3>Глубина — день</h3><div class="legend"><span><i style="background:var(--fact)"></i>факт</span><span><i style="background:var(--plan)"></i>ГТН</span><span><i style="background:var(--lks)"></i>ЛКС</span><span><i style="background:var(--st-npv);opacity:.5;height:9px"></i>НПВ</span></div></div><div class="chart" id="ggd"></div></div>
       <div class="facts"><div><span>Забуривание</span><b>${fmtDY(dateAt(w.spud))}</b></div><div><span>Сутки на скважине</span><b>${nf1(w.tNow)} из ${nf1(w.planS.end)}</b></div><div><span>К графику ГТН</span><b style="color:${lag>.3?'var(--bad)':lag<-.3?'var(--good)':'var(--ink)'}">${signed1(lag)} сут</b></div><div><span>ЛКС на скважину</span><b>${nf1(w.lksS.end)} сут</b></div><div><span>Прогноз окончания</span><b>${fmtDY(dateAt(rem))}</b></div><div><span>НПВ на скважине</span><b>${nf1(d3.sum(w.fact.segs.filter(g=>g.op.k==='N'&&g.t0<w.tNow),g=>Math.min(g.t1,w.tNow)-g.t0)*24)} ч</b></div></div><p class="note">ГГД и ГТН — демонстрационные, построены от фактического забоя на 10.10.26.</p>`;
     if(tab==='dyn') h+=dynHTML('wd');
-    if(tab==='rig'){const done=w.hist.filter(x=>x.t1>-365);
-      h+=`<div class="facts"><div><span>Буровая установка</span><b>${esc(w.rig)}</b></div><div><span>Грузоподъёмность</span><b>${w.cap} т</b></div><div style="grid-column:1/-1"><span>Ресурс оборуд.</span><b>${resHTML(w)}</b></div><div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><div><span>Заказчик</span><b>${esc(w.cust.n)}</b></div></div>
-        ${kpiHTML([{k:'Скважин за год',v:String(done.length),s:'сдано (демо)'},{k:'Проходка за год',v:nf0(metersW(w,-365,0))+' м',s:'план '+nf0(w.planDay*365)+' м'},{k:'НПВ за год',v:nf0(npvTime(w,-365,0)*24)+' ч',s:'демо'}])}
-        <div class="sec"><div class="sec-h"><h3>Скважины станка за год</h3><span>демо</span></div><div class="list">${done.slice().reverse().map(x=>`<div class="row" style="cursor:default"><span class="av" style="background:var(--muted)">${esc(x.pad).slice(0,4)}</span><span><div class="t">${esc(x.no)}</div><div class="s">${fmtDY(dateAt(x.t0))} – ${fmtDY(dateAt(x.t1))}</div></span><span class="r"><b>${nf0(x.T)} м</b>${nf1(x.fact.end)} сут</span></div>`).join('')}</div></div>`}
+    if(tab==='rig'){const done=w.hist.filter(x=>x.t1>-365), m365=metersW(w,-365,0), p365=w.planDay*365, pct=p365?m365/p365:0, npvH=npvTime(w,-365,0)*24;
+      const rl=w.res.l, rcol=`var(${RES[rl].v})`, mm=String(w.res.t).replace(/\s/g,'').match(/([\d,.]+)ч>([\d,.]+)/), rv=mm?[parseFloat(mm[1].replace(',','.')),parseFloat(mm[2].replace(',','.'))]:null;
+      const rp=rv&&rv[1]?rv[0]/rv[1]:null;
+      // путь станка за 12 месяцев
+      const segs=done.map(x=>({a:Math.max(-365,x.t0),b:x.t1,no:x.no,cur:false})).concat([{a:Math.max(-365,w.spud),b:0,no:'Скв. '+w.no,cur:true}]);
+      const X=t=>((t+365)/365*100).toFixed(2), months=d3.range(0,12).map(k=>{const d=new Date(SNAP.getFullYear(),SNAP.getMonth()-11+k,1); return {x:X(tOf(d)),l:MON[d.getMonth()]}}).filter(m=>m.x>=0);
+      const rows=[{no:'Скв. '+w.no,pad:w.pad,d0:dateAt(w.spud),d1:null,T:w.depth,days:w.tNow,cur:true}].concat(done.slice().reverse().map(x=>({no:/^скв/i.test(x.no)?x.no.replace(/^скв\./,'Скв.'):'Скв. '+x.no,pad:x.pad,d0:dateAt(x.t0),d1:dateAt(x.t1),T:x.T,days:x.fact.end,cur:false})));
+      const fmtR=d=>pad2(d.getDate())+'.'+pad2(d.getMonth()+1);
+      h+=`<div class="rigc">
+        <div class="rig-h"><span class="rig-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5 7 21.5M12 2.5l5 19M8.6 15h6.8M9.8 9.5h4.4M5 21.5h14"/></svg></span>
+          <div class="rig-n"><div class="eyebrow">Буровая установка</div><b>${esc(w.rig)}</b><span>грузоподъёмность ${w.cap} т</span></div></div>
+        <div class="rig-move"><div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><i aria-hidden="true">→</i><div><span>Сейчас</span><b>Скв. ${esc(w.no)}</b></div><i aria-hidden="true">→</i><div><span>Переедет на</span><b>${w.next?esc(w.next):'—'}</b>${w.nextNote?`<small>${esc(w.nextNote)}</small>`:''}</div></div>
+        <div class="rig-res" style="--rc:${rcol}"><div class="rr-h"><span class="dot"></span><b>Ресурс оборудования</b><em>${RES[rl].n}</em></div><div class="rr-t">${esc(w.res.t)}</div>
+          ${rp!=null?`<div class="rr-bar"><i style="width:${Math.min(100,rp/1.2*100)}%"></i><b style="left:${100/1.2}%"></b></div><div class="rr-s"><span>наработка ${nf0(rv[0])} ч</span><span>норма ${nf0(rv[1])} ч · ${Math.round(rp*100)} %</span></div>`:''}</div>
+      </div>
+      <div class="sec-h" style="margin-top:14px"><h3>За 12 месяцев</h3><span>демо</span></div>
+      <div class="rig-k"><div><span>Скважин</span><b>${done.length+1}</b><small>${done.length} сдано + текущая</small></div>
+        <div><span>Проходка</span><b>${nf0(m365)}<em> м</em></b><small class="${Math.round(pct*100)>=100?'dgoodc':'dbadc'}">${Math.round(pct*100)} % плана</small></div>
+        <div><span>НПВ</span><b>${nf0(npvH)}<em> ч</em></b><small>${nf1(npvH/24)} сут</small></div></div>
+      <div class="sec"><div class="sec-h"><h3>Путь станка</h3><span>скважины за 12 месяцев</span></div>
+        <div class="rig-tl">${segs.map((g,k)=>`<i class="${g.cur?'cur':k%2?'b':''}" style="left:${X(g.a)}%;width:${Math.max(.6,X(g.b)-X(g.a))}%" title="${esc(g.no)}"></i>`).join('')}</div>
+        <div class="rig-tm">${months.map(m=>`<span style="left:${m.x}%">${m.l}</span>`).join('')}</div>
+        <div class="rig-l">${rows.map(r=>`<div class="rl${r.cur?' cur':''}"><span class="pad">${esc(String(r.pad)).slice(0,4)}</span><span class="m"><b>${esc(r.no)}${r.cur?'<em>сейчас</em>':''}</b><small>${fmtR(r.d0)} – ${r.d1?fmtR(r.d1):'по н. в.'} · ${nf1(r.days)} сут</small></span><span class="v">${nf0(r.T)} м</span></div>`).join('')}</div></div>`}
     h+='</div>'; panel.innerHTML=h; bindGo(panel);
     panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{state.wtab=b.dataset.wt; renderPanel()});
     if(tab==='drill') stopWB=wellbore(document.getElementById('wbc'),w);
