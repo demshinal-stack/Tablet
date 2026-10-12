@@ -403,6 +403,15 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
 .wcard .spkrow span{color:var(--muted);font-size:12px}
 .wcard .spkrow b{font-weight:600;min-width:44px;text-align:right}
 
+.hbl{display:grid;gap:2px;margin:6px -8px 0}
+.hb{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"t pc" "b pc";column-gap:12px;row-gap:6px;align-items:center;padding:8px;border:0;background:none;border-radius:12px;text-align:left;cursor:pointer;width:100%}
+.hb:hover{background:var(--band)}
+.hb .t{grid-area:t;min-width:0;display:flex;align-items:baseline;gap:8px;white-space:nowrap;overflow:hidden}
+.hb .t b{font-weight:600;font-size:13.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+.hb .t small{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.hb .pc{grid-area:pc;font-weight:600;font-size:15px;text-align:right;min-width:62px}
+.hb .pc small{display:block;font-size:11px;font-weight:400;color:var(--muted);white-space:nowrap}
+.hb .dbar{grid-area:b}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -514,7 +523,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:16,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:17,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -946,17 +955,13 @@ function chartGGD(el,w,h=220){
   s.append('circle').attr('cx',x(w.tNow)).attr('cy',y(w.depth)).attr('r',5).style('fill','var(--fact)').style('stroke','var(--surface)').style('stroke-width',2);
   s.append('text').attr('x',Math.min(x(w.tNow)+8,W-70)).attr('y',y(w.depth)-8).style('fill','var(--ink)').style('font-weight',600).text(nf0(w.depth)+' м');
 }
-function hbars(el,rows){
-  el.innerHTML=''; const W=el.clientWidth||500, rh=30, m={l:Math.min(190,W*.36),r:70}, H=rows.length*rh+6;
-  const s=d3.select(el).append('svg').attr('viewBox',`0 0 ${W} ${H}`).attr('height',H);
-  const x=d3.scaleLinear().domain([0,(d3.max(rows,r=>Math.max(r.fact,r.plan))||1)*1.05]).range([m.l,W-m.r]);
-  rows.forEach((r,i)=>{const y=i*rh+4, g=s.append('g').style('cursor',r.go?'pointer':null).on('click',()=>r.go&&r.go());
-    g.append('rect').attr('x',0).attr('y',y-2).attr('width',W).attr('height',rh).style('fill','transparent');
-    g.append('text').attr('x',0).attr('y',y+15).style('fill','var(--ink)').style('font-size','12px').style('font-weight',600).text(r.label.length>28?r.label.slice(0,27)+'…':r.label);
-    g.append('rect').attr('x',m.l).attr('y',y+5).attr('width',Math.max(1,x(r.fact)-m.l)).attr('height',14).attr('rx',3).style('fill',r.plan&&r.fact<r.plan*.95?'var(--bad)':'var(--fact)');
-    g.append('line').attr('x1',x(r.plan)).attr('x2',x(r.plan)).attr('y1',y+1).attr('y2',y+23).style('stroke','var(--accent)').style('stroke-width',2.5);
-    const p=r.plan?Math.round(r.fact/r.plan*100):0; g.append('text').attr('x',W-m.r+8).attr('y',y+16).style('fill',p<95?'var(--bad)':'var(--good)').style('font-size','12px').style('font-weight',600).text(p+' %')});
-}
+function hbars(el,rows){ /* строки «факт к плану» в том же виде, что шкалы проходки: подпись сверху, полоса снизу, процент справа */
+  const mx=(d3.max(rows,r=>Math.max(r.fact,r.plan))||1)*1.08;
+  el.innerHTML='<div class="hbl">'+rows.map((r,i)=>{const p=r.plan?Math.round(r.fact/r.plan*100):0, ok=p>=100;
+    return `<button type="button" class="hb" data-i="${i}"><span class="t"><b>${esc(r.label)}</b>${r.sub?`<small>${esc(r.sub)}</small>`:''}</span>
+      <span class="pc ${ok?'dgoodc':'dbadc'}">${p} %<small>${nf0(r.fact)} из ${nf0(r.plan)} м</small></span>
+      <span class="dbar"><i style="width:${Math.min(100,r.fact/mx*100)}%"></i><b style="left:${Math.min(100,r.plan/mx*100)}%"></b></span></button>`}).join('')+'</div>';
+  el.querySelectorAll('.hb').forEach(b=>{const r=rows[+b.dataset.i]; if(r.go) b.onclick=()=>r.go(); else b.style.cursor='default'})}
 
 /* ======================= анимация ствола ======================= */
 function wellbore(canvas,w){
@@ -1050,7 +1055,7 @@ function cumChart(el,ws,per,vd,csEl){const P=cumPeriod(per), rate=d3.sum(ws,w=>w
   const xs=[0], cf=[0], cp=[0]; pts.forEach(q=>{xs.push(q.b-P.a0); cf.push(cf.at(-1)+q.f); cp.push(cp.at(-1)+q.p)});
   const n=pts.length, e=-P.a0, F=cf[n], planEnd=rate*P.L, open=e<P.L-1e-6, fc=open&&e>0?F/e*P.L:F;
   if(csEl) csEl.textContent=P.sub;
-  const W=Math.max(260,el.clientWidth||340), H=W<420?190:210, l=46, r=10, t=16, bt=22;
+  const W=Math.max(260,el.clientWidth||340), H=W<420?196:216, l=46, r=10, t=24, bt=22;
   const ymax=Math.max(planEnd,fc,F,1)*1.07, X=x=>l+x/P.L*(W-l-r), Y=v=>t+(H-t-bt)*(1-v/ymax);
   const nice=d3.ticks(0,ymax,4);
   let g=nice.map(v=>`<line x1="${l}" x2="${W-r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--grid)"/><text x="${l-6}" y="${Y(v)+4}" font-size="11" fill="var(--muted)" text-anchor="end">${v>=1e6?nf1(v/1e6)+' млн':v>=1000?nf0(v/1000)+' тыс':v}</text>`).join('');
@@ -1063,9 +1068,13 @@ function cumChart(el,ws,per,vd,csEl){const P=cumPeriod(per), rate=d3.sum(ws,w=>w
     ${open?`<line x1="${ex}" y1="${ey}" x2="${X(P.L)}" y2="${Y(fc)}" stroke="var(--fact)" stroke-width="1.8" stroke-dasharray="1.5 4" stroke-linecap="round"/>`:''}
     <polyline points="${xs.map((x,i)=>X(x)+','+Y(cf[i])).join(' ')}" fill="none" stroke="var(--fact)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/>
     <circle cx="${ex}" cy="${ey}" r="5" fill="var(--fact)" stroke="var(--surface)" stroke-width="2.5"/>
-    ${open?`<text x="${W-r}" y="${Y(planEnd)-7}" font-size="11.5" fill="var(--plan)" text-anchor="end" font-weight="600">план ${nf0(planEnd)}</text>
-    <text x="${W-r}" y="${left?Y(fc)+(fc<planEnd?22:-8):Math.max(Y(fc),ey)+24}" font-size="11.5" fill="var(--fact)" text-anchor="end" font-weight="600">прогноз ${nf0(fc)}</text>`:''}
-    <text x="${left?ex+8:(open?W-r:ex-8)}" y="${ey+(left?22:(open?42:24))}" font-size="11.5" font-weight="600" fill="var(${behind?'--bad':'--good'})" text-anchor="${left?'start':'end'}">${signed0(F-cp[n])} м к плану</text>
+    ${open?(()=>{/* подписи у правого края: план и прогноз, без наложения — выше та линия, что выше */
+      const top=t+10, bot=H-bt-6; let yp=Y(planEnd), yf=Y(fc); const up=fc>=planEnd;
+      let a1=(up?yf:yp)-8, a2=(up?yp:yf)+16; if(a2-a1<15) a2=a1+15; a1=Math.max(top,a1); if(a2-a1<15) a2=a1+15; a2=Math.min(bot,a2);
+      const yF=up?a1:a2, yP=up?a2:a1;
+      return `<text x="${W-r}" y="${yP}" font-size="11.5" fill="var(--plan)" text-anchor="end" font-weight="600" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round">план ${nf0(planEnd)}</text>
+      <text x="${W-r}" y="${yF}" font-size="11.5" fill="var(--fact)" text-anchor="end" font-weight="600" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round">прогноз ${nf0(fc)}</text>`})():''}
+    <text x="${left?ex+8:(open?W-r:ex-8)}" y="${ey+(left?22:(open?42:24))}" font-size="11.5" font-weight="600" paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round" fill="var(${behind?'--bad':'--good'})" text-anchor="${left?'start':'end'}">${signed0(F-cp[n])} м к плану</text>
     <line class="hx" y1="${t}" y2="${H-bt}" stroke="var(--muted)" stroke-dasharray="2 3" opacity="0"/><circle class="hd" r="4" fill="var(--fact)" stroke="var(--surface)" stroke-width="2" opacity="0"/>
     <rect class="hit" x="${l}" y="${t}" width="${W-l-r}" height="${H-t-bt}" fill="transparent"/></svg><div class="ctip"></div>`;
   el.innerHTML=svg;
@@ -1137,7 +1146,7 @@ function renderPanel(){
       <div class="sec"><div class="sec-h"><h3>Скважины: факт к плану</h3><span id="cbh"></span></div><div class="chart" id="cbars"></div></div>
       <div class="sec"><div class="sec-h"><h3>Скважины заказчика</h3><span>${ws.length}</span></div><div class="cards">${ws.map(wCard).join('')}</div></div></div>`;
     panel.innerHTML=h; bindGo(panel); bindW(panel); const af=document.getElementById('allF'); if(af) af.onclick=()=>go({level:'cust',field:null,well:null});
-    const hb=()=>{document.getElementById('cbh').textContent=PER[state.per].n.toLowerCase()+' · нажмите строку'; hbars(document.getElementById('cbars'),ws.map(w=>{const t=totals([w],state.per); return {label:'Скв. '+w.no+' · '+w.field.n,fact:t.fact,plan:t.plan,go:()=>go({level:'well',well:w.id,field:state.field||w.field.id})}}))};
+    const hb=()=>{document.getElementById('cbh').textContent=PER[state.per].n.toLowerCase()+' · нажмите строку'; hbars(document.getElementById('cbars'),ws.map(w=>{const t=totals([w],state.per); return {label:'Скв. '+w.no,sub:(state.field?'':w.field.n+' · ')+w.rig,fact:t.fact,plan:t.plan,go:()=>go({level:'well',well:w.id,field:state.field||w.field.id})}}))};
     dynBind('cd',ws,hb); return;
   }
   if(lev==='well'){
