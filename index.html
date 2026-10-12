@@ -606,6 +606,7 @@ button.np-tr{cursor:pointer} .np-tr.h{font-size:10.5px;color:var(--muted);border
 .np-ops{width:100%;border-collapse:collapse;font-size:12px} .np-ops th{color:var(--muted);font-weight:500;text-align:left;padding:5px 4px;border-bottom:1px solid var(--line)} .np-ops td{padding:6px 4px;border-bottom:1px solid var(--grid);vertical-align:top;color:var(--body)} .np-ops td.n{color:var(--bad)}
 .np-ops td,.np-ops th{text-align:left} .np-ops td:last-child,.np-ops th:last-child{text-align:right}
 .np-p{margin:0;font-size:13px}
+@media (max-width:900px), (orientation:landscape) and (max-height:600px){.np-b[data-nb]{display:none}}
 /* ===== режим карты: карта — фон на весь экран, интерфейс плавает поверх ===== */
 body.mode-map .app{background:transparent;pointer-events:none;display:grid;overflow:hidden;padding-bottom:0}
 body.mode-map .app>.top{pointer-events:auto;position:relative;z-index:10;background:color-mix(in srgb,var(--chrome) 90%,transparent);-webkit-backdrop-filter:saturate(140%) blur(16px);backdrop-filter:saturate(140%) blur(16px)}
@@ -721,7 +722,7 @@ body.mode-map .scalebar{bottom:calc(12px + var(--insB,0px));right:calc(12px + va
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:28,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:29,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -914,13 +915,13 @@ function go(patch,noPush){ if(!noPush) hist.push({...state}); if(patch.level==='
   if(state.level==='well'){const w=WELLS.find(x=>x.id===state.well); if(state.cust&&state.cust!==w.cust.id) state.cust=null; state.field=w.field.id; if(!patch.wtab) state.wtab='drill'}
   if(state.level==='cust'&&state.field){const c=CUSTOMERS.find(x=>x.id===state.cust); if(!c.wells.some(w=>w.field.id===state.field)) state.field=null}
   refresh(true)}
-const goBack=()=>{const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
+const goBack=()=>{const P=document.getElementById('npanel'); if(P&&!P.hidden){nBack(); return} const p=hist.pop(); if(!p) return; state=p; setTabs(); refresh(true)};
 document.getElementById('back').onclick=goBack; document.getElementById('scrBack').onclick=goBack;
 function setTabs(){[['scrMap','map'],['scrStats','stats'],['scrProf','profile']].forEach(([id,s])=>document.getElementById(id).setAttribute('aria-selected',state.screen===s))}
-function setScreen(s){state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
+function setScreen(s){if(typeof nClose==='function') nClose(); state.screen=s; setTabs(); refresh(s==='map'); document.querySelector('.app').scrollTop=0}
 document.getElementById('scrMap').onclick=()=>setScreen('map'); document.getElementById('scrStats').onclick=()=>setScreen('stats'); document.getElementById('scrProf').onclick=()=>setScreen('profile');
 function refresh(fit){
-  renderSync(); document.getElementById('back').disabled=!hist.length; document.body.classList.toggle('has-back',hist.length>0);
+  renderSync(); document.getElementById('back').disabled=!hist.length; updBack();
   syncFilters(); renderCrumbs();
   const scr=state.screen, isMap=scr==='map';
   document.getElementById('main').classList.toggle('stats',!isMap);
@@ -1748,14 +1749,16 @@ function nItems(){const out=[];
   }
   if(NFIRST){out.filter(i=>i.d>0).forEach(i=>NST.r[i.id]=1); NFIRST=false; nSave()}
   return out}
-let NITEMS=[], NV={scr:'feed',d:0,cut:'f',w:null};
+let NITEMS=[], NV={scr:'feed',d:0,cut:'f',w:null}, NSTK=[];
 const unread=()=>NITEMS.filter(i=>!NST.r[i.id]).length;
 function renderBell(){NITEMS=nItems(); const n=unread(), e=document.getElementById('bellN'); if(e){e.hidden=!n; e.textContent=n>99?'99+':n}
   const b=document.getElementById('bellBtn'); if(b) b.setAttribute('aria-label','Уведомления'+(n?', непрочитанных: '+n:''));
   try{if(PREFS.nPush&&'setAppBadge' in navigator){n?navigator.setAppBadge(n):navigator.clearAppBadge()} else if('clearAppBadge' in navigator) navigator.clearAppBadge()}catch(err){}
   const P=document.getElementById('npanel'); if(P&&!P.hidden) nRender()}
-function nOpen(scr,extra){Object.assign(NV,{scr:scr||'feed'},extra||{}); document.getElementById('npanel').hidden=false; document.getElementById('syncPop').hidden=true; nRender()}
-function nClose(){document.getElementById('npanel').hidden=true}
+function nOpen(scr,extra){const P=document.getElementById('npanel'); if(P.hidden) NSTK=[]; else if((scr||'feed')!==NV.scr) NSTK.push({...NV}); Object.assign(NV,{scr:scr||'feed'},extra||{}); P.hidden=false; updBack(); document.getElementById('syncPop').hidden=true; nRender()}
+function nClose(){document.getElementById('npanel').hidden=true; NSTK=[]; updBack()}
+function nBack(){if(NSTK.length){Object.assign(NV,NSTK.pop()); nRender()} else nClose()}
+function updBack(){const P=document.getElementById('npanel'); document.body.classList.toggle('has-back',hist.length>0||(P&&!P.hidden))}
 function nRead(id){if(!NST.r[id]){NST.r[id]=1; nSave(); renderBell()}}
 function nAct(it){nRead(it.id); if(it.kind==='sum') nOpen('sum',{d:it.d}); else if(it.kind==='well') nOpen('well',{w:it.w.id,d:it.d}); else if(it.kind==='res'){nClose(); F.res=true; if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'fields',field:null,cust:null,well:null})}}
 const NAVH=(t,sub,back)=>`<div class="np-nav">${back?`<button type="button" class="np-b" data-nb="${back}" aria-label="Назад">‹</button>`:''}<div class="np-t"><b>${t}</b>${sub?`<small>${sub}</small>`:''}</div>${back?'':`<button type="button" class="np-all" id="npAll">Прочитать все</button>`}<button type="button" class="np-b" data-nx aria-label="Закрыть">×</button></div>`;
@@ -1789,11 +1792,11 @@ function nWell(){const w=WELLS.find(x=>x.id===NV.w), S=daySum(NV.d,[w]), a=S.a,b
    <div class="np-g">План на следующие сутки</div><p class="np-p">${nxt.length?nxt.map(esc).join('. ')+'.':'Окончание строительства скважины.'}</p>
    <button type="button" class="btn2" data-ngo="${w.id}" style="margin-top:8px">Открыть скважину</button>`}
 function nRender(){const el=document.getElementById('npin'); el.innerHTML=NV.scr==='sum'?nSum():NV.scr==='well'?nWell():nFeed(); el.scrollTop=0;
-  el.querySelectorAll('[data-nx]').forEach(b=>b.onclick=nClose); el.querySelectorAll('[data-nb]').forEach(b=>b.onclick=()=>{NV.scr=b.dataset.nb; nRender()});
+  el.querySelectorAll('[data-nx]').forEach(b=>b.onclick=nClose); el.querySelectorAll('[data-nb]').forEach(b=>b.onclick=nBack);
   const all=el.querySelector('#npAll'); if(all) all.onclick=()=>{NITEMS.forEach(i=>NST.r[i.id]=1); nSave(); renderBell(); nRender()};
   el.querySelectorAll('[data-ni]').forEach(b=>b.onclick=()=>nAct(NITEMS.find(i=>i.id===b.dataset.ni)));
   el.querySelectorAll('[data-nc]').forEach(b=>b.onclick=()=>{NV.cut=b.dataset.nc; const t=el.scrollTop; nRender(); el.scrollTop=t});
-  el.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{NV.w=b.dataset.nw; NV.scr='well'; nRender()});
+  el.querySelectorAll('[data-nw]').forEach(b=>b.onclick=()=>{NSTK.push({...NV}); NV.w=b.dataset.nw; NV.scr='well'; nRender()});
   el.querySelectorAll('[data-ngo]').forEach(b=>b.onclick=()=>{const w=WELLS.find(x=>x.id===b.dataset.ngo); nClose(); if(state.screen!=='map'){state.screen='map'; setTabs()} go({level:'well',well:w.id,field:w.field.id,cust:null})})}
 document.getElementById('bellBtn').onclick=e=>{e.stopPropagation(); const P=document.getElementById('npanel'); if(P.hidden) nOpen('feed'); else nClose()};
 /* системные уведомления: при открытии приложения, если включено в «Профиле» */
@@ -1808,7 +1811,7 @@ function nNotifySystem(force){if(!PREFS.nPush||!('Notification' in window)||Noti
   fresh.forEach(i=>NST.p[i.id]=1); nSave()}
 function nOpenById(id){const it=NITEMS.find(i=>i.id===id); if(it) nAct(it); else nOpen('feed')}
 if(navigator.serviceWorker) navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.type==='pulse-open') nOpenById(e.data.id)});
-document.addEventListener('pointerdown',e=>{const P=document.getElementById('npanel'); if(P&&!P.hidden&&!e.target.closest('#npanel')&&!e.target.closest('#bellBtn')) nClose()});
+document.addEventListener('pointerdown',e=>{const P=document.getElementById('npanel'); if(P&&!P.hidden&&!e.target.closest('#npanel')&&!e.target.closest('#bellBtn')&&!e.target.closest('#scrBack')) nClose()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape') nClose()});
 
 /* ======================= старт ======================= */
