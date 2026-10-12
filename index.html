@@ -14,6 +14,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap">
 <script src="./vendor/d3.min.js"></script>
+<script>
+/* iPad: высота приложения = наименьшая из всех оценок высоты окна (innerHeight, visualViewport, 100lvh/100dvh/100svh, сторона экрана).
+   На iPadOS (особенно с экрана «Домой») часть из них больше реального окна — нижнее меню уходило за край. */
+(function(){var d=document.documentElement,ua=navigator.userAgent;
+ var ipad=/iPad/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1);
+ if(!ipad)return; d.classList.add('ipad'); var last=0,pr=null;
+ function probe(u){if(!document.body)return 0;if(!pr){pr=document.createElement('div');pr.style.cssText='position:absolute;left:-9999px;top:0;width:1px;visibility:hidden;pointer-events:none';document.body.appendChild(pr)}
+   pr.style.height='100'+u;var h=pr.getBoundingClientRect().height;return h>0?h:0}
+ function typing(){var e=document.activeElement;return e&&/^(INPUT|TEXTAREA|SELECT)$/.test(e.tagName)}
+ function measure(){var land=matchMedia('(orientation: landscape)').matches,sw=screen.width,sh=screen.height;
+   var scr=land?Math.min(sw,sh):Math.max(sw,sh); var vv=window.visualViewport;
+   var c={ih:innerHeight,vv:(vv&&!typing())?Math.round(vv.height):0,lvh:probe('lvh'),dvh:probe('dvh'),svh:probe('svh'),scr:scr};
+   var h=Infinity;for(var k in c){var v=c[k];if(v&&v>200&&v<h)h=v}
+   if(!isFinite(h))h=innerHeight; c.H=Math.floor(h); window.__vp=c; return c.H}
+ function set(){var h=measure();if(!h||h===last)return false;last=h;d.style.setProperty('--appH',h+'px');return true}
+ function later(){[0,80,250,600,1200].forEach(function(t){setTimeout(function(){if(set())window.dispatchEvent(new Event('resize'))},t)})}
+ set(); document.addEventListener('DOMContentLoaded',later); addEventListener('load',later);
+ addEventListener('resize',set); addEventListener('orientationchange',later); addEventListener('pageshow',later);
+ window.visualViewport&&visualViewport.addEventListener('resize',function(){if(set())window.dispatchEvent(new Event('resize'))});
+ document.addEventListener('visibilitychange',function(){if(!document.hidden)later()});
+})();
+</script>
 <meta name="description" content="Пульс 2 — планшет руководителя ЭНГС: месторождения, заказчики и скважины в бурении, проходка факт/план, ГГД.">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
@@ -1014,6 +1036,13 @@ body.mode-rep .top .crumbs{display:none!important}
 /* тёмная тема: «Глубокий синий» — темнее и приглушённее */
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#050C17;--surface:#0C1A2E;--chrome:#081323;--band:#10223A;--line:#1E3350;--grid:#12253F;--land:#0C1C33;--land-2:#0A1729;--sea:#040A14;--yanao:#12263F;--field:#0F3646;--water:#12304F;--water-ln:#2C5684;--grat:#10223A;--muted:#97A9C2;--body:#D4DDEA;--c1:#4A6690;--c2:#253D5E;--chrome-line:#1E3350;--pale:#10223A;--chrome-mut:#97A9C2;--other:#253D5E;--t4:#253D5E;--r-none:#3D5375}}
 :root[data-theme="dark"]{--bg:#050C17;--surface:#0C1A2E;--chrome:#081323;--band:#10223A;--line:#1E3350;--grid:#12253F;--land:#0C1C33;--land-2:#0A1729;--sea:#040A14;--yanao:#12263F;--field:#0F3646;--water:#12304F;--water-ln:#2C5684;--grat:#10223A;--muted:#97A9C2;--body:#D4DDEA;--c1:#4A6690;--c2:#253D5E;--chrome-line:#1E3350;--pale:#10223A;--chrome-mut:#97A9C2;--other:#253D5E;--t4:#253D5E;--r-none:#3D5375}
+
+/* iPad: вся раскладка — в высоту реального окна */
+html.ipad,html.ipad body{height:var(--appH,100dvh)!important;min-height:0!important;max-height:var(--appH,100dvh)}
+
+/* iPad: body — опора для всех fixed-слоёв (меню, шторки), чтобы они считались от реальной высоты */
+html.ipad{position:absolute!important;top:0;left:0;width:100%;overflow:hidden}
+html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidden;transform:translateZ(0)}
 </style>
 </head>
 <body>
@@ -1077,7 +1106,7 @@ body.mode-rep .top .crumbs{display:none!important}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:58,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:60,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2268,7 +2297,7 @@ function renderProfile(){
       <div class="prow"><span class="l">История проходки, план, ГТН<small>до подключения к ГТИ и суточным рапортам</small></span><span class="note">демо</span></div>
       <div class="prow"><span class="l">Сбросить настройки</span><button type="button" class="btn2" id="pReset">Сбросить</button></div></div>
     <div class="pbox"><h3>О приложении</h3>
-      <div class="about"><img src="icons/icon-180.png" alt="" onerror="this.remove()"><div><div style="font-family:var(--f-display);font-size:17px;color:var(--ink)">${APP.name}</div><div class="note">Версия ${APP.version} · сборка ${APP.build} · ${APP.date}</div><div class="note">Demshin_lab для ЭНГС</div></div></div>
+      <div class="about"><img src="icons/icon-180.png" alt="" onerror="this.remove()"><div><div style="font-family:var(--f-display);font-size:17px;color:var(--ink)">${APP.name}</div><div class="note">Версия ${APP.version} · сборка ${APP.build} · ${APP.date}</div>${window.__vp?`<div class="note" style="font-size:11px;opacity:.75">iPad: экран ${screen.width}×${screen.height} · окно ${innerWidth}×${__vp.ih} · vv ${__vp.vv} · lvh ${Math.round(__vp.lvh)} · dvh ${Math.round(__vp.dvh)} · svh ${Math.round(__vp.svh)} → ${__vp.H}</div>`:''}<div class="note">Demshin_lab для ЭНГС</div></div></div>
       <div class="prow"><span class="l">Обновления<small id="updS">${'serviceWorker' in navigator&&location.protocol.startsWith('http')&&!location.hostname.endsWith('claude.ai')?'проверяются при каждом открытии':'доступны после установки на экран «Домой»'}</small></span><button type="button" class="btn2" id="pUpd">Проверить</button></div>
       <p class="note" style="margin:0">Установка на iPhone и iPad: откройте адрес приложения в Safari → «Поделиться» → «На экран „Домой“». На компьютере: Chrome или Edge → значок установки в адресной строке.</p></div>
   </div>`;
