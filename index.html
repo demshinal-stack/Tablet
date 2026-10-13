@@ -1068,6 +1068,14 @@ html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidd
 @media (max-width:900px) and (orientation:portrait){
   body.mode-rep .app>.top{position:sticky;top:0;z-index:60}
 }
+
+/* горизонтальный телефон, отчёты: ровные поля 16 pt слева / между / справа, карточки на всю ширину, шапка по краю карточек */
+@media (orientation:landscape) and (max-height:600px){
+  body.mode-rep .app{padding-right:0!important}
+  body.mode-rep #main{padding-left:16px!important;padding-right:16px!important}
+  body.mode-rep #repwrap{padding-inline:0!important}
+  body.mode-rep .app>.top{margin-right:0!important;padding-right:16px!important}
+}
 </style>
 </head>
 <body>
@@ -1131,7 +1139,7 @@ html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidd
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:63,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:64,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
@@ -2606,6 +2614,7 @@ function tile(I,wide){const ps=CMP(), v=I.v, cur=val(v,ps[2]); let sub='', ch;
 
 const host=document.getElementById('repwrap'), shadow=host.attachShadow({mode:'open'}), root=shadow;
 const RCSS=`:host([hidden]){display:none!important}
+@media (orientation:landscape) and (max-height:600px){.tiles{gap:16px!important}}
 :host{display:block;color:var(--body);font-family:var(--f-body);font-size:14px;line-height:1.4;font-variant-numeric:tabular-nums}
 
 /* Макет: телефон (лента плиток) и планшет (все плитки на одном экране); цвета по позиции периода в сравнении */
