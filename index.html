@@ -1043,6 +1043,31 @@ html.ipad,html.ipad body{height:var(--appH,100dvh)!important;min-height:0!import
 /* iPad: body — опора для всех fixed-слоёв (меню, шторки), чтобы они считались от реальной высоты */
 html.ipad{position:absolute!important;top:0;left:0;width:100%;overflow:hidden}
 html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidden;transform:translateZ(0)}
+
+/* вертикально: «Отчётность · 2026» — второй строкой шапки, легенда периодов справа */
+@media (max-width:900px) and (orientation:portrait){
+  body.mode-rep .app>.top{flex-wrap:wrap!important;row-gap:4px;padding-bottom:8px}
+  body.mode-rep .rephead{order:10;flex:1 0 100%;margin-left:0;gap:10px}
+  body.mode-rep .rephead b{display:inline;font-size:16px}
+  body.mode-rep .top .bell{margin-left:auto}
+}
+
+/* горизонтальный телефон: профиль снова в шапке справа, в боковом меню его нет */
+@media (orientation:landscape) and (max-height:600px){
+  .top .hava{display:grid!important}
+  .tabbar .rprof{display:none!important}
+}
+/* горизонтально: «Отчётность · 2026» в потоке шапки между переключателем и легендой — не перекрывается и не пропадает */
+@media (orientation:landscape){
+  body.mode-rep .rephead{flex:1 1 auto;min-width:0;gap:12px}
+  body.mode-rep .rephead b{display:block!important;position:static!important;transform:none!important;max-width:none!important;margin-inline:auto;flex:0 1 auto;min-width:0;text-align:center}
+  body.mode-rep .rephead .rlg{margin-left:0}
+}
+
+/* вертикально на телефоне: шапка отчётов закреплена при пролистывании */
+@media (max-width:900px) and (orientation:portrait){
+  body.mode-rep .app>.top{position:sticky;top:0;z-index:60}
+}
 </style>
 </head>
 <body>
@@ -1106,7 +1131,7 @@ html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidd
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:60,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:63,date:'12.10.2026'};
 (function(){
 /* ======================= ДАННЫЕ (снимок 10.10.26) ======================= */
 const GROUPS=[{n:'Газпром нефть',cust:['zap','yamal','mer'],c:'#CFF5F0'},{n:'НОВАТЭК',cust:['arc','yur','tar','spg'],c:'#DCE6F1'},{n:'Прочие',cust:['nort','rospan'],c:'#2E5E63',dark:1}];
