@@ -15,6 +15,17 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@400;500;600&display=swap">
 <script src="./vendor/d3.min.js"></script>
 <script>
+/* ===== диагностика: ловим ошибки с самого начала ===== */
+window.__diag={err:[],tap:[]};
+(function(){const add=(m)=>{const d=window.__diag; d.err.unshift({t:new Date().toLocaleTimeString('ru-RU'),m:String(m).slice(0,300)}); d.err.length=Math.min(d.err.length,12);
+    try{let b=document.getElementById('diagT'); if(!b){b=document.createElement('div'); b.id='diagT'; b.setAttribute('role','alert'); b.style.cssText='position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 90px);z-index:99999;background:#7A1E24;color:#fff;font:500 12.5px/1.35 system-ui,sans-serif;padding:10px 12px;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.35)'; b.onclick=()=>b.remove(); document.body.appendChild(b)}
+      b.textContent='Ошибка (нажмите, чтобы скрыть): '+m}catch(e){}};
+  addEventListener('error',e=>add((e.message||'ошибка')+(e.lineno?' · стр. '+e.lineno+':'+e.colno:'')));
+  addEventListener('unhandledrejection',e=>add('promise: '+((e.reason&&(e.reason.message||e.reason))||'')));
+  addEventListener('click',e=>{try{const m=document.getElementById('map'); if(!m||!m.contains(e.target)) return; const d=window.__diag, g=e.target.closest&&e.target.closest('g[class]');
+    d.tap.unshift(new Date().toLocaleTimeString('ru-RU')+' click '+(e.isTrusted?'системный':'наш')+' → '+(g?g.getAttribute('class'):e.target.tagName)); d.tap.length=Math.min(d.tap.length,10)}catch(x){}},true);
+  window.__diagAdd=add})();
+</script><script>
 /* iPad: высота приложения = наименьшая из всех оценок высоты окна (innerHeight, visualViewport, 100lvh/100dvh/100svh, сторона экрана).
    На iPadOS (особенно с экрана «Домой») часть из них больше реального окна — нижнее меню уходило за край. */
 (function(){var d=document.documentElement,ua=navigator.userAgent;
@@ -1213,7 +1224,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:83,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:86,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -1234,7 +1245,8 @@ const PulseRepo=(()=>{
   const by=k=>(a,b)=>a[k]-b[k];
   const put=(o,k,v)=>{if(v!==null&&v!==undefined) o[k]=v; return o};
   const flag=(o,k,v)=>{if(v) o[k]=1; return o};
-  const ms=s=>Date.parse(s+(/Z|[+-]\d\d:\d\d$/.test(s)?'':'Z'));   /* метки без пояса — арифметика в UTC, без зависимости от устройства */
+  /* метки без пояса — арифметика в UTC, без зависимости от устройства. Строго по ISO: Safari не понимает «2026-10-12Z» */
+  const ms=v=>{let s=String(v); if(/^\d{4}-\d\d-\d\d$/.test(s)) s+='T00:00:00'; if(!/(Z|[+-]\d\d:\d\d)$/.test(s)) s+='Z'; const t=Date.parse(s); if(!isFinite(t)) throw new Error('Неверная дата в базе: '+v); return t};
   const sumBy=(a,f)=>a.reduce((s,x)=>s+(f(x)||0),0);
   const g0=(a,k)=>{const m=new Map(); a.forEach(x=>{const v=x[k]; m.has(v)?m.get(v).push(x):m.set(v,[x])}); return m};
 
@@ -2536,6 +2548,13 @@ function applyTheme(){const r=document.documentElement; if(PREFS.theme==='system
 function initials(n){const p=(n||'').trim().split(/\s+/).filter(Boolean); return p.length?(p[0][0]+(p[1]?p[1][0]:'')).toUpperCase():'ЭН'}
 
 
+
+/* ===== профиль: диагностика ===== */
+function diagWire(){const el=document.getElementById('diagSt'); if(!el) return; const d=window.__diag||{err:[],tap:[]};
+  el.innerHTML=`<p class="note" style="margin:0 0 6px">Сборка ${APP.build} · ${esc(navigator.userAgent.replace(/.*(iPhone OS|CPU OS|Android|Mac OS X|Windows NT)\s?([\d_\.]+).*/,'$1 $2'))}</p>`+
+   `<p class="note" style="margin:0"><b>Ошибки:</b> ${d.err.length?d.err.map(x=>esc(x.t+' — '+x.m)).join('<br>'):'нет'}</p>`+
+   `<p class="note" style="margin:6px 0 0"><b>Касания карты:</b> ${d.tap.length?d.tap.map(x=>esc(x)).join('<br>'):'нет'}</p>`}
+const _dgRP=renderProfile; renderProfile=function(){_dgRP.apply(this,arguments); diagWire()};
 /* ======================= Профиль: база данных ======================= */
 const fmtMB=b=>(b/1048576).toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1})+' МБ';
 async function dbWire(){const st=document.getElementById('dbSt'); if(!st) return;
@@ -2631,6 +2650,7 @@ function renderProfile(){
     <div class="pbox"><h3>Данные и экраны</h3>
       <div class="prow"><span class="l">Период по умолчанию<small>для динамики и статистики</small></span>${seg('per',[['day','Сутки'],['month','Месяц'],['year','Год']])}</div>
       <div class="prow"><span class="l">Стартовый экран</span>${seg('start',[['map','Карта'],['stats','Сводка']])}</div></div>
+    <div class="pbox" id="diagbox"><h3>Диагностика</h3><div id="diagSt"></div></div>
     <div class="pbox" id="dbbox"><h3>База данных</h3><div id="dbSt"><p class="note" style="margin:0">…</p></div></div>
     <div class="pbox" id="offbox"><h3>Работа без сети</h3>
       <div class="prow"><span class="l">Хранить данные на устройстве<small>карта, сводка, отчёты, справочники и шрифты открываются без интернета</small></span><button type="button" class="sw" role="switch" id="offSw" aria-checked="${!!PREFS.offline}" aria-label="Хранить данные на устройстве"></button></div>
@@ -3441,16 +3461,27 @@ const PulseAnimRep=(()=>{
 
 
 /* ======================= Карта: надёжное касание на сенсорных экранах ======================= */
-(function(){const svg=document.getElementById('map'); if(!svg) return; let st=null, last=0;
-  svg.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse') return; st=e.isPrimary?{x:e.clientX,y:e.clientY,t:Date.now(),el:e.target,id:e.pointerId}:null},true);
-  svg.addEventListener('pointercancel',()=>{st=null},true);
-  svg.addEventListener('pointerup',e=>{const s=st; st=null; if(!s||e.pointerType==='mouse'||e.pointerId!==s.id) return;
-    if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>12||Date.now()-s.t>700) return;
-    let n=s.el; while(n&&n!==svg){if(n.__on&&n.__on.some(o=>o.type==='click')) break; n=n.parentNode}
-    if(!n||n===svg) return; last=Date.now();
-    n.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY}))},true);
-  /* настоящий click, если он всё же придёт следом, не должен сработать второй раз */
-  svg.addEventListener('click',e=>{if(e.isTrusted&&Date.now()-last<800){e.stopPropagation(); e.preventDefault()}},true);
+/* Касание распознаём сами — и по событиям указателя, и по событиям касания (что придёт первым).
+   Слушаем на уровне окна в фазе перехвата, чтобы жесты карты (d3-zoom) не могли их остановить.
+   После распознанного касания системный click подавляется везде, чтобы он не сработал по новому экрану. */
+(function(){let st=null, last=0, lx=0, ly=0;
+  const svg=()=>document.getElementById('map');
+  const startAt=(x,y,id,src)=>{const s=svg(); if(!s) return; const el=document.elementFromPoint(x,y); st=el&&s.contains(el)?{x,y,t:Date.now(),el,id,src}:null};
+  const endAt=(x,y,id,src,ev)=>{const s0=st; if(!s0||s0.src!==src||s0.id!==id) return; st=null;
+    if(Math.hypot(x-s0.x,y-s0.y)>12||Date.now()-s0.t>700) return;
+    if(Date.now()-last<400){if(ev&&ev.cancelable) ev.preventDefault(); return}            // уже обработано другим типом событий
+    const s=svg(); let n=s0.el; while(n&&n!==s){if(n.__on&&n.__on.some(o=>o.type==='click')) break; n=n.parentNode}
+    const lg=m=>{try{const d=window.__diag; d.tap.unshift(new Date().toLocaleTimeString('ru-RU')+' '+src+' '+m); d.tap.length=Math.min(d.tap.length,10)}catch(e){}};
+    if(!n||n===s){lg('мимо: '+(s0.el.tagName||'')+'.'+(s0.el.getAttribute&&s0.el.getAttribute('class')||'')); return} last=Date.now(); lx=x; ly=y; if(ev&&ev.cancelable) ev.preventDefault();
+    const lv0=(window.__app&&__app.state().level)||''; try{n.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:x,clientY:y}))}catch(e){lg('ошибка '+e.message)}
+    setTimeout(()=>lg((n.getAttribute('class')||n.tagName)+' '+(n.__data__&&n.__data__.no?'скв. '+n.__data__.no:'')+': '+lv0+' → '+((window.__app&&__app.state().level)||'?')),60)};
+  addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'&&e.isPrimary) startAt(e.clientX,e.clientY,e.pointerId,'p')},true);
+  addEventListener('pointerup',e=>{if(e.pointerType!=='mouse') endAt(e.clientX,e.clientY,e.pointerId,'p',null)},true);
+  addEventListener('touchstart',e=>{if(e.touches.length===1){const t=e.changedTouches[0]; if(!st||st.src!=='p') startAt(t.clientX,t.clientY,t.identifier,'t')} else st=null},{capture:true,passive:true});
+  addEventListener('touchend',e=>{const t=e.changedTouches[0]; if(Date.now()-last<400&&e.cancelable){e.preventDefault(); return} endAt(t.clientX,t.clientY,t.identifier,'t',e)},{capture:true,passive:false});
+  addEventListener('pointercancel',()=>{if(st&&st.src==='p') st=null},true);
+  /* системный click от того же касания (то же место, сразу после) не должен сработать ещё раз */
+  addEventListener('click',e=>{if(e.isTrusted&&Date.now()-last<600&&Math.hypot(e.clientX-lx,e.clientY-ly)<30){e.stopPropagation(); e.preventDefault()}},true);
 })();
 pulseBoot();
 
