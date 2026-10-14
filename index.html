@@ -542,6 +542,18 @@ body.mode-map .fpop .freset{box-shadow:none;border:0;background:none;text-decora
   body.has-back .tabbar button:not(.tbk){max-width:none}
 }
 
+
+/* ===== «Назад» — стандартно, в нижнем меню, на любом экране ===== */
+.top .back{display:none!important}
+.tabbar .tbk{display:flex;position:relative;flex:0 0 0;max-width:0;opacity:0;transform:translateX(-12px);overflow:visible;padding-inline:0;pointer-events:none}
+.tabbar .tbk em,.tabbar .tbk svg{overflow:hidden}
+body.has-back .tabbar .tbk{flex:1 1 0;max-width:170px;opacity:1;transform:none;margin-right:9px;pointer-events:auto}
+.tabbar .tbk::after{content:"";position:absolute;right:-5px;top:8px;bottom:8px;width:1px;background:color-mix(in srgb,var(--muted) 45%,transparent)}
+@media (orientation:landscape) and (max-height:600px){
+  body.has-back .tabbar .tbk{flex:0 0 auto;max-width:none;margin:0 0 6px}
+  .tabbar .tbk{max-height:0;padding-block:0;overflow:hidden;transform:translateY(-8px)} body.has-back .tabbar .tbk{max-height:80px;padding-block:10px;overflow:visible;transform:none}
+  .tabbar .tbk::after{left:12px;right:12px;top:auto;bottom:-4px;width:auto;height:1px}
+}
 /* ===== Liquid Glass (Профиль → Оформление): стекло только на том, что парит над картой ===== */
 html.glass{--g-base:color-mix(in srgb,var(--surface) 58%,transparent);--g-edge:rgba(255,255,255,.26);--g-hi:rgba(255,255,255,.45);--g-shadow:rgba(0,10,30,.35);--g-blur:blur(18px) saturate(185%)}
 @media (prefers-color-scheme: light){html.glass:not([data-theme="dark"]){--g-base:color-mix(in srgb,#fff 52%,transparent);--g-edge:rgba(255,255,255,.85);--g-hi:rgba(255,255,255,.95);--g-shadow:rgba(0,35,75,.18)}}
@@ -1224,7 +1236,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:87,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:88,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
