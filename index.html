@@ -1245,7 +1245,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:92,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:93,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2908,9 +2908,16 @@ const LKEYS=Object.keys(LOAD.tot), LTOT=LKEYS.reduce((a,k)=>a+LOAD.tot[k],0);
 function donut(segs,cTop,cSub,R,th,sel){R=R||62; th=th||16; const S=R*2+8, c=S/2, C=2*Math.PI*(R-th/2), tot=segs.reduce((a,x)=>a+x.v,0); let off=0, s=`<svg viewBox="0 0 ${S} ${S}" width="${S}" height="${S}" aria-hidden="true" style="flex:none">`;
   segs.forEach(x=>{const L=x.v/tot*C; s+=`<circle ${x.k?`data-lf="${x.k}" style="cursor:pointer"`:''} opacity="${sel&&x.k!==sel?.28:1}" cx="${c}" cy="${c}" r="${R-th/2}" fill="none" stroke="${x.c}" stroke-width="${sel===x.k?th+6:th}" stroke-dasharray="${Math.max(0,L-2).toFixed(1)} ${C}" stroke-dashoffset="${(-off).toFixed(1)}" transform="rotate(-90 ${c} ${c})"/>`; off+=L});
   return s+`<text x="${c}" y="${c+2}" text-anchor="middle" font-family="var(--f-display)"  font-size="${R>70?26:R>50?20:15}" fill="var(--ink)">${cTop}</text><text x="${c}" y="${c+(R>70?22:18)}" text-anchor="middle" font-size="${R>70?12:10.5}" fill="var(--muted)">${cSub}</text></svg>`}
-function gauge(p){const W=220,H=124,cx=110,cy=112,R=92,th=18, a=x=>Math.PI*(1-x), P=x=>[cx+R*Math.cos(a(x)),cy-R*Math.sin(a(x))], arc=(x0,x1,c)=>{const [X0,Y0]=P(x0),[X1,Y1]=P(x1); return `<path d="M${X0.toFixed(1)} ${Y0.toFixed(1)}A${R} ${R} 0 0 1 ${X1.toFixed(1)} ${Y1.toFixed(1)}" fill="none" stroke="${c}" stroke-width="${th}" stroke-linecap="butt"/>`};
-  let s=`<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">`+arc(0,1,'var(--line)'); let x0=0; LKEYS.forEach(k=>{const x1=x0+LOAD.tot[k]/LTOT; s+=arc(x0,Math.max(x0,x1-.004),`var(${LOAD.col[k]})`); x0=x1});
-  return s+`<text x="${cx}" y="${cy-18}" text-anchor="middle" font-family="var(--f-display)" font-size="24" fill="var(--ink)">${nf(p,1)} %</text><text x="${cx}" y="${cy}" text-anchor="middle" font-size="11" fill="var(--muted)">загрузка</text></svg>`}
+function gauge(p){const R=92, th=34, pad=34, W=2*(R+th/2+pad), cx=W/2, cy=R+th/2+pad-6, H=cy+8;
+  const a=x=>Math.PI*(1-x), P=(r,x)=>[cx+r*Math.cos(a(x)),cy-r*Math.sin(a(x))];
+  const arc=(x0,x1,c,cls)=>{const [X0,Y0]=P(R,x0),[X1,Y1]=P(R,x1); return `<path class="${cls}" d="M${X0.toFixed(1)} ${Y0.toFixed(1)}A${R} ${R} 0 0 1 ${X1.toFixed(1)} ${Y1.toFixed(1)}" fill="none" stroke="${c}" stroke-width="${th}" stroke-linecap="butt"/>`};
+  let s=`<svg viewBox="0 0 ${W.toFixed(0)} ${H.toFixed(0)}" aria-hidden="true" class="gauge2" style="overflow:visible">`+arc(0,1,'var(--line)','garc gbg'), lab='', x0=0;
+  LKEYS.forEach(k=>{const f=LOAD.tot[k]/LTOT, x1=x0+f, m=(x0+x1)/2, t=nf(f*100,0)+' %', tw=t.length*6.4;
+    s+=arc(x0,Math.max(x0,x1-.004),`var(${LOAD.col[k]})`,'garc');
+    if(R*Math.PI*f>=tw+6){const [X,Y]=P(R,m); lab+=`<text class="glab" x="${X.toFixed(1)}" y="${(Y+4).toFixed(1)}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" style="paint-order:stroke;stroke:rgba(0,10,30,.35);stroke-width:2.5px;stroke-linejoin:round">${t}</text>`}
+    else{const [X,Y]=P(R+th/2+8,m); lab+=`<text class="glab" x="${X.toFixed(1)}" y="${(Y+4).toFixed(1)}" text-anchor="${m<.42?'end':m>.58?'start':'middle'}" font-size="11" font-weight="700" fill="var(--ink)">${t}</text>`}
+    x0=x1});
+  return s+lab+`<text x="${cx}" y="${cy-20}" text-anchor="middle" font-family="var(--f-display)" font-size="26" fill="var(--ink)">${nf(p,1)} %</text><text x="${cx}" y="${cy-2}" text-anchor="middle" font-size="11.5" fill="var(--muted)">загрузка</text></svg>`}
 const RIGS38=(()=>{const a=LOAD.rigs.map(r=>({n:r[0],idle:r[3]/r.slice(1).reduce((x,y)=>x+y,0)})); DICT.rigs.forEach(x=>{if(!a.some(r=>r.n===x.code)) a.push({n:x.code,idle:0})}); return a})();
 function rigGrid(cols){const idle=RIGS38.filter(r=>r.idle>0).length; return `<div class="rgrid" style="grid-template-columns:repeat(${cols||10},1fr)">${RIGS38.slice().sort((x,y)=>y.idle-x.idle).map(r=>`<i title="${esc(r.n)}" style="background:${r.idle>NORM.idle_bad?'var(--st-npv)':r.idle>NORM.idle_warn?'var(--warn)':r.idle>0?'color-mix(in srgb,var(--warn) 55%,var(--line))':'color-mix(in srgb,var(--st-drill) 70%,transparent)'}"></i>`).join('')}</div><div class="sublg"><span><i style="background:var(--st-npv)"></i>простой > ${Math.round(NORM.idle_bad*100)} %</span><span><i style="background:var(--warn)"></i>${Math.round(NORM.idle_warn*100)}–${Math.round(NORM.idle_bad*100)} %</span><span><i style="background:color-mix(in srgb,var(--st-drill) 70%,transparent)"></i>без простоя</span></div>`}
 const NPVTOT=NPVT.reduce((a,r)=>a+r[1],0);
@@ -2923,7 +2930,7 @@ function npvTypes(kind,big){
   return ''}
 function loadViz(kind,big,sel){
   if(kind==='donut') return `<div class="dwrap">${donut(LKEYS.map(k=>({v:LOAD.tot[k],c:`var(${LOAD.col[k]})`,k})),sel?nf(LOAD.tot[sel]/LTOT*100,0)+' %':String(DICT.rigs.length),sel?sel.toLowerCase():'станков',big?96:84,big?24:22,sel)}<div class="dleg">${LKEYS.map(k=>`<span data-lf="${k}" class="${sel&&sel!==k?'off':''}"><i style="background:var(${LOAD.col[k]})"></i>${k} <b>${nf(LOAD.tot[k]/LTOT*100,0)} %</b></span>`).join('')}</div></div>`;
-  if(kind==='gauge') return `<div class="gwrap">${gauge((IND.find(i=>i.id==='load')||{v:{}}).v.f)}<div class="dleg row">${LKEYS.map(k=>`<span><i style="background:var(${LOAD.col[k]})"></i>${k} ${nf(LOAD.tot[k]/LTOT*100,0)} %</span>`).join('')}</div></div>`;
+  if(kind==='gauge') return `<div class="gwrap">${gauge((IND.find(i=>i.id==='load')||{v:{}}).v.f)}<div class="dleg row">${LKEYS.map(k=>`<span><i style="background:var(${LOAD.col[k]})"></i>${k}</span>`).join('')}</div></div>`;
   if(kind==='grid') return `<div style="width:100%">${rigGrid(big?13:10)}</div>`;
   return ''}
 /* ---------- плитка ---------- */
@@ -3226,6 +3233,10 @@ h2{font-size:20px}
 .wide .tile .gwrap svg{width:min(100%,340px)!important}
 .wide .tile .dwrap svg{max-width:min(100%,180px)!important}
 .wide .tile .viz>svg{width:100%;height:100%}
+
+.gwrap svg.gauge2{width:min(100%,290px)!important}
+.wide .tile .gwrap svg.gauge2{width:min(100%,380px)!important}
+.vizc .gwrap svg.gauge2{width:min(100%,360px)!important}
 @media (min-width:600px){.narrow .tiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))} .narrow .chart svg,.narrow .vizc>*{max-width:560px;margin-inline:auto} .narrow .tile .ch svg{max-height:200px}}
 `;
 let wide=false;
@@ -3465,7 +3476,8 @@ const PulseAnimRep=(()=>{
     cs.forEach(c=>{const L=+c.getAttribute('stroke-dasharray').split(/[ ,]+/)[0]||0, dur=Math.max(120,p.ring*L/tot); sweepStroke(c,{duration:dur,delay:d},list); d+=dur*(V==='pen'?1:.85)});
     svg.querySelectorAll('text').forEach((t,i)=>{if(i===0) counter(t,p.num,list,'r'+Math.random()); fade(t,{duration:400,delay:100},list)})}
   function gauge(svg,list){const p=P[V], ps=[...svg.querySelectorAll('path')]; fade(ps[0],{duration:300},list); let d=200; ps.slice(1).forEach(x=>{draw(x,{duration:p.ring/ps.length*1.4,delay:d},list); d+=p.ring/ps.length*1.3});
-    const t=svg.querySelector('text'); if(t) counter(t,p.num,list,'g'+Math.random())}
+    svg.querySelectorAll('.glab').forEach((t,i)=>fade(t,{duration:350,delay:d+i*60},list));
+    const t=[...svg.querySelectorAll('text')].find(x=>!x.classList.contains('glab')); if(t) counter(t,p.num,list,'g'+Math.random())}
   function tree(svg,list){[...svg.querySelectorAll('rect')].forEach((r,i)=>pop(r,{duration:420,delay:120+i*140},list)); [...svg.querySelectorAll('text')].forEach((t,i)=>fade(t,{duration:300,delay:400+i*70},list))}
 
   /* ---------- разбор экрана ---------- */
@@ -3476,7 +3488,7 @@ const PulseAnimRep=(()=>{
     root.querySelectorAll('.tile').forEach((t,i)=>{if(p.card) rise(t,{duration:p.card,delay:Math.min(i*90,540)},grp(t,'card'))});
     root.querySelectorAll('svg[aria-label="Сравнение трёх периодов"]').forEach(s=>bars3(s,grp(s)));
     root.querySelectorAll('.dwrap svg, .vizc svg[viewBox^="0 0 1"], .viz svg').forEach(s=>{if(s.querySelector('circle[stroke-dasharray]')&&!pend.has(s)) ring(s,grp(s))});
-    root.querySelectorAll('svg').forEach(s=>{if(pend.has(s)) return; const ps=s.querySelectorAll('path[stroke-width="18"]'); if(ps.length) gauge(s,grp(s)); else if(s.getAttribute('aria-label')==='НПВ по типам') tree(s,grp(s))});
+    root.querySelectorAll('svg').forEach(s=>{if(pend.has(s)) return; const ps=s.querySelectorAll('path.garc, path[stroke-width="18"]'); if(ps.length) gauge(s,grp(s)); else if(s.getAttribute('aria-label')==='НПВ по типам') tree(s,grp(s))});
     root.querySelectorAll('.nbars').forEach(n=>{const l=grp(n); [...n.querySelectorAll('u')].forEach((u,i)=>grow(u,{duration:p.bar+150,delay:100+i*(V==='pen'?160:90)},l,'x'))});
     root.querySelectorAll('.rgrid').forEach(g=>{const l=grp(g), it=[...g.querySelectorAll('i')], cols=(getComputedStyle(g).gridTemplateColumns.split(' ').length)||10;
       it.forEach((x,i)=>pop(x,{duration:260,delay:V==='pen'?100+(i%cols)/cols*p.sweep:100+Math.min(i*14,600)},l))});
