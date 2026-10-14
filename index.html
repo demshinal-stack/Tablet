@@ -1213,7 +1213,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:81,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:82,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -1611,7 +1611,7 @@ function drawBase(){
     .on('click',ev=>{ev.stopPropagation(); go({level:'field',field:f.id,cust:null,well:null})})
     .on('pointerenter',ev=>showTip(ev,'<b>'+f.n+'</b>'+coordTxt(f)+'<br>'+f.custs.length+' '+plural(f.custs.length,'заказчик','заказчика','заказчиков')+' · '+nDr(f.wells)+' скв. в бурении')).on('pointerleave',hideTip)});
 }
-function showTip(ev,html){tipEl.innerHTML=html; tipEl.classList.add('on'); const r=wrapEl.getBoundingClientRect(); let x=ev.clientX-r.left+14,y=ev.clientY-r.top+14; const tw=tipEl.offsetWidth; if(x+tw>MW-8) x=ev.clientX-r.left-tw-14; tipEl.style.left=x+'px'; tipEl.style.top=y+'px'}
+function showTip(ev,html){if(ev&&ev.pointerType&&ev.pointerType!=='mouse') return; tipEl.innerHTML=html; tipEl.classList.add('on'); const r=wrapEl.getBoundingClientRect(); let x=ev.clientX-r.left+14,y=ev.clientY-r.top+14; const tw=tipEl.offsetWidth; if(x+tw>MW-8) x=ev.clientX-r.left-tw-14; tipEl.style.left=x+'px'; tipEl.style.top=y+'px'}
 function hideTip(){tipEl.classList.remove('on')}
 const zoom=d3.zoom().on('zoom',e=>{if(e.sourceEvent) SPIDER=null; zt=e.transform; gGeo.attr('transform',zt); updateOverlay(); hideTip()});
 svg.call(zoom).on('dblclick.zoom',null);
