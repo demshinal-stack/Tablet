@@ -1245,7 +1245,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:91,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:92,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3220,6 +3220,12 @@ h2{font-size:20px}
 .glass .ord li{background:color-mix(in srgb,var(--surface) 35%,transparent)}
 .glass .seg{background:color-mix(in srgb,var(--surface) 40%,transparent);-webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur)}
 .glass .dp{-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+.wide .tile .ch svg{max-height:none!important;height:100%;width:100%}
+.wide .tile .ch{overflow:hidden}
+.wide .tile .gwrap svg{width:min(100%,340px)!important}
+.wide .tile .dwrap svg{max-width:min(100%,180px)!important}
+.wide .tile .viz>svg{width:100%;height:100%}
 @media (min-width:600px){.narrow .tiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))} .narrow .chart svg,.narrow .vizc>*{max-width:560px;margin-inline:auto} .narrow .tile .ch svg{max-height:200px}}
 `;
 let wide=false;
@@ -3280,6 +3286,14 @@ const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:OR
         const ids=[...ul.querySelectorAll('li[data-p]')].map(x=>x.dataset.p); if(ul.dataset.kind==='tiles') TORD=ids; else ORDER=ids.concat(ORDER.filter(p=>PER[p].lock)); APPS.forEach(a=>a.render(true))};
       window.addEventListener('pointermove',move); window.addEventListener('pointerup',up); window.addEventListener('pointercancel',up)}}))}
 
+
+  /* плитки на широком экране: график — под фактический размер плитки */
+  function fitTiles(){shadow.querySelectorAll('.tile[data-go^="ind:"]').forEach(t=>{const I=IND.find(x=>'ind:'+x.id===t.dataset.go), ch=t.querySelector('.ch'); if(!I||!ch) return;
+      const w=ch.clientWidth, h=ch.clientHeight; if(w<120||h<90) return;
+      if(I.load){if(h>200) ch.innerHTML=loadViz(LV,true); return}
+      if(I.npv){if(h>170) ch.innerHTML=npvTypes(NV,true); return}
+      const k=Math.max(1,Math.min(1.55,Math.min(w/300,h/185)));
+      ch.innerHTML=bars3(I.v,I.d,I.up,{compact:1,W:Math.round(w/k),H:Math.round(h/k),split:I.split})})}
 const SCR={home,ind,table,set};
 const APPS=[{render:k=>{saveRep(); render(k); if(typeof renderSync==='function') renderSync()}}];
 function render(keep){wide=innerWidth>900&&innerHeight>=560;
@@ -3287,7 +3301,7 @@ function render(keep){wide=innerWidth>900&&innerHeight>=560;
   const gl=document.documentElement.classList.contains('glass');
   shadow.innerHTML=`<style>${RCSS}</style><div class="rp ${wide?'wide':'narrow'}${gl?' glass':''}"><div class="rb">${SCR[top().t](top())}</div></div>`;
   if(keep&&wide) $('.rb').scrollTop=st; if(!keep){const a=document.querySelector('.app'); if(a) a.scrollTop=0; host.scrollTop=0}
-  bindDrag(); const det=$('.det'); if(det&&!keep) det.scrollTop=0;
+  bindDrag(); if(wide&&top().t==='home') fitTiles(); const det=$('.det'); if(det&&!keep) det.scrollTop=0;
   if(typeof updBack==='function') updBack(); if(typeof setTabs==='function') setTabs()}
 function toast(){}
   shadow.addEventListener('click',e=>{if(e.target.closest('[data-dm]')){e.stopPropagation(); DM=DM==='pct'?'abs':'pct'; APPS.forEach(x=>x.render(true)); return}
