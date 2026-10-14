@@ -1245,7 +1245,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:93,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:94,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2939,7 +2939,7 @@ const TDEF=['ebitda','rev','drill','wells','load','speed','npv','cost'];
 let TORD=TDEF.slice(), THIDE=new Set();
 const TILES=()=>TORD.filter(id=>!THIDE.has(id)).map(id=>IND.find(i=>i.id===id));
 function tile(I,wide){const ps=CMP(), v=I.v, cur=val(v,ps[2]); let sub='', ch;
-  if(I.load){return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n}</div><div class="v">${nf(v.f,I.d)}<small>%</small></div><div class="ds"><span class="dp">факт · ${PER.p93.sh}</span><span class="dp">${nf(LTOT,0)} станко-сут</span></div><div class="ch viz">${loadViz(LV,false)}</div></button>`}
+  if(I.load){return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n}</div>${loadHead()}<div class="ch viz">${loadViz(LV,false)}</div></button>`}
   if(I.npv){return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n} · по типам</div><div class="v">${nf(cur,I.d)}<small>% · ${nf(NPVTOT,0)} млн ₽</small></div><div class="ds">${dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)}${dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div><div class="ch viz">${npvTypes(NV,false)}</div></button>`}
   if(I.margin){const m=cur!=null?cur/val(REV,ps[2])*100:null; sub=m!=null?`<div class="sublg" style="font-size:11.5px">рентабельность <b style="color:var(--ink);margin-left:4px">${nf(m,1)} %</b></div>`:''}
   return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n}</div><div class="v">${nf(cur,I.d)}<small>${I.u}</small></div>
@@ -3258,8 +3258,8 @@ const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:OR
     return `<div class="card rows sc">${rows.map(r=>`<div class="rw"><span class="nm">${esc(r.n)}</span><span class="bb">${r.v.map((x,i)=>x==null?'':`<span class="${i===2?'f':''}"><u style="width:${Math.max(2,x/mx*56)}px;background:${SLOT[i]}"></u>${nf(x,b.d)}</span>`).join('')}</span>${dPill(r.v[2],r.v[1]!=null?r.v[1]:r.v[0],I.up,'',b.d,0)}</div>`).join('')}</div>
      <p class="why">${b.demo?'<b style="color:var(--warn)">Условные данные</b> — в макетах детализации нет. ':''}Полоски — три периода сравнения. Справа — ${PER[ps[2]].sh} к ${PER[ps[1]==='f25'?ps[0]:ps[1]].sh}, ${I.u}.${miss.length?' По '+miss.join(', ')+' детализации в макете нет.':''}</p>`}
   function ind(it){const I=IND.find(x=>x.id===it.id), ps=CMP(), v=I.v, cur=val(v,ps[2]), bi=Math.min(S.br[I.id]||0,Math.max(0,I.br.length-1));
-    let left=`<div class="mh"><div class="k">${I.n} · ${PER[I.load?'p93':ps[2]].n}</div><div class="v">${nf(I.load?v.f:cur,I.d)}<small>${I.u}</small></div>
-      <div class="ds">${I.load?'<span class="dp">факт · '+PER.p93.n+'</span><span class="dp">без сравнения</span>':dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)+dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div></div>`;
+    let left=`<div class="mh"><div class="k">${I.n} · ${PER[I.load?'p93':ps[2]].n}</div>${I.load?loadHead():`<div class="v">${nf(cur,I.d)}<small>${I.u}</small></div>
+      <div class="ds">${dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)+dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div>`}</div>`;
     if(I.margin){const m=cur/val(REV,ps[2])*100, mb=val(v,ps[1])!=null?val(v,ps[1])/val(REV,ps[1])*100:null; left+=`<div class="card" style="padding:10px 12px;margin-top:10px;display:flex;justify-content:space-between;gap:8px;align-items:baseline"><span style="color:var(--muted);font-size:12.5px">Рентабельность по EBITDA</span><span><b style="color:var(--ink);font-family:var(--f-display)">${nf(m,1)} %</b> ${mb!=null?`<span class="dp ${m>=mb?'g':'b'}"><em>${PER[ps[1]].sh}</em>${nf(mb,1)} %</span>`:''}</span></div>`}
     if(I.load) left+=`<div class="sec"><div class="card vizc">${loadViz(LV,true,S.lf)}</div></div>`; else left+=`<div class="sec"><div class="card chart">${bars3(v,I.d,I.up,{split:I.split})}${I.split?`<div class="split"><span><i style="background:var(--muted)"></i>суточная ставка</span><span><i style="background:var(--muted);opacity:.62"></i>под ключ</span></div>`:''}</div></div>`;
     if(I.npv) left+=`<div class="sec"><div class="lbl"><b>По типам</b><small>${nf(NPVTOT,0)} млн ₽</small></div><div class="card vizc">${npvTypes(NV,true)}</div></div>`;
@@ -3305,6 +3305,9 @@ const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:OR
       if(I.npv){if(h>170) ch.innerHTML=npvTypes(NV,true); return}
       const k=Math.max(1,Math.min(1.55,Math.min(w/300,h/185)));
       ch.innerHTML=bars3(I.v,I.d,I.up,{compact:1,W:Math.round(w/k),H:Math.round(h/k),split:I.split})})}
+/* БУ всего и загружено (не в консервации) — по последнему суточному рапорту */
+  const RIGS_N=DICT.rigs.length, RIGS_ON=DICT.cur.filter(c=>{const s=STS_BY[c.st]; return !(s&&s.rs==='idle')}).length;
+  const loadHead=()=>`<div class="v">${RIGS_ON}<small>из ${RIGS_N} БУ загружено</small></div>`;
 const SCR={home,ind,table,set};
 const APPS=[{render:k=>{saveRep(); render(k); if(typeof renderSync==='function') renderSync()}}];
 function render(keep){wide=innerWidth>900&&innerHeight>=560;
