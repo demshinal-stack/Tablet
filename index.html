@@ -1245,7 +1245,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:90,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:91,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2936,7 +2936,7 @@ function tile(I,wide){const ps=CMP(), v=I.v, cur=val(v,ps[2]); let sub='', ch;
   if(I.npv){return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n} · по типам</div><div class="v">${nf(cur,I.d)}<small>% · ${nf(NPVTOT,0)} млн ₽</small></div><div class="ds">${dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)}${dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div><div class="ch viz">${npvTypes(NV,false)}</div></button>`}
   if(I.margin){const m=cur!=null?cur/val(REV,ps[2])*100:null; sub=m!=null?`<div class="sublg" style="font-size:11.5px">рентабельность <b style="color:var(--ink);margin-left:4px">${nf(m,1)} %</b></div>`:''}
   return `<button class="tile" data-go="ind:${I.id}"><div class="k">${I.n}</div><div class="v">${nf(cur,I.d)}<small>${I.u}</small></div>
-   <div class="ds">${dPill(cur,val(v,ps[0]),I.up,'к '+PER[ps[0]].sh,I.d)}${dPill(cur,val(v,ps[1]),I.up,'к '+PER[ps[1]].sh,I.d)}</div>
+
    <div class="ch">${bars3(v,I.d,I.up,{compact:1,W:300,H:wide?150:172,split:I.split})}</div>${sub}</button>`}
 
 
