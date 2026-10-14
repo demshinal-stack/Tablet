@@ -1213,7 +1213,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:82,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:83,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3439,6 +3439,19 @@ const PulseAnimRep=(()=>{
     go()}
   return {attach}})();
 
+
+/* ======================= Карта: надёжное касание на сенсорных экранах ======================= */
+(function(){const svg=document.getElementById('map'); if(!svg) return; let st=null, last=0;
+  svg.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse') return; st=e.isPrimary?{x:e.clientX,y:e.clientY,t:Date.now(),el:e.target,id:e.pointerId}:null},true);
+  svg.addEventListener('pointercancel',()=>{st=null},true);
+  svg.addEventListener('pointerup',e=>{const s=st; st=null; if(!s||e.pointerType==='mouse'||e.pointerId!==s.id) return;
+    if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>12||Date.now()-s.t>700) return;
+    let n=s.el; while(n&&n!==svg){if(n.__on&&n.__on.some(o=>o.type==='click')) break; n=n.parentNode}
+    if(!n||n===svg) return; last=Date.now();
+    n.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true,clientX:e.clientX,clientY:e.clientY}))},true);
+  /* настоящий click, если он всё же придёт следом, не должен сработать второй раз */
+  svg.addEventListener('click',e=>{if(e.isTrusted&&Date.now()-last<800){e.stopPropagation(); e.preventDefault()}},true);
+})();
 pulseBoot();
 
 /* ===== установка как приложение: офлайн-кеш и обновления (только при открытии с сайта) ===== */
