@@ -1,6 +1,6 @@
 /* Пульс 2 © Demshin_lab. Офлайн-кеш и обновления.
    Версию поднимайте вместе с APP в index.html и version.json. */
-const VERSION = "pulse2-2.0.0-73";
+const VERSION = "pulse2-2.0.0-78";
 const SHELL = [
   "./",
   "./index.html",
@@ -23,7 +23,7 @@ self.addEventListener("install", (e) => {
 self.addEventListener("activate", (e) => {
   e.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k !== VERSION && !k.startsWith("pulse2-offline")).map((k) => caches.delete(k))))
       .then(() => self.clients.claim())
   );
 });
