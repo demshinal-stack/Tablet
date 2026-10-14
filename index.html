@@ -1087,6 +1087,15 @@ html.ipad body{position:absolute!important;top:0;left:0;width:100%;overflow:hidd
   body.mode-rep .rephead .rlg{margin-left:0}
 }
 
+
+/* планшет вертикально (700–900 px): заголовок отчётов и легенда — в одной строке шапки */
+@media (min-width:700px) and (max-width:900px) and (orientation:portrait){
+  body.mode-rep .app>.top{flex-wrap:nowrap!important;row-gap:0}
+  body.mode-rep .rephead{order:0;flex:1 1 auto;min-width:0;margin-left:0;gap:12px}
+  body.mode-rep .rephead b{display:block!important;position:static!important;transform:none!important;max-width:none!important;margin-inline:auto;flex:0 1 auto;min-width:0;text-align:center;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  body.mode-rep .rephead .rlg{margin-left:0;flex:none}
+  body.mode-rep .top .bell{margin-left:0}
+}
 /* вертикально на телефоне: шапка отчётов закреплена при пролистывании */
 @media (max-width:900px) and (orientation:portrait){
   body.mode-rep .app>.top{position:sticky;top:0;z-index:60}
@@ -1236,7 +1245,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:88,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:89,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
