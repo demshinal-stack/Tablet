@@ -1248,7 +1248,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:95,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:97,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3433,6 +3433,10 @@ const good=(dv,up)=>dv===0?'':((dv>0)===!!up?'g':'r');
 const chip=(a,b,up,lbl,d=1)=>{if(a==null||b==null) return `<span class="r2chip">${lbl} <b>нет данных</b></span>`; const p=pct(a,b); return `<span class="r2chip ${good(p,up)}">${lbl} <b>${sg(p,d)} %</b></span>`};
 const txt=(x,y,s,o={})=>`<text x="${x}" y="${y}" ${o.a?`text-anchor="${o.a}"`:''} class="${o.c||''}" font-size="${o.fs||12}" ${o.w?`font-weight="${o.w}"`:''} ${o.st?`style="${o.st}"`:''}>${esc(s)}</text>`;
 const T=(s)=>`data-t="${esc(s)}"`;
+/* ширина подписи по настоящему шрифту: колонка названий подстраивается под самое длинное, а не обрезает его */
+const TW=(()=>{let c=null; return (s,fs=12,wt=400)=>{if(!c) c=document.createElement('canvas').getContext('2d'); c.font=`${wt} ${fs}px ${getComputedStyle(document.body).fontFamily||'sans-serif'}`; return c.measureText(String(s)).width*1.04}})();
+const LABW=(names,fs,w,mx=.42)=>Math.round(Math.min(w*mx,Math.max(36,...names.map(n=>TW(n,fs)))+14));
+const FIT=(s,px,fs=12,wt=400)=>{s=String(s); if(TW(s,fs,wt)<=px) return s; while(s.length>2&&TW(s+'…',fs,wt)>px) s=s.slice(0,-1); return s.replace(/[\s.,-]+$/,'')+'…'};
 const SHORT=n=>String(n).replace(/^(\d+)-[^-]+-(?:[^-]+-)?([^-]+-\d+\w*)$/,'$1 $2');
 
 /* ---------- графики: каждая функция получает реальный размер области (w,h) ---------- */
@@ -3487,7 +3491,7 @@ function waterfall(st,steps,en,o,w,h){ // мост «БП → 9+3» по зак�
   let run=st.v, lo=Math.min(st.v,en.v), hi=Math.max(st.v,en.v); steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
   const span=hi-lo, y0=Math.max(0,lo-span*.9), Y=x=>base-((x-y0)/(hi-y0))*(base-top);
   let s=`<line x1="0" x2="${w}" y1="${base+.5}" y2="${base+.5}" class="gl"/>`, cur=st.v;
-  const nm=(i,l,b)=>{const fs=slot<78?10.5:11.5; let a=l,c=''; if(l.length*fs*.62>slot-6){const k=l.indexOf('-')>0?l.indexOf('-')+1:l.indexOf(' ')>0?l.indexOf(' '):-1; if(k>0){a=l.slice(0,k).trim(); c=l.slice(k).trim()}} return txt(slot*i+slot/2,base+14,a,{a:'middle',c:b?'t-i':'t-m',fs,w:b?700:400})+(c?txt(slot*i+slot/2,base+26,c,{a:'middle',c:'t-m',fs}):'')};
+  const nm=(i,l,b)=>{const fs=slot<78?10.5:11.5; let a=l,c=''; if(TW(l,fs,b?700:400)>slot-4){const k=l.indexOf('-')>0?l.indexOf('-')+1:l.indexOf(' ')>0?l.indexOf(' '):-1; if(k>0){a=l.slice(0,k).trim(); c=l.slice(k).trim()}} return txt(slot*i+slot/2,base+14,FIT(a,slot-2,fs,b?700:400),{a:'middle',c:b?'t-i':'t-m',fs,w:b?700:400})+(c?txt(slot*i+slot/2,base+26,FIT(c,slot-2,fs),{a:'middle',c:'t-m',fs}):'')};
   const bar=(i,v,lbl,col,dd)=>`<rect class="gy" style="--d:${dd}s" x="${slot*i+slot/2-bw/2}" y="${Y(v)}" width="${bw}" height="${base-Y(v)}" rx="4" fill="${col}" ${T(lbl+': '+nf(v,d)+' '+o.u)}/>`+txt(slot*i+slot/2,Y(v)-7,nf(v,v>=1000?0:d),{a:'middle',c:'t-i fd',w:700,fs:13,st:`--d:${dd}s`});
   s+=bar(0,st.v,st.l,'var(--c2)',0)+nm(0,st.l,1);
   // разрыв оси
@@ -3502,16 +3506,16 @@ function waterfall(st,steps,en,o,w,h){ // мост «БП → 9+3» по зак�
   return s}
 
 function waterfallH(st,steps,en,o,w,h){ // телефон: мост по горизонтали
-  const d=o.d||0, n=steps.length+2, rh=h/n, L=96, R=54; let run=st.v, lo=Math.min(st.v,en.v), hi=Math.max(st.v,en.v); steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
+  const d=o.d||0, n=steps.length+2, rh=h/n, L=LABW(steps.map(s=>s[0]).concat([st.l,en.l]),12,w,.45), R=54; let run=st.v, lo=Math.min(st.v,en.v), hi=Math.max(st.v,en.v); steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
   const x0=Math.max(0,lo-(hi-lo)*.6), X=x=>L+((x-x0)/(hi-x0))*(w-L-R); let s='', cur=st.v;
-  const row=(i,l,b)=>txt(L-8,i*rh+rh/2+4,l.length>14?l.slice(0,13)+'…':l,{a:'end',fs:12,c:b?'t-i':'t-m',w:b?700:400});
+  const row=(i,l,b)=>txt(L-8,i*rh+rh/2+4,FIT(l,L-10,12,b?700:400),{a:'end',fs:12,c:b?'t-i':'t-m',w:b?700:400});
   s+=row(0,st.l,1)+`<rect class="gx" x="${L}" y="${rh/2-11}" width="${X(st.v)-L}" height="22" rx="3" fill="var(--c2)"/>`+txt(X(st.v)+5,rh/2+4,nf(st.v,d),{fs:12,w:700,c:'t-i fd'});
   steps.forEach((r,i)=>{const a=cur,b=cur+r[1], y=(i+1)*rh, dd=.2+i*.1, g=good(r[1],o.up)==='g'; s+=row(i+1,r[0]);
     s+=`<rect class="gx" style="--d:${dd}s" x="${X(Math.min(a,b))}" y="${y+rh/2-11}" width="${Math.max(1.5,Math.abs(X(b)-X(a)))}" height="22" rx="3" fill="${g?'var(--good)':'var(--bad)'}" ${T(r[0]+': '+sg(r[1],d)+' '+o.u)}/>`+txt(w,y+rh/2+4,sg(r[1],d),{a:'end',fs:12,w:600,c:(g?'t-g':'t-r')+' fd',st:`--d:${dd}s`}); cur=b});
   const y=(n-1)*rh; s+=row(n-1,en.l,1)+`<rect class="gx" style="--d:${.2+steps.length*.1}s" x="${L}" y="${y+rh/2-11}" width="${X(en.v)-L}" height="22" rx="3" fill="var(--c3)"/>`+txt(X(en.v)+5,y+rh/2+4,nf(en.v,d),{fs:12,w:700,c:'t-i fd'});
   return s}
 function dumbbell(rows,o,w,h){ // по заказчикам/станкам: точка БП → точка 9+3
-  const d=o.d||0, n=rows.length, rh=h/n, L=Math.min(150,w*.34), R=w<420?58:96, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, mn=o.zero===false?Math.min(...rows.flatMap(r=>[r[1],r[2]||r[1]]))*.85:0, X=x=>L+((x-mn)/(mx-mn))*(w-L-R), y0=(h-rh*n)/2;
+  const d=o.d||0, n=rows.length, rh=h/n, L=LABW(rows.map(r=>r[0]),12.5,w,.38), R=w<420?58:96, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, mn=o.zero===false?Math.min(...rows.flatMap(r=>[r[1],r[2]||r[1]]))*.85:0, X=x=>L+((x-mn)/(mx-mn))*(w-L-R), y0=(h-rh*n)/2;
   let s='';
   rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, a=r[2], b=r[1], dd=i*.06, gc=a==null?'var(--muted)':good(b-a,o.up)==='g'?'var(--good)':good(b-a,o.up)==='r'?'var(--bad)':'var(--muted)';
     s+=`<line x1="${L}" x2="${w-R}" y1="${y}" y2="${y}" class="gl"/>`+txt(L-10,y+4,r[0],{a:'end',fs:12.5,c:'t-i'});
@@ -3550,10 +3554,10 @@ function wellbores(rows,o,w,h){ // бурение: каждый заказчик
   return s}
 
 function lolli(rows,o,w,h){ // ранжированный список: точка 9+3, штрих — БП
-  const d=o.d||0, n=rows.length, rh=h/n, L=Math.min(120,w*.36), R=52, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, X=x=>L+(x/mx)*(w-L-R), y0=(h-rh*n)/2;
+  const d=o.d||0, n=rows.length, rh=h/n, L=LABW(rows.map(r=>o.short?SHORT(r[0]):r[0]),12,w,.42), R=52, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, X=x=>L+(x/mx)*(w-L-R), y0=(h-rh*n)/2;
   let s='';
   rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, dd=Math.min(i,14)*.07, p=r[2]!=null?good(r[1]-r[2],o.up):'', c=p==='g'?'var(--good)':p==='r'?'var(--bad)':'var(--c3)';
-    s+=`<g ${r[3]?'opacity=".55"':''}>`+txt(L-8,y+4,o.short?SHORT(r[0]):r[0],{a:'end',fs:12,c:'t-i'});
+    s+=`<g ${r[3]?'opacity=".55"':''}>`+txt(L-8,y+4,FIT(o.short?SHORT(r[0]):r[0],L-10,12),{a:'end',fs:12,c:'t-i'});
     s+=`<line class="gx" style="--d:${dd}s" x1="${L}" x2="${X(r[1])}" y1="${y}" y2="${y}" stroke="var(--c3)" stroke-width="22" stroke-linecap="butt"/>`;
     if(r[2]!=null) s+=`<line class="fd" style="--d:${dd}s" x1="${X(r[2])}" x2="${X(r[2])}" y1="${y-15}" y2="${y+15}" stroke="var(--ink)" stroke-width="2.5" opacity=".6"/>`;
     s+=`<circle class="pop" style="--d:${dd+.5}s" cx="${X(r[1])}" cy="${y}" r="8" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`+txt(w-R+8,y+4.5,nf(r[1],d),{c:'t-i fd',w:600,fs:12.5,st:`--d:${dd}s`})+'</g>';
@@ -3571,7 +3575,7 @@ function waffle(rows,o,w,h){ // каждая законченная скважи
   return s}
 
 function stackM(months,types,o,w,h){ // ковёр помесячно: 100 % станко-суток по видам работ
-  const L=30, top=8, base=h-20, n=12, slot=(w-L)/n, bw=slot*.78, M=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  const L=36, top=8, base=h-20, n=12, slot=(w-L)/n, bw=slot*.78, M=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
   let s=''; [0,.5,1].forEach(t=>{const y=base-(base-top)*t; s+=`<line x1="${L}" x2="${w}" y1="${y}" y2="${y}" class="gl"/>`+txt(L-4,y+4,nf(t*100)+'%',{a:'end',c:'t-m',fs:10})});
   months.forEach((m,i)=>{let y=base; const x=L+slot*i+(slot-bw)/2, fc=!!(D.load.fc&&D.load.fc[i]); m.forEach((q,j)=>{const hh=q*(base-top); s+=`<rect class="gy" style="--d:${i*.07}s" x="${x}" y="${y-hh}" width="${bw}" height="${Math.max(0,hh-1.5)}" rx="${j===m.length-1?3:1}" fill="var(${types[j][1]})" opacity="${fc?.55:1}" ${T(M[i]+(fc?' (прогноз)':'')+' · '+types[j][0]+': '+nf(q*100,1)+' %')}/>`; y-=hh});
     s+=txt(x+bw/2,h-4,slot<34?'ЯФМАМИИАСОНД'[i]:M[i],{a:'middle',c:fc?'t-m':'t-i',fs:slot<40?10.5:11.5})});
@@ -3617,10 +3621,10 @@ function speedo(v,o,w,h){ // спидометр: стрелка — 9+3, мет�
   return s}
 
 function hlist(rows,o,w,h){ // горизонтальные полосы с подписью значения
-  const n=rows.length, rh=h/n, L=o.L||Math.min(150,w*.36), R=o.R||92, mx=Math.max(...rows.map(r=>r.v||0))*1.02, X=x=>L+(x/mx)*(w-L-R), y0=o.top?0:(h-rh*n)/2;
+  const n=rows.length, rh=h/n, L=LABW(rows.map(r=>r.n),12.5,w,o.Lmax||.45), R=o.R||92, mx=Math.max(...rows.map(r=>r.v||0))*1.02, X=x=>L+(x/mx)*(w-L-R), y0=o.top?0:(h-rh*n)/2;
   let s='';
   rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, dd=i*.08;
-    const mc=Math.floor((L-10)/6.6), nm=r.n.length>mc?r.n.slice(0,mc-1)+'…':r.n; s+=txt(L-8,y+(r.sub?0:4),nm,{a:'end',fs:12.5,c:'t-i'})+(r.sub?txt(L-8,y+13,r.sub,{a:'end',fs:10.5,c:'t-m'}):'');
+    const nm=FIT(r.n,L-10,12.5); s+=txt(L-8,y+(r.sub?0:4),nm,{a:'end',fs:12.5,c:'t-i'})+(r.sub?txt(L-8,y+13,r.sub,{a:'end',fs:10.5,c:'t-m'}):'');
     s+=`<rect class="gx" style="--d:${dd}s" x="${L}" y="${y-11}" width="${Math.max(2,X(r.v)-L)}" height="22" rx="3" fill="${r.c}" ${r.demo?'opacity=".5"':''} ${T(r.tip||r.n)}/>`;
     if(r.demo) s+=`<rect x="${L}" y="${y-11}" width="${Math.max(2,X(r.v)-L)}" height="22" rx="3" fill="url(#hatch)" class="gx" style="--d:${dd}s"/>`;
     s+=txt(X(r.v)+7,y+4.5,r.lab,{c:'t-i fd',w:600,fs:12.5,st:`--d:${dd}s`})+(r.r?txt(w,y+4.5,r.r,{a:'end',c:'t-m fd',fs:11.5,st:`--d:${dd}s`}):'');
@@ -3651,7 +3655,7 @@ function treemap(types,w,h){ // плитки типов: площадь — мл
   const lay=(arr,x,y,W,H)=>{if(!arr.length) return; if(arr.length===1){const t=arr[0], g=2, dd=(k++)*.1, big=W>70&&H>44;
       s+=`<g class="pop" style="--d:${dd}s"><rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="${t.c}" ${t.demo?'opacity=".55"':''} ${T((t.full||t.n)+': '+nf(t.v,1)+' млн ₽ · '+nf(t.v/tot*100,0)+' %'+(t.demo?' (демо)':''))}/>${t.demo?`<rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="url(#hatch)" pointer-events="none"/>`:''}`;
       const fg=(t.n==='Ремонт'||t.c==='var(--other)')?'var(--ink)':'#fff';
-      if(W>46&&H>30) s+=`<text x="${x+8}" y="${y+18}" font-size="${big?12.5:10.5}" style="fill:${fg}" pointer-events="none">${esc((m=>t.n.length>m?t.n.slice(0,Math.max(3,m-1))+'.':t.n)(Math.floor((W-14)/(big?7.4:6.4))))}</text><text x="${x+W-8}" y="${y+H-9}" text-anchor="end" font-size="${big?Math.min(22,H*.3):12}" font-weight="700" style="fill:${fg}" pointer-events="none">${nf(t.v/tot*100,0)}%</text>`;
+      if(W>46&&H>30) s+=`<text x="${x+8}" y="${y+18}" font-size="${big?12.5:10.5}" style="fill:${fg}" pointer-events="none">${esc(FIT(t.n,W-14,big?12.5:10.5))}</text><text x="${x+W-8}" y="${y+H-9}" text-anchor="end" font-size="${big?Math.min(22,H*.3):12}" font-weight="700" style="fill:${fg}" pointer-events="none">${nf(t.v/tot*100,0)}%</text>`;
       s+='</g>'; return}
     const S=sum(arr.map(z=>z.v)); let acc=0,i=0; while(i<arr.length-1&&acc+arr[i].v<S/2){acc+=arr[i].v;i++} if(i===0){acc=arr[0].v;i=1}
     const f=acc/S; if(W>=H){lay(arr.slice(0,i),x,y,W*f,H);lay(arr.slice(i),x+W*f,y,W*(1-f),H)} else {lay(arr.slice(0,i),x,y,W,H*f);lay(arr.slice(i),x,y+H*f,W,H*(1-f))}};
@@ -3659,7 +3663,7 @@ function treemap(types,w,h){ // плитки типов: площадь — мл
 function wfZero(steps,o,w,h){ // водопад от нуля: шаги по видам работ → итого (как «НПВ общее БП»)
   const n=steps.length+1, top=22, bot=h-38, slot=w/n, bw=Math.min(64,slot*.62); let run=0, lo=0, hi=0; steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
   const Y=v=>top+((hi-v)/((hi-lo)||1))*(bot-top); let s=`<line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1" opacity=".5"/>`, cur=0;
-  const lab=(i,l)=>{const m=Math.floor((slot-4)/6.4); return txt(slot*i+slot/2,h-4,l.length>m?l.slice(0,Math.max(3,m-1))+'.':l,{a:'middle',fs:10.5,c:i===n-1?'t-i':'t-m',w:i===n-1?700:400})};
+  const lab=(i,l)=>{return txt(slot*i+slot/2,h-4,FIT(l,slot-4,10.5,i===n-1?700:400),{a:'middle',fs:10.5,c:i===n-1?'t-i':'t-m',w:i===n-1?700:400})};
   steps.forEach((r,i)=>{const a=cur,b=cur+r[1], x=slot*i+slot/2-bw/2, dd=i*.18, g=r[1]>=0;
     if(i) s+=`<line class="fd" style="--d:${dd}s" x1="${x-slot+bw}" x2="${x}" y1="${Y(a)}" y2="${Y(a)}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
     s+=`<rect class="${g?'gy':'gyd'}" style="--d:${dd}s" x="${x}" y="${Y(Math.max(a,b))}" width="${bw}" height="${Math.max(2,Math.abs(Y(a)-Y(b)))}" rx="4" fill="${g?'var(--good)':'var(--bad)'}" ${T(r[0]+': '+sg(r[1],0)+' '+o.u)}/>`;
@@ -3683,34 +3687,34 @@ function ringCount(st0,w,h){ // наружный край общий; секто
   if(lgW){const lh=26, y0=cy-lh*n/2+lh/2; st.forEach((x,i)=>{const y=y0+i*lh; s+=`<rect x="${w-lgW+10}" y="${y-7}" width="13" height="13" rx="3" fill="var(${x[1]})"/>`+txt(w-lgW+30,y+4,x[0],{fs:13,c:'t-i'})+txt(w,y+4,x[2],{a:'end',fs:13,w:700,c:'t-i'})})}
   return s}
 function pairBars(rows,o,w,h){ // как «Детализация» в приложении: две тонкие полосы (сейчас / БП) и разница
-  const n=rows.length, rh=Math.max(54,h/n), L=Math.min(104,w*.32), mx=Math.max(...rows.flatMap(r=>[r[1],r[2]])), X=v=>(v/mx)*(w-L-8-20-40); let s='';
+  const n=rows.length, rh=Math.max(54,h/n), L=LABW(rows.map(r=>r[0]),12,w,.4), mx=Math.max(...rows.flatMap(r=>[r[1],r[2]])), X=v=>(v/mx)*(w-L-8-20-40); let s='';
   rows.forEach((r,i)=>{const y=i*rh+rh/2, d=r[2]==null?0:r[1]-r[2], dd=i*.06;
-    s+=txt(L-8,y+4,r[0].length>15?r[0].slice(0,14)+'…':r[0],{a:'end',fs:12,c:'t-i'});
+    s+=txt(L-8,y+4,FIT(r[0],L-10,12),{a:'end',fs:12,c:'t-i'});
     s+=`<rect class="gx" style="--d:${dd}s" x="${L}" y="${y-23}" width="${Math.max(2,X(r[1]))}" height="22" rx="3" fill="var(--c3)" ${T(r[0]+': сейчас '+r[1]+' '+o.u)}/>`+txt(L+X(r[1])+5,y-8,r[1],{fs:11.5,w:700,c:'t-i fd'});
     s+=`<rect class="gx" style="--d:${dd+.1}s" x="${L}" y="${y+1}" width="${Math.max(2,X(r[2]||0))}" height="22" rx="3" fill="var(--c2)" ${T(r[0]+': БП '+r[2]+' '+o.u)}/>`+txt(L+X(r[2]||0)+5,y+16,r[2]==null?'—':r[2],{fs:10.5,c:'t-m fd'});
     const lb=d?sg(d,0):'0', cw=lb.length*7+12; s+=`<g class="fd"><rect x="${w-cw}" y="${y-9}" width="${cw}" height="18" rx="6" fill="${d>0?'var(--good-bg)':d<0?'var(--bad-bg)':'var(--band)'}"/>${txt(w-cw/2,y+4,lb,{a:'middle',fs:11.5,w:700,c:d>0?'t-g':d<0?'t-r':'t-m'})}</g>`});
   return s}
 function rigStack(rows,types,w,h){ // каждая БУ — полоса на 365 дней, сегменты — дни по видам работ
-  const L=Math.min(104,w*.3), R=34, B=20, list=SORT.ld?[...rows].reverse():rows, n=list.length, rh=Math.max(34,(h-B)/n), X=d=>L+(d/365)*(w-L-R), M=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], md=[31,28,31,30,31,30,31,31,30,31,30,31];
+  const L=LABW(rows.map(r=>SHORT(r[0])),12,w,.32), R=34, B=20, list=SORT.ld?[...rows].reverse():rows, n=list.length, rh=Math.max(34,(h-B)/n), X=d=>L+(d/365)*(w-L-R), M=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], md=[31,28,31,30,31,30,31,31,30,31,30,31];
   let s='', acc=0; md.forEach((d,m)=>{const x=X(acc); s+=`<line x1="${x}" x2="${x}" y1="${B-4}" y2="${B+n*rh}" class="gl"/>`+txt(X(acc+d/2),12,(w-L)/12<34?M[m][0]:M[m],{a:'middle',fs:10.5,c:'t-m'}); acc+=d});
-  list.forEach((r,i)=>{const y=B+i*rh+rh/2, dd=Math.min(i,14)*.05; let x=L; s+=txt(L-8,y+4,SHORT(r[0]),{a:'end',fs:12,c:'t-i'});
+  list.forEach((r,i)=>{const y=B+i*rh+rh/2, dd=Math.min(i,14)*.05; let x=L; s+=txt(L-8,y+4,FIT(SHORT(r[0]),L-10,12),{a:'end',fs:12,c:'t-i'});
     r[1].forEach((d,j)=>{if(!d) return; const ww=X(d)-L; s+=`<rect class="gx" style="--d:${dd}s" x="${x}" y="${y-11}" width="${Math.max(0,ww-1.5)}" height="22" rx="3" fill="var(${types[j][1]})" ${T(r[0]+' · '+types[j][0]+': '+d+' дн.')}/>`;
       if(ww>22) s+=txt(x+ww/2,y+4,d,{a:'middle',fs:10.5,w:600,c:(types[j][1]==='--other'?'t-i':'t-w')+' fd',st:`--d:${dd}s`}); x+=ww});
     s+=txt(w,y+4,sum(r[1]),{a:'end',fs:11.5,c:'t-m'})});
   return s}
 function diverge(rows,w,h){ // по заказчикам: влево — потери ЭНГС, вправо — компенсирует заказчик
-  const n=rows.length, rh=h/n, C=w*.56, L=Math.min(100,w*.36), mx=Math.max(...rows.map(r=>Math.max(r[1]-r[2],r[2]))), Xl=v=>(v/mx)*(C-L-34), Xr=v=>(v/mx)*(w-C-36); let s='';
+  const n=rows.length, rh=h/n, L=LABW(rows.map(r=>r[0]),12,w,.36), C=Math.max(w*.56,L+70), mx=Math.max(...rows.map(r=>Math.max(r[1]-r[2],r[2]))), Xl=v=>(v/mx)*(C-L-34), Xr=v=>(v/mx)*(w-C-36); let s='';
   s+=`<line x1="${C}" x2="${C}" y1="0" y2="${h}" stroke="var(--line)" stroke-width="1.5"/>`;
-  rows.forEach((r,i)=>{const y=i*rh+rh/2, lo=r[1]-r[2], dd=i*.08, nm=r[0].length>13?r[0].slice(0,12)+'…':r[0];
+  rows.forEach((r,i)=>{const y=i*rh+rh/2, lo=r[1]-r[2], dd=i*.08, nm=FIT(r[0],L-6,12);
     s+=txt(0,y+4,nm,{fs:12,c:'t-i'});
     s+=`<rect class="gx" style="--d:${dd}s;transform-origin:100% 50%" x="${C-2-Xl(lo)}" y="${y-11}" width="${Xl(lo)}" height="22" rx="3" fill="var(--st-npv)" ${T(r[0]+': потери ЭНГС '+nf(lo,1)+' млн ₽')}/>`+txt(C-6-Xl(lo),y+4,'−'+nf(lo,lo<10?1:0),{a:'end',fs:11.5,c:'t-r fd',w:600});
     s+=`<rect class="gx" style="--d:${dd+.2}s" x="${C+2}" y="${y-11}" width="${Xr(r[2])}" height="22" rx="3" fill="var(--c1)" ${T(r[0]+': компенсирует заказчик '+nf(r[2],1)+' млн ₽')}/>`+txt(C+6+Xr(r[2]),y+4,'+'+nf(r[2],r[2]<10?1:0),{fs:11.5,c:'t-m fd',w:600})});
   return s}
 const incOf=g=>{const nm=D.npv.incg[g][0]; return D.npv.ev.filter(e=>e.g===nm).map(e=>[e.n,(e.well?'скв. '+e.well+' · ':'')+SHORT(e.rig||''),e.sh])};
 function incTree(w,h){ // группы инцидентов (% стоимости) с раскрытием
-  const L=Math.min(150,w*.48), R=46, mx=Math.max(...D.npv.incg.map(x=>Math.abs(x[1]))), X=v=>(Math.abs(v)/mx)*(w-L-R-26), nr=D.npv.incg.length+(NPVX!=null?incOf(NPVX).length:0); let s='', y=0, rh=Math.max(34,h/nr);
+  const L=LABW(D.npv.incg.map(g=>g[0]),12,w,.48), R=46, mx=Math.max(...D.npv.incg.map(x=>Math.abs(x[1]))), X=v=>(Math.abs(v)/mx)*(w-L-R-26), nr=D.npv.incg.length+(NPVX!=null?incOf(NPVX).length:0); let s='', y=0, rh=Math.max(34,h/nr);
   D.npv.incg.forEach((g,i)=>{const op=NPVX===i, dd=i*.08, cy=y+rh/2;
-    s+=`<g data-xg="${i}" style="cursor:pointer"><rect x="0" y="${y}" width="${w}" height="${rh}" fill="transparent"/>${txt(0,cy+4,(m=>g[0].length>m?g[0].slice(0,m-1)+'…':g[0])(Math.floor((L-8)/6.8)),{fs:12,c:'t-i',w:op?700:400})}
+    s+=`<g data-xg="${i}" style="cursor:pointer"><rect x="0" y="${y}" width="${w}" height="${rh}" fill="transparent"/>${txt(0,cy+4,FIT(g[0],L-10,12,700),{fs:12,c:'t-i',w:op?700:400})}
       <rect class="gx" style="--d:${dd}s" x="${L}" y="${cy-11}" width="${Math.max(2,X(g[1]))}" height="22" rx="3" fill="var(--rs-vmr)" opacity="${g[1]<0?.4:1}"/>${txt(L+Math.max(2,X(g[1]))+6,cy+4,nf(g[1],0)+' %',{fs:12,w:600,c:'t-i fd'})}
       <path d="${op?`M${w-14} ${cy+3}l5 -5 5 5`:`M${w-14} ${cy-3}l5 5 5 -5`}" fill="none" stroke="var(--muted)" stroke-width="1.8"/></g>`; y+=rh;
     if(op) incOf(i).forEach(r=>{const m=y+rh/2; s+=`<g class="fdi">${txt(12,m-1,r[0],{fs:11.5,c:'t-i'})}${txt(12,m+12,r[1],{fs:10,c:'t-m'})}${txt(w,m+4,nf(r[2],0)+' %',{a:'end',fs:11.5,c:'t-m'})}</g>`; y+=rh})});
@@ -3824,7 +3828,12 @@ function post(keep){const g=shadow.querySelector('.r2g'); if(!g) return; const m
   if(key==='home'&&lastInd){const el=g.querySelector(`[data-go="ind:${lastInd}"]`); lastInd=null; if(el){const r=el.getBoundingClientRect(); if(r.top<60||r.bottom>innerHeight-70) el.scrollIntoView({block:'center'}); el.classList.add('back-hl'); setTimeout(()=>el.classList.remove('back-hl'),900)}}
   if(key!=='home') lastInd=key}
 /* подсказки по касанию/наведению */
-function tipAt(e){const tip=shadow.querySelector('.r2tip'); if(!tip) return; const el=e.target.closest&&e.target.closest('[data-t]'); if(!el){tip.classList.remove('on'); return}
+/* палец толще линии: ищем ближайший элемент с подсказкой в радиусе ~32 px (сначала — тот, в чью колонку попали) */
+function nearT(e){const hit=e.target.closest&&e.target.closest('[data-t]'); if(hit&&!hit.classList.contains('hit')) return hit;
+  const svg=e.target.closest&&e.target.closest('.r2ch svg'); if(!svg) return hit; const x=e.clientX, y=e.clientY, R=e.pointerType==='mouse'?10:32; let best=hit, bd=hit?1:1e9;
+  svg.querySelectorAll('[data-t]').forEach(el=>{if(el.classList.contains('hit')) return; const r=el.getBoundingClientRect(); const dx=Math.max(r.left-x,0,x-r.right), dy=Math.max(r.top-y,0,y-r.bottom);
+    if(dx>R) return; const d=dx*3+Math.min(dy,R*4)*.25+(dy>R*4?1e6:0); if(d<bd){bd=d; best=el}}); return best}
+function tipAt(e){const tip=shadow.querySelector('.r2tip'); if(!tip) return; const el=nearT(e); if(!el){tip.classList.remove('on'); return}
   tip.textContent=el.dataset.t; tip.classList.add('on'); const x=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12), y=Math.max(60,e.clientY-tip.offsetHeight-12); tip.style.left=x+'px'; tip.style.top=y+'px'}
 shadow.addEventListener('pointermove',e=>{if(e.pointerType==='mouse') tipAt(e)});
 shadow.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){tipAt(e); const tip=shadow.querySelector('.r2tip'); clearTimeout(tipAt._t); tipAt._t=setTimeout(()=>tip&&tip.classList.remove('on'),2200)}});
