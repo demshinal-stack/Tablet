@@ -558,7 +558,7 @@ body.has-back .tabbar .tbk{flex:1 1 0;max-width:170px;opacity:1;transform:none;m
 html.glass{--g-base:color-mix(in srgb,var(--surface) 58%,transparent);--g-edge:rgba(255,255,255,.26);--g-hi:rgba(255,255,255,.45);--g-shadow:rgba(0,10,30,.35);--g-blur:blur(18px) saturate(185%)}
 @media (prefers-color-scheme: light){html.glass:not([data-theme="dark"]){--g-base:color-mix(in srgb,#fff 52%,transparent);--g-edge:rgba(255,255,255,.85);--g-hi:rgba(255,255,255,.95);--g-shadow:rgba(0,35,75,.18)}}
 html.glass[data-theme="light"]{--g-base:color-mix(in srgb,#fff 52%,transparent);--g-edge:rgba(255,255,255,.85);--g-hi:rgba(255,255,255,.95);--g-shadow:rgba(0,35,75,.18)}
-html.glass .tabbar,html.glass body.mode-map .panel:not(.smax),html.glass body.mode-map .kc,html.glass .zoomctl button,html.glass .legendov,html.glass .maptitle,html.glass .fpop{
+html.glass .tabbar,html.glass body.mode-map .panel:not(.smax),html.glass body.mode-map .kc:not(.open),html.glass .zoomctl button,html.glass .legendov,html.glass .maptitle,html.glass .fpop{
   background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 55%),var(--g-base)!important;
   -webkit-backdrop-filter:var(--g-blur);backdrop-filter:var(--g-blur);
   border:1px solid var(--g-edge)!important;box-shadow:inset 0 1px 0 var(--g-hi),inset 0 -1px 1px rgba(255,255,255,.08),0 10px 30px var(--g-shadow)!important}
@@ -1170,6 +1170,28 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 
 /* сборка 95: стрелки показателей в шапке отчётов */
 .rephead .rnav{border:0;background:color-mix(in srgb,var(--chrome-ink,#fff) 12%,transparent);color:inherit;width:28px;height:28px;border-radius:50%;font-size:17px;line-height:26px;cursor:pointer;flex:none;padding:0}
+
+/* ---------- сборка 102 ---------- */
+#fchips{display:none!important}
+.hasph{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important;color:transparent!important;text-shadow:none!important}
+.hasph>span{visibility:hidden}
+#pava{cursor:pointer;position:relative;overflow:hidden;border-radius:50%}
+.pavaw{position:relative;flex:none}
+.pavaw .pcam{position:absolute;right:-4px;bottom:-4px;width:24px;height:24px;border-radius:50%;border:2px solid var(--surface);background:var(--accent);color:var(--surface);display:grid;place-items:center;padding:0;cursor:pointer}
+.phb{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.phed{position:fixed;inset:0;z-index:200;background:rgba(0,12,30,.62);display:grid;place-items:center;padding:16px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.phed[hidden]{display:none}
+.phed .box{background:var(--surface);color:var(--body);border:1px solid var(--line);border-radius:22px;padding:16px;width:min(340px,100%);box-shadow:0 20px 60px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:12px}
+.phed h3{margin:0;font-family:var(--f-display);font-size:17px;color:var(--ink)}
+.phed canvas{width:100%;aspect-ratio:1;border-radius:14px;touch-action:none;cursor:grab;background:var(--band);display:block}
+.phed canvas:active{cursor:grabbing}
+.phed .zr{display:flex;align-items:center;gap:10px}
+.phed .zr input{flex:1;accent-color:var(--accent)}
+.phed .zr button,.phed .act button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 12px;font:inherit;font-size:13.5px;cursor:pointer}
+.phed .act{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.phed .act .pri{background:var(--accent);border-color:var(--accent);color:var(--surface);font-weight:600}
+.phed .act .lft{margin-right:auto}
+.phed .note{margin:0}
 </style>
 </head>
 <body>
@@ -1248,7 +1270,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:100,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:102,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2665,14 +2687,67 @@ addEventListener('offline',()=>offRender());
 /* после каждой отрисовки профиля подключаем переключатель */
 const _offRP=renderProfile; renderProfile=function(){_offRP.apply(this,arguments); offWire()};
 setTimeout(()=>{const m=offMeta(); if(PREFS.offline&&navigator.onLine&&(!m||m.build!==APP.build)) offDownload()},2500);
+/* ---------- сборка 102: фото профиля — только на этом устройстве ---------- */
+const PH_K='engs-ava', PH_SRC='engs-ava-src', PH_ST='engs-ava-st';
+const phGet=k=>{try{return localStorage.getItem(k)}catch(e){return null}}, phSet=(k,v)=>{try{if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); return true}catch(e){return false}};
+function avaPaint(){const u=phGet(PH_K); [document.getElementById('scrProf'),document.getElementById('pava'),document.getElementById('rtProfT')].forEach(el=>{if(!el) return;
+  if(u){el.style.backgroundImage=`url("${u}")`; el.classList.add('hasph')} else {el.style.backgroundImage=''; el.classList.remove('hasph')}});
+  const has=!!u; ['phEd','phDel'].forEach(id=>{const b=document.getElementById(id); if(b) b.hidden=!has}); const up=document.getElementById('phUp'); if(up) up.textContent=has?'Заменить':'Загрузить'}
+/* редактор: круг 1:1, перетаскивание, масштаб (ползунок, щипок, колесо), поворот на 90° */
+let PHE=null;
+function phEditor(src,st){let ov=document.getElementById('phed'); if(!ov){ov=document.createElement('div'); ov.id='phed'; ov.className='phed'; ov.setAttribute('role','dialog'); ov.setAttribute('aria-label','Фото профиля'); document.body.appendChild(ov)}
+  ov.innerHTML=`<div class="box"><h3>Фото профиля</h3><canvas width="560" height="560" aria-label="Перетащите фото, чтобы выбрать область"></canvas>
+    <div class="zr"><span class="note">−</span><input type="range" min="1" max="4" step="0.01" value="1" aria-label="Масштаб"><span class="note">+</span><button type="button" data-a="rot" aria-label="Повернуть">⟳ 90°</button></div>
+    <p class="note">Перетащите фото и приблизьте, чтобы лицо было в круге. Фото хранится только на этом устройстве.</p>
+    <div class="act"><button type="button" class="lft" data-a="new">Другое фото</button><button type="button" data-a="x">Отмена</button><button type="button" class="pri" data-a="ok">Сохранить</button></div></div>`;
+  ov.hidden=false; const cv=ov.querySelector('canvas'), cx=cv.getContext('2d'), V=cv.width, zr=ov.querySelector('input'), img=new Image();
+  const S=PHE={z:1,x:0,y:0,r:0,...(st||{})}; zr.value=S.z;
+  const dims=()=>{const w=S.r%2?img.height:img.width, h=S.r%2?img.width:img.height, sc=V/Math.min(w,h)*S.z; return {w,h,sc}};
+  const clamp=()=>{const {w,h,sc}=dims(), mx=(w*sc-V)/2, my=(h*sc-V)/2; S.x=Math.max(-mx,Math.min(mx,S.x)); S.y=Math.max(-my,Math.min(my,S.y))};
+  const paint=(c,N,mask)=>{const k=N/V, {sc}=dims(); c.save(); c.clearRect(0,0,N,N); c.translate(N/2+S.x*k,N/2+S.y*k); c.rotate(S.r*Math.PI/2); c.scale(sc*k,sc*k); c.drawImage(img,-img.width/2,-img.height/2); c.restore();
+    if(mask){c.save(); c.fillStyle='rgba(0,12,30,.55)'; c.beginPath(); c.rect(0,0,N,N); c.arc(N/2,N/2,N/2-2,0,Math.PI*2,true); c.fill('evenodd'); c.strokeStyle='rgba(255,255,255,.9)'; c.lineWidth=3; c.beginPath(); c.arc(N/2,N/2,N/2-2,0,Math.PI*2); c.stroke(); c.restore()}};
+  const draw=()=>{clamp(); paint(cx,V,true)};
+  img.onload=draw; img.src=src;
+  const pts=new Map(); let last=null, pinch=null; const toV=e=>{const r=cv.getBoundingClientRect(); return [(e.clientX-r.left)*V/r.width,(e.clientY-r.top)*V/r.height]};
+  cv.onpointerdown=e=>{cv.setPointerCapture(e.pointerId); pts.set(e.pointerId,toV(e)); if(pts.size===2){const [a,b]=[...pts.values()]; pinch={d:Math.hypot(a[0]-b[0],a[1]-b[1]),z:S.z}} last=toV(e)};
+  cv.onpointermove=e=>{if(!pts.has(e.pointerId)) return; const p=toV(e); pts.set(e.pointerId,p);
+    if(pts.size===2&&pinch){const [a,b]=[...pts.values()]; S.z=Math.max(1,Math.min(4,pinch.z*Math.hypot(a[0]-b[0],a[1]-b[1])/pinch.d)); zr.value=S.z; draw(); return}
+    if(last){S.x+=p[0]-last[0]; S.y+=p[1]-last[1]; last=p; draw()}};
+  cv.onpointerup=cv.onpointercancel=e=>{pts.delete(e.pointerId); if(pts.size<2) pinch=null; last=pts.size?[...pts.values()][0]:null};
+  cv.onwheel=e=>{e.preventDefault(); S.z=Math.max(1,Math.min(4,S.z*(e.deltaY<0?1.08:1/1.08))); zr.value=S.z; draw()};
+  zr.oninput=()=>{S.z=+zr.value; draw()};
+  const close=()=>{ov.hidden=true; ov.innerHTML=''; PHE=null};
+  ov.onclick=e=>{const a=e.target.closest('[data-a]'); if(e.target===ov){close(); return} if(!a) return;
+    if(a.dataset.a==='rot'){S.r=(S.r+1)%4; S.x=S.y=0; draw()}
+    else if(a.dataset.a==='x') close();
+    else if(a.dataset.a==='new'){close(); phPick()}
+    else if(a.dataset.a==='ok'){const o=document.createElement('canvas'); o.width=o.height=320; const c=o.getContext('2d'); c.fillStyle='#fff'; c.fillRect(0,0,320,320); paint(c,320,false);
+      const url=o.toDataURL('image/jpeg',.86); if(!phSet(PH_K,url)){alert('Не удалось сохранить фото: на устройстве нет места для данных приложения.'); return}
+      phSet(PH_ST,JSON.stringify({z:S.z,x:S.x,y:S.y,r:S.r})); close(); avaPaint()}};
+  document.addEventListener('keydown',function esc(e){if(e.key==='Escape'&&!ov.hidden){close(); document.removeEventListener('keydown',esc)}})}
+/* выбор файла: уменьшаем до 1200 px, исходник храним для повторного редактирования (если хватает места) */
+function phPick(){let inp=document.getElementById('phFile'); if(!inp){inp=document.createElement('input'); inp.type='file'; inp.accept='image/*'; inp.id='phFile'; inp.hidden=true; document.body.appendChild(inp)}
+  inp.value=''; inp.onchange=()=>{const f=inp.files&&inp.files[0]; if(!f) return; const u=URL.createObjectURL(f), im=new Image();
+    im.onload=()=>{const k=Math.min(1,1200/Math.max(im.width,im.height)), c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(u);
+      const src=c.toDataURL('image/jpeg',.85); if(!phSet(PH_SRC,src)) phSet(PH_SRC,null); phSet(PH_ST,null); phEditor(src,null)};
+    im.onerror=()=>{URL.revokeObjectURL(u); alert('Не удалось открыть этот файл как изображение.')}; im.src=u};
+  inp.click()}
+function phEdit(){const src=phGet(PH_SRC)||phGet(PH_K); if(!src){phPick(); return} let st=null; try{st=phGet(PH_SRC)?JSON.parse(phGet(PH_ST)||'null'):null}catch(e){} phEditor(src,st)}
+function phDel(){if(!confirm('Удалить фото профиля с этого устройства?')) return; [PH_K,PH_SRC,PH_ST].forEach(k=>phSet(k,null)); avaPaint()}
+function phWire(){const g=id=>document.getElementById(id); if(g('phUp')) g('phUp').onclick=phPick; if(g('phEd')) g('phEd').onclick=phEdit; if(g('phDel')) g('phDel').onclick=phDel;
+  if(g('pava')) g('pava').onclick=()=>phGet(PH_K)?phEdit():phPick(); if(g('pcam')) g('pcam').onclick=e=>{e.stopPropagation(); phGet(PH_K)?phEdit():phPick()}; avaPaint()}
+const _phRP=renderProfile; renderProfile=function(){_phRP.apply(this,arguments); phWire()};
+setTimeout(avaPaint,0);
+
 function renderProfile(){
   const el=document.getElementById('profwrap'), sw=(k,l,s)=>`<div class="prow"><span class="l">${l}${s?'<small>'+s+'</small>':''}</span><button type="button" class="sw" role="switch" data-k="${k}" aria-checked="${!!PREFS[k]}" aria-label="${l.replace(/<[^>]+>/g,'').trim()}"></button></div>`;
   const seg=(k,opts)=>`<div class="seg" data-seg="${k}">${opts.map(([v,n])=>`<button type="button" data-v="${v}" aria-pressed="${PREFS[k]===v}">${n}</button>`).join('')}</div>`;
   el.innerHTML=`<div class="prof">
-    <div class="pbox" style="flex-direction:row;align-items:center;gap:14px"><span class="ava" id="pava">${initials(PREFS.name)}</span><div><div class="eyebrow">Профиль</div><div id="pnm" style="font-family:var(--f-display);font-size:18px;color:var(--ink)">${esc(PREFS.name||'Имя не указано')}</div><div class="note" id="prl">${esc(PREFS.role)} · ЭНГС</div></div></div>
+    <div class="pbox" style="flex-direction:row;align-items:center;gap:14px"><span class="pavaw"><span class="ava" id="pava" role="button" tabindex="0" aria-label="Фото профиля"><span>${initials(PREFS.name)}</span></span><button type="button" class="pcam" id="pcam" aria-label="Загрузить или изменить фото"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg></button></span><div><div class="eyebrow">Профиль</div><div id="pnm" style="font-family:var(--f-display);font-size:18px;color:var(--ink)">${esc(PREFS.name||'Имя не указано')}</div><div class="note" id="prl">${esc(PREFS.role)} · ЭНГС</div></div></div>
     <div class="pbox"><h3>Пользователь</h3>
       <div class="prow"><label for="pName">Имя</label><input type="text" id="pName" value="${esc(PREFS.name)}" placeholder="Фамилия И. О."></div>
-      <div class="prow"><label for="pRole">Должность</label><input type="text" id="pRole" value="${esc(PREFS.role)}"></div></div>
+      <div class="prow"><label for="pRole">Должность</label><input type="text" id="pRole" value="${esc(PREFS.role)}"></div>
+      <div class="prow"><span class="l">Фото<small>хранится только на этом устройстве</small></span><span class="phb"><button type="button" class="btn2" id="phUp">Загрузить</button><button type="button" class="btn2" id="phEd" hidden>Изменить</button><button type="button" class="btn2" id="phDel" hidden>Удалить</button></span></div></div>
     <div class="pbox"><h3>Оформление</h3>
       <div class="prow"><span class="l">Тема</span>${seg('theme',[['system','Как в системе'],['light','Светлая'],['dark','Тёмная']])}</div>
       ${sw('glass','Liquid Glass <span class="newb">новое</span>','стеклянные меню, шторки и панели над картой')}</div>
@@ -2700,7 +2775,7 @@ function renderProfile(){
       <div class="prow"><span class="l">Обновления<small id="updS">${'serviceWorker' in navigator&&location.protocol.startsWith('http')&&!location.hostname.endsWith('claude.ai')?'проверяются при каждом открытии':'доступны после установки на экран «Домой»'}</small></span><button type="button" class="btn2" id="pUpd">Проверить</button></div>
       <p class="note" style="margin:0">Установка на iPhone и iPad: откройте адрес приложения в Safari → «Поделиться» → «На экран „Домой“». На компьютере: Chrome или Edge → значок установки в адресной строке.</p></div>
   </div>`;
-  const upd=()=>{savePrefs(); document.getElementById('pava').textContent=document.getElementById('havaT').textContent=initials(PREFS.name); document.getElementById('pnm').textContent=PREFS.name||'Имя не указано'; document.getElementById('prl').textContent=PREFS.role+' · ЭНГС'};
+  const upd=()=>{savePrefs(); document.getElementById('pava').firstElementChild.textContent=document.getElementById('havaT').textContent=initials(PREFS.name); document.getElementById('pnm').textContent=PREFS.name||'Имя не указано'; document.getElementById('prl').textContent=PREFS.role+' · ЭНГС'};
   document.getElementById('pName').oninput=e=>{PREFS.name=e.target.value; upd()};
   document.getElementById('pUpd').onclick=()=>{const st=document.getElementById('updS'); st.textContent='проверяю…'; (window.__pulseCheckUpdate?window.__pulseCheckUpdate():Promise.resolve(null)).then(f=>{st.textContent=f===null?'доступны после установки на экран «Домой»':f?'есть новая версия — нажмите «Обновить» внизу':'у вас последняя версия '+APP.version})};
   document.getElementById('pRole').oninput=e=>{PREFS.role=e.target.value; upd()};
@@ -3663,16 +3738,25 @@ function splits(L,w,h){ // две полосы «доля А / доля Б» о�
   return s}
 let SORT={}, NPVX=null;
 const sorted=(a,k)=>[...a].sort((x,y)=>SORT[k]?x[1]-y[1]:y[1]-x[1]);
-function treemap(types,w,h){ // плитки типов: площадь — млн ₽
+function treemap(types,w,h){ // плитки типов: площадь — млн ₽; подпись — полное название, если не влезает — меньше шрифт или вертикально; цвет подписи — по яркости плитки (tmInk)
   const it=[...types].sort((a,b)=>b.v-a.v), tot=sum(it.map(x=>x.v)); let s='', k=0;
-  const lay=(arr,x,y,W,H)=>{if(!arr.length) return; if(arr.length===1){const t=arr[0], g=2, dd=(k++)*.1, big=W>70&&H>44;
-      s+=`<g class="pop" style="--d:${dd}s"><rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="${t.c}" ${t.demo?'opacity=".55"':''} ${T((t.full||t.n)+': '+nf(t.v,1)+' млн ₽ · '+nf(t.v/tot*100,0)+' %'+(t.demo?' (демо)':''))}/>${t.demo?`<rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="url(#hatch)" pointer-events="none"/>`:''}`;
-      const fg=(t.n==='Ремонт'||t.c==='var(--other)')?'var(--ink)':'#fff';
-      if(W>46&&H>30) s+=`<text x="${x+8}" y="${y+18}" font-size="${big?12.5:10.5}" style="fill:${fg}" pointer-events="none">${esc(FIT(t.n,W-14,big?12.5:10.5))}</text><text x="${x+W-8}" y="${y+H-9}" text-anchor="end" font-size="${big?Math.min(22,H*.3):12}" font-weight="700" style="fill:${fg}" pointer-events="none">${nf(t.v/tot*100,0)}%</text>`;
+  const lay=(arr,x,y,W,H)=>{if(!arr.length) return; if(arr.length===1){const t=arr[0], g=2, dd=(k++)*.1, big=W>70&&H>44, pc=nf(t.v/tot*100,0)+'%';
+      s+=`<g class="pop tm" style="--d:${dd}s"${t.demo?' data-op=".55"':''}><rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="${t.c}" ${t.demo?'opacity=".55"':''} ${T((t.full||t.n)+': '+nf(t.v,1)+' млн ₽ · '+pc+(t.demo?' (демо)':''))}/>${t.demo?`<rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="url(#hatch)" pointer-events="none"/>`:''}`;
+      const nm=t.n, at=(xx,yy,fs,wt,a,tx,rot)=>`<text class="tml" x="${xx}" y="${yy}" font-size="${fs}" font-weight="${wt}"${a?` text-anchor="${a}"`:''}${rot?` transform="rotate(-90 ${xx} ${yy})"`:''} pointer-events="none">${esc(tx)}</text>`;
+      const pfs=big?Math.min(22,H*.3):11.5, pw=TW(pc,pfs,700), fsH=[12.5,11,10].find(f=>TW(nm,f,600)<=W-12);
+      if(fsH&&H>=22){s+=at(x+7,y+(H<34?H/2+4:17),fsH,600,'',nm); if(H>=44&&W>=pw+12) s+=at(x+W-7,y+H-8,pfs,700,'end',pc); else if(H<44&&W>=TW(nm,fsH,600)+pw+22) s+=at(x+W-7,y+(H<34?H/2+4:17),11,700,'end',pc)}
+      else {const fsV=[12.5,11,10].find(f=>TW(nm,f,600)<=H-12&&W>=f+6); // узкая высокая плитка — название вертикально
+        if(fsV){const pv=W>=pw+8&&H>=TW(nm,fsV,600)+34; s+=at(x+W/2+fsV*.36,y+H-(pv?28:7),fsV,600,'',nm,1); if(pv) s+=at(x+W/2,y+H-8,Math.min(11.5,pfs),700,'middle',pc)}
+        else if(W>=24&&H>=16) s+=at(x+W/2,y+H/2+4,Math.min(11,W/3.2),700,'middle',(t.short||nm).slice(0,W>=40?4:2))}
       s+='</g>'; return}
     const S=sum(arr.map(z=>z.v)); let acc=0,i=0; while(i<arr.length-1&&acc+arr[i].v<S/2){acc+=arr[i].v;i++} if(i===0){acc=arr[0].v;i=1}
     const f=acc/S; if(W>=H){lay(arr.slice(0,i),x,y,W*f,H);lay(arr.slice(i),x+W*f,y,W*(1-f),H)} else {lay(arr.slice(0,i),x,y,W,H*f);lay(arr.slice(i),x,y+H*f,W,H*(1-f))}};
   lay(it,0,0,w,h); return s}
+/* цвет подписей на плитках treemap — по фактической яркости плитки в текущей теме (с учётом прозрачности демо); на штриховке — ореол цвета плитки */
+function tmInk(root){const rgb=c=>{const m=String(c).match(/[\d.]+/g); return m?m.slice(0,3).map(Number):[255,255,255]};
+  root.querySelectorAll('g.tm').forEach(g=>{const r=g.querySelector('rect'); if(!r) return; let e=g.ownerSVGElement||g, cb='rgba(0, 0, 0, 0)'; while(e){cb=getComputedStyle(e).backgroundColor; if(!/rgba\(.*,\s*0\)$|transparent/.test(cb)) break; e=e.parentElement||(e.getRootNode&&e.getRootNode().host)} const bg=rgb(cb), op=+(g.dataset.op||1), c=rgb(getComputedStyle(r).fill).map((v,i)=>v*op+bg[i]*(1-op));
+    const L=c.map(v=>{v/=255; return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)}), Y=.2126*L[0]+.7152*L[1]+.0722*L[2], fg=1.05/(Y+.05)>=(Y+.05)/.06?'#FFFFFF':'#0C1A2E', halo=`rgb(${c.map(Math.round).join(',')})`;
+    g.querySelectorAll('text.tml').forEach(t=>{t.style.fill=fg; if(g.dataset.op){t.style.stroke=halo; t.style.strokeWidth='3px'; t.style.paintOrder='stroke'; t.style.strokeLinejoin='round'}})})}
 function wfZero(steps,o,w,h){ // водопад от нуля: шаги по видам работ → итого (как «НПВ общее БП»)
   const n=steps.length+1, top=22, bot=h-38, slot=w/n, bw=Math.min(64,slot*.62); let run=0, lo=0, hi=0; steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
   const Y=v=>top+((hi-v)/((hi-lo)||1))*(bot-top); let s=`<line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1" opacity=".5"/>`, cur=0;
@@ -3796,6 +3880,7 @@ const LLO=()=>[LI.line('var(--c3)','9+3'),LI.tick('var(--ink)','БП'),LI.dot('v
 const LWF=(up)=>[LI.sw('var(--c2)','БП'),LI.sw('var(--good)',up?'рост к БП':'экономия к БП'),LI.sw('var(--bad)',up?'снижение к БП':'перерасход к БП'),LI.sw('var(--c3)','9+3')];
 const LTY=(fc)=>D.load.types.map(x=>LI.sw(`var(${x[1]})`,x[0])).concat(fc?[LI.sw('var(--c3)','прогноз окт–дек',.45)]:[]);
 const LSP=()=>[LI.sw('var(--c3)','9+3 · '+nf(D.speed.v.f,2)),LI.tick('var(--ink)','БП · '+nf(D.speed.v.bp,2)),LI.tick('var(--c1)','2025 · '+nf(D.speed.v.f25,2))];
+const LNT=()=>[...D.npv.types].sort((a,b)=>b.v-a.v).map(t=>LI.sw(t.c,t.n)).concat([LI.hatch('демо')]);
 const LG={
  'ebitda.a':LP,'ebitda.b':()=>[LI.sw('var(--c3)','9+3 · '+nf(D.margin.f,1)+' %'),LI.tick('var(--ink)','БП · '+nf(D.margin.bp,1)+' %')],'ebitda.c':LPER,'ebitda.d':()=>LWF(1),'ebitda.g':()=>[`<span>цвет — группа, площадь — доля EBITDA 9+3</span>`],
  'rev.a':()=>LSPL('rev'),'rev.b':LPER,'rev.c':()=>LWF(1),
@@ -3803,11 +3888,11 @@ const LG={
  'wells.a':LP,'wells.b':LPER,
  'load.a':()=>LTY(0),'load.b':()=>[LI.sw('var(--c3)','сейчас'),LI.sw('var(--c2)','БП (демо)'),`<span>справа — разница</span>`],'load.m':()=>LTY(1),'load.c':()=>LTY(0).concat([`<span>шкала — дни года · ↕ — сортировка</span>`]),
  'speed.a':LP,'speed.b':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'speed.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),
- 'npv.a':LP,'npv.b':()=>[`<span>цвет — тип НПВ, площадь — млн ₽</span>`,LI.hatch('демо')],'npv.c':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],'npv.d':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],
+ 'npv.a':LP,'npv.b':()=>LNT(),'npv.c':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],'npv.d':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],
  'npv.e':()=>[LI.sw('var(--bad)','потери к БП'),LI.sw('var(--good)','лучше БП'),LI.sw('var(--ink)','итого')],'npv.f':()=>[LI.sw('var(--st-npv)','НПВ — потери ЭНГС'),LI.sw('var(--c1)','компенсирует заказчик (сут. ставка)')],
  'npv.g':()=>[LI.sw('var(--rs-vmr)','доля стоимости инцидентов'),`<span>⌄ — состав группы (демо)</span>`],'npv.h':()=>[LI.sw('#7A2328','ЭНГС'),LI.sw('var(--c1)','заказчик')],
  'cost.a':()=>LSPL('cost'),'cost.b':LPER,'cost.c':()=>LWF(0),
- 'home.ebitda':LP,'home.rev':()=>LSPL('rev'),'home.drill':LP,'home.wells':LP,'home.load':()=>LTY(0),'home.speed':LSP,'home.npv':()=>[LI.sw('var(--st-npv)','млн ₽, цвет — тип'),LI.hatch('демо')],'home.cost':()=>LSPL('cost')};
+ 'home.ebitda':LP,'home.rev':()=>LSPL('rev'),'home.drill':LP,'home.wells':LP,'home.load':()=>LTY(0),'home.speed':LSP,'home.npv':()=>LNT(),'home.cost':()=>LSPL('cost')};
 
 /* ---------- первый уровень: плитки по настройке (порядок, скрытые), у каждой — свой график ---------- */
 const HCH={load:(w,h)=>ringCount(D.load.state,w,h,1), speed:(w,h)=>speedo(D.speed.v,{max:6,u:'т. м/ст-мес'},w,h), npv:(w,h)=>treemap(D.npv.types,w,h)};
@@ -3853,7 +3938,7 @@ function post(keep){const g=shadow.querySelector('.r2g'); if(!g) return; const m
   [...g.children].forEach((el,i)=>{const t=SPEC.tiles[i], ch=el.querySelector('.r2ch'); if(!t||!ch) return; let w=ch.clientWidth, h=ch.clientHeight; if(w<40||h<40) return;
     if(t.rows){const need=t.rows()*(+el.dataset.rh||t.rh||34)+extraH(t), can=EXP===key+'.'+t.a||need>h+1; el.dataset.can=can?1:0; if(!can){const b=el.querySelector('.r2exp'); if(b) b.remove()} if(need>h+1){ch.classList.add('scr'); w=ch.clientWidth-6; h=need}}
     try{ch.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--surface)" stroke-width="2.2"/></pattern></defs>${t.ch(w,h)}</svg>`}catch(e){ch.innerHTML='<p class="r2ft">Нет данных для графика</p>'; console.error(e)}});
-  if(anim) countUp(g);
+  tmInk(g); if(anim) countUp(g);
   if(key==='home'&&lastInd){const el=g.querySelector(`[data-go="ind:${lastInd}"]`); lastInd=null; if(el){const r=el.getBoundingClientRect(); if(r.top<60||r.bottom>innerHeight-70) el.scrollIntoView({block:'center'}); el.classList.add('back-hl'); setTimeout(()=>el.classList.remove('back-hl'),900)}}
   if(key!=='home') lastInd=key}
 /* подсказки по касанию/наведению */
