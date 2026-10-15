@@ -1326,7 +1326,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:107,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:108,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4024,12 +4024,17 @@ shadow.addEventListener('click',e=>{const ex=e.target.closest('[data-exp]'); if(
   const xg=e.target.closest('[data-xg]'); if(xg){e.stopPropagation(); const i=+xg.dataset.xg; NPVX=NPVX===i?null:i; render(true)}},true);
 /* отклонение над столбцами: % ↔ абсолют. Срабатывает по отрыву пальца (iOS может не прислать click после прокрутки или перерисовки),
    click по плашке гасится — плитка не открывается, подсказки нет */
-let dvDown=null, dvDone=0;
+let dvDown=null, dvDone=0, dvPos=[0,0];
 const dvToggle=()=>{DM=DM==='pct'?'abs':'pct'; if(typeof APPS!=='undefined') APPS.forEach(x=>x.render(true)); else render(true)};
-shadow.addEventListener('pointerdown',e=>{const g=e.target.closest&&e.target.closest('[data-dm]'); dvDown=g?{x:e.clientX,y:e.clientY,t:performance.now()}:null},true);
-shadow.addEventListener('pointerup',e=>{const g=e.target.closest&&e.target.closest('[data-dm]'); if(!g||!dvDown||e.pointerType==='mouse') return;
-  if(Math.hypot(e.clientX-dvDown.x,e.clientY-dvDown.y)<12&&performance.now()-dvDown.t<800){e.stopPropagation(); dvDone=performance.now(); dvToggle()} dvDown=null},true);
-shadow.addEventListener('click',e=>{const g=e.target.closest&&e.target.closest('[data-dm]'); if(!g) return; e.stopPropagation(); e.preventDefault(); if(performance.now()-dvDone>700) dvToggle()},true);
+/* попадание определяем по координатам, а не по цели события: Safari на iPhone «доводит» касание до ближайшей кнопки (плитки) */
+const dvAt=(x,y)=>[...shadow.querySelectorAll('.r2dv .dvhit')].some(r=>{const b=r.getBoundingClientRect(); return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom});
+shadow.addEventListener('pointerdown',e=>{dvDown=dvAt(e.clientX,e.clientY)?{x:e.clientX,y:e.clientY,t:performance.now()}:null; if(dvDown) e.stopPropagation()},true);
+shadow.addEventListener('pointerup',e=>{if(!dvDown) return; const ok=e.pointerType!=='mouse'&&Math.hypot(e.clientX-dvDown.x,e.clientY-dvDown.y)<12&&performance.now()-dvDown.t<800; dvDown=null; if(!ok) return;
+  e.stopPropagation(); dvDone=performance.now(); dvPos=[e.clientX,e.clientY]; dvToggle()},true);
+shadow.addEventListener('pointercancel',()=>{dvDown=null},true);
+/* любой click сразу после касания плашки — гасим (даже если Safari отдал его плитке) */
+shadow.addEventListener('click',e=>{const recent=performance.now()-dvDone<800&&(e.clientX||e.clientY)&&Math.hypot(e.clientX-dvPos[0],e.clientY-dvPos[1])<40, on=dvAt(e.clientX,e.clientY)||(e.target.closest&&e.target.closest('[data-dm]'));
+  if(!recent&&!on) return; e.stopPropagation(); e.preventDefault(); if(!recent) dvToggle()},true);
 let lastTap={t:0,a:null,x:0,y:0};
 shadow.addEventListener('pointerup',e=>{if(e.target.closest('[data-srt],[data-exp],[data-xg],[data-dm]')) return; const el=e.target.closest('.r2t'); if(!el||el.dataset.can!=='1') return; const g=shadow.querySelector('.r2g'), t=SPEC&&SPEC.tiles[[...g.children].indexOf(el)]; if(!t||!t.rows||t.go) return;
   const now=performance.now(); if(lastTap.a===t.a&&now-lastTap.t<350&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<24){lastTap={t:0,a:null}; toggleExp(t.a)} else lastTap={t:now,a:t.a,x:e.clientX,y:e.clientY}});
