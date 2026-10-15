@@ -1329,7 +1329,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:109,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:110,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3602,7 +3602,7 @@ function bars3(v,o,w,h){ // три периода; скобки отклонен
     s+=`<path class="fd" d="M${x1} ${y1}V${ly}H${x2}V${y2-4}" fill="none" stroke="var(--muted)" stroke-width="1.2" opacity=".7"/><path class="fd" d="M${x2-4} ${y2-9}l4 6 4-6" fill="none" stroke="var(--muted)" stroke-width="1.2"/><circle class="fd" cx="${x1}" cy="${y1}" r="2.5" fill="var(--muted)"/>`;
     /* отклонение: нажатие переключает % ↔ абсолют (как в «Итогах»); своя увеличенная зона касания — не уводит на 2-й уровень и не вызывает подсказку */
     const abs=typeof DM!=='undefined'&&DM==='abs', lb=abs?sg(b-a,d):sg(p,1)+' %', tw=TW(lb,12,600)+16, mx2=(x1+x2)/2;
-    s+=`<g class="fd r2dv" data-dm="1" role="button" aria-label="Отклонение ${lb}: нажмите — % или абсолют"><rect class="dvhit" x="${mx2-tw/2-14}" y="${ly-20}" width="${tw+28}" height="40" fill="transparent"/><rect x="${mx2-tw/2}" y="${ly-10}" width="${tw}" height="20" rx="10" fill="${c}"/>${txt(mx2,ly+4.5,lb,{a:'middle',c:'t-w',fs:12,w:600})}</g>`});}
+    const lp=sg(p,1)+' %', la=sg(b-a,d); s+=`<g class="fd r2dv" data-dm="1" data-lp="${lp}" data-la="${la}" data-cx="${mx2}" role="button" aria-label="Отклонение ${lb}: нажмите — % или абсолют"><rect class="dvhit" x="${mx2-tw/2-14}" y="${ly-20}" width="${tw+28}" height="40" fill="transparent"/><rect x="${mx2-tw/2}" y="${ly-10}" width="${tw}" height="20" rx="10" fill="${c}"/>${txt(mx2,ly+4.5,lb,{a:'middle',c:'t-w',fs:12,w:600})}</g>`});}
   return s}
 
 function perRows(v,o,w,h){ // «на станок»: горизонтальные полосы трёх периодов + метка БП
@@ -4029,7 +4029,12 @@ shadow.addEventListener('click',e=>{const ex=e.target.closest('[data-exp]'); if(
 /* отклонение над столбцами: % ↔ абсолют. Срабатывает по отрыву пальца (iOS может не прислать click после прокрутки или перерисовки),
    click по плашке гасится — плитка не открывается, подсказки нет */
 let dvDown=null, dvDone=0, dvPos=[0,0];
-const dvToggle=()=>{DM=DM==='pct'?'abs':'pct'; if(typeof APPS!=='undefined') APPS.forEach(x=>x.render(true)); else render(true)};
+/* переключение без перерисовки экрана: меняем только надписи плашек — прокрутка не прыгает (Safari сбрасывал её при перерисовке) */
+const dvToggle=()=>{DM=DM==='pct'?'abs':'pct'; const L=[...shadow.querySelectorAll('.r2dv[data-lp]')];
+  if(!L.length){if(typeof APPS!=='undefined') APPS.forEach(x=>x.render(true)); else render(true); return}
+  L.forEach(g=>{const lb=DM==='abs'?g.dataset.la:g.dataset.lp, cx=+g.dataset.cx, tw=TW(lb,12,600)+16, rs=g.querySelectorAll('rect'), tx=g.querySelector('text');
+    tx.textContent=lb; rs[0].setAttribute('x',cx-tw/2-14); rs[0].setAttribute('width',tw+28); rs[1].setAttribute('x',cx-tw/2); rs[1].setAttribute('width',tw);
+    g.setAttribute('aria-label','Отклонение '+lb+': нажмите — % или абсолют')})};
 /* попадание определяем по координатам, а не по цели события: Safari на iPhone «доводит» касание до ближайшей кнопки (плитки) */
 const dvAt=(x,y)=>[...shadow.querySelectorAll('.r2dv .dvhit')].some(r=>{const b=r.getBoundingClientRect(); return x>=b.left&&x<=b.right&&y>=b.top&&y<=b.bottom});
 shadow.addEventListener('pointerdown',e=>{dvDown=dvAt(e.clientX,e.clientY)?{x:e.clientX,y:e.clientY,t:performance.now()}:null; if(dvDown) e.stopPropagation()},true);
