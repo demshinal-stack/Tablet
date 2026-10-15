@@ -1270,7 +1270,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:102,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:103,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2183,7 +2183,7 @@ function cumChart(el,ws,per,vd,csEl){const P=cumPeriod(per), rate=d3.sum(ws,w=>w
       :`При текущем темпе ${per==='month'?'месяц':'год'} закроется на <b>${Math.round(fc/planEnd*100)} %</b> плана — не хватит <b>${nf0(planEnd-fc)} м</b>. Нужно ${nf0((planEnd-F)/(P.L-e)*(per==='year'?30.4:1))} м/${per==='year'?'мес.':'сут'} вместо ${nf0(F/e*(per==='year'?30.4:1))}.`}</span>`}}
 function dynBind(id,ws,after,onPer){const draw=()=>{const bul=document.getElementById(id+'bul'); if(!bul) return;
     bul.innerHTML=bulletsHTML(ws);
-    bul.querySelectorAll('.dbr').forEach(b=>b.onclick=()=>{state.per=b.dataset.p; if(onPer) onPer(); else draw()});
+    bul.querySelectorAll('.dbr').forEach(b=>b.onclick=()=>{state.per=b.dataset.p; if(onPer) onPer(); else draw(); if(typeof renderStrip==='function') renderStrip()});
     cumChart(document.getElementById(id+'ch'),ws,state.per,document.getElementById(id+'vd'),document.getElementById(id+'cs'));
     const nb=document.getElementById(id+'npv'); if(nb){nb.innerHTML=npvHTML(ws,state.per); nb.querySelector('.npvc').onclick=()=>npvOpen(ws,state.per); document.getElementById(id+'ns').textContent=PER[state.per].n.toLowerCase()+' · доля календарного времени'}
     if(after) after()};
@@ -2567,17 +2567,17 @@ function renderSync(){const b=document.getElementById('syncBtn'); if(!b) return;
 document.getElementById('syncBtn').onclick=e=>{e.stopPropagation(); if(state.mode==='rep'){repTab('set'); return} const P=document.getElementById('syncPop'); P.hidden=!P.hidden};
 document.addEventListener('pointerdown',e=>{const P=document.getElementById('syncPop'); if(P&&!P.hidden&&!e.target.closest('#syncPop')&&!e.target.closest('#syncBtn')) P.hidden=true});
 function renderStrip(){if(typeof lpRender==='function') setTimeout(lpRender,0); const el=document.getElementById('kstrip'); if(!el) return; if(state.screen!=='map'){el.innerHTML=''; return}
-  const sc=scopeWells(), t=totals(sc,'day'), npv=sc.filter(w=>w.npv).length, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
+  const sc=scopeWells(), sp=state.per||'day', t=totals(sc,sp), npv=sc.filter(w=>w.npv).length, SPN={day:'сутки',month:'месяц',year:'год'}[sp], npvV=sp==='month'?npvReal(sc):npvShare(sc,sp).opct, rr=sc.filter(w=>w.res.l==='r').length, op=panelOpen();
   const rigs=new Set(sc.map(w=>w.rig)).size, cus=new Set(sc.map(w=>w.cust)).size;
   let te,tt; if(state.level==='fields'){te='Ямало-Ненецкий АО'; const nf_=new Set(sc.map(w=>w.field)).size; tt=nf_+' '+plural(nf_,'месторождение','месторождения','месторождений')}
   else if(state.level==='field'){te='Месторождение'; tt=FIELDS.find(x=>x.id===state.field).n}
   else if(state.level==='cust'){te='Заказчик'; tt=CUSTOMERS.find(x=>x.id===state.cust).n}
   else {const w=WELLS.find(x=>x.id===state.well); te=w.field.n; tt='Скв. '+w.no}
   el.innerHTML=`<span class="kc ktitle"><span>${esc(te)}</span><b>${esc(tt)}</b></span><button type="button" class="kc btn klist" data-kl="rig" aria-haspopup="dialog"><span>Буровые уст.</span><b>${rigs}</b></button><button type="button" class="kc btn klist" data-kl="cust" aria-haspopup="dialog"><span>Заказчики</span><b>${cus}</b></button><button type="button" class="kc btn klist" data-kl="well" aria-haspopup="dialog"><span>Скважины</span><b>${sc.length}</b></button>`+
-    `<span class="kc kw ${t.pct<NORM.plan_day_bad?'bad':''}"><span>Проходка за сутки</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
-    `<button type="button" class="kc kw btn ${npv?'bad':''}" id="kNpv"><span>НПВ ЭНГС за месяц</span><b>${pct1(npvReal(sc))}</b><span>${npv} скв. сейчас ›</span></button>`+
+    `<span class="kc kw ${t.pct<NORM.plan_day_bad?'bad':''}"><span>Проходка за ${SPN}</span><b>${nf0(t.fact)} м</b><span>${Math.round(t.pct*100)} % плана</span></span>`+
+    `<button type="button" class="kc kw btn ${npv?'bad':''}" id="kNpv"><span>НПВ ЭНГС за ${SPN}</span><b>${pct1(npvV)}</b><span>${npv} скв. сейчас ›</span></button>`+
     (op?'':`<button type="button" class="kc open" id="kOpen"><b>Показатели</b>›</button>`);
-  document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),'month');
+  document.getElementById('kNpv').onclick=()=>npvOpen(scopeWells(),state.per||'month');
   el.querySelectorAll('[data-kl]').forEach(b=>b.onclick=e=>{e.stopPropagation(); lpOpen(b.dataset.kl)});
   const ko=document.getElementById('kOpen'); if(ko) ko.onclick=()=>togglePanel(true)}
 let LP_prev=LANDP();
