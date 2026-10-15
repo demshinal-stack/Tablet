@@ -1248,7 +1248,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:99,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:100,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3687,9 +3687,9 @@ function wfZero(steps,o,w,h){ // водопад от нуля: шаги по в�
   return s}
 const SECW=(i,n,R,k=1)=>R*k*(.24+.18*(n>1?(n-1-i)/(n-1):1)); // доля радиуса; k — понижающий коэффициент для 1-го уровня
 const SEMI_K=.7; // i — место по убыванию
-function ringCount(st0,w,h){ // наружный край общий; сектора от большего (толще) к меньшему (тоньше) по часовой; при появлении кольцо прокручивается
+function ringCount(st0,w,h,noLg){ // наружный край общий; сектора от большего (толще) к меньшему (тоньше) по часовой; при появлении кольцо прокручивается
   const st=[...st0].sort((a,b)=>b[2]-a[2]||a[0].localeCompare(b[0])), n=st.length;
-  const tot=sum(st.map(x=>x[2])), lgW=w>520?150:0, R=Math.min((w-lgW)/2,h/2-14)-1, cx=lgW?(w-lgW)/2:w/2, cy=h/2, P=(a,r)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  const tot=sum(st.map(x=>x[2])), lgW=!noLg&&w>520?150:0, R=Math.min((w-lgW)/2,h/2-14)-1, cx=lgW?(w-lgW)/2:w/2, cy=h/2, P=(a,r)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
   const ri=i=>R-SECW(i,n,R); let a0=-Math.PI/2, g='', lb='';
   st.forEach((x,i)=>{const f=x[2]/tot, a1=a0+f*2*Math.PI, r0=ri(i), big=(a1-a0)>Math.PI?1:0, [x1,y1]=P(a0,R),[x2,y2]=P(a1,R),[x3,y3]=P(a1,r0),[x4,y4]=P(a0,r0);
     g+=`<path d="M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 ${big} 0 ${x4} ${y4}Z" fill="var(${x[1]})" ${T(x[0]+': '+x[2]+' БУ · '+nf(f*100,0)+' %')}/>`;
@@ -3810,7 +3810,7 @@ const LG={
  'home.ebitda':LP,'home.rev':()=>LSPL('rev'),'home.drill':LP,'home.wells':LP,'home.load':()=>LTY(0),'home.speed':LSP,'home.npv':()=>[LI.sw('var(--st-npv)','млн ₽, цвет — тип'),LI.hatch('демо')],'home.cost':()=>LSPL('cost')};
 
 /* ---------- первый уровень: плитки по настройке (порядок, скрытые), у каждой — свой график ---------- */
-const HCH={load:(w,h)=>semi(D.load.types,D.load.v.f,w,h), speed:(w,h)=>speedo(D.speed.v,{max:6,u:'т. м/ст-мес'},w,h), npv:(w,h)=>treemap(D.npv.types,w,h)};
+const HCH={load:(w,h)=>ringCount(D.load.state,w,h,1), speed:(w,h)=>speedo(D.speed.v,{max:6,u:'т. м/ст-мес'},w,h), npv:(w,h)=>treemap(D.npv.types,w,h)};
 function homeSpec(){const ids=TILES().map(I=>I.id), n=ids.length, c=n<=3?Math.max(1,n):n<=6?3:4;
   return {n:'Отчётность',cols:c,rows:Math.max(1,Math.ceil(n/c)),tiles:ids.map(k=>{const s=SC[k].tiles[0]; return {...s,a:k,go:'ind:'+k,k:k==='npv'?'НПВ · по типам':s.k,
     s:k==='speed'?()=>bpChip('speed')+f25Chip('speed'):k==='npv'?SC.npv.tiles[0].s:s.s, ch:HCH[k]||s.ch, ft:null, dm:false, hn:250}})}}
