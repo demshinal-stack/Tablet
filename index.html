@@ -1167,6 +1167,9 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 .dbgate.busy .dbg-btn{opacity:.5;pointer-events:none} .dbgate.drag .dbg-card{outline:2px dashed var(--accent,#00DCC8);outline-offset:6px}
 .dbg-err{color:var(--bad,#FF6B5E)!important;font-weight:600;min-height:0} .dbg-err:empty{display:none} .dbg-note{font-size:12.5px!important;color:var(--muted,#97A9C2)!important}
 .dbrow{display:flex;gap:8px;flex-wrap:wrap}
+
+/* сборка 95: стрелки показателей в шапке отчётов */
+.rephead .rnav{border:0;background:color-mix(in srgb,var(--chrome-ink,#fff) 12%,transparent);color:inherit;width:28px;height:28px;border-radius:50%;font-size:17px;line-height:26px;cursor:pointer;flex:none;padding:0}
 </style>
 </head>
 <body>
@@ -1245,7 +1248,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:94,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:95,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -1257,7 +1260,7 @@ const DB_MODE='file', DB_API='/api/pulse2/v1';
    Выход — разделы, которые читают экраны (dict, svodka, wells…). Все итоги и разрезы считаются здесь,
    в хранилище лежат только исходные строки. Тот же код может работать на сервере (Node) для API. */
 const PulseRepo=(()=>{
-  const SCHEMA=3;
+  const SCHEMA=4;
   const R4=x=>Math.round(x*1e4)/1e4, R1=x=>Math.round(x*10)/10;
   const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-яa-z0-9]/g,'');
   /* строки таблицы как объекты, по порядку ord/seq, если он есть */
@@ -1319,7 +1322,8 @@ const PulseRepo=(()=>{
       if(k.per_name!==null){o.per=put(put({n:k.per_name},'u',k.per_unit),'d',k.per_decimals); vs.forEach(v=>o.per[v.period_code]=v.per_value)}
       if(k.view) o[k.view]=1; flag(o,'margin',k.has_margin);
       o.br=KB.filter(b=>b.kpi_id===k.id).map(b=>{const r=flag(flag(flag(put(put({n:b.name},'u',b.unit),'d',b.decimals),'one',b.single),'share',b.share),'demo',b.demo);
-        r.rows=KR.filter(x=>x.kpi_id===k.id&&x.breakdown_ord===b.ord).map(x=>x.v2!==null?[x.label,x.v1,x.v2]:x.note!==null?[x.label,x.v1,x.note]:[x.label,x.v1]); return r});
+        const kr=KR.filter(x=>x.kpi_id===k.id&&x.breakdown_ord===b.ord); r.rows=kr.map(x=>x.v2!==null?[x.label,x.v1,x.v2]:x.note!==null?[x.label,x.v1,x.note]:[x.label,x.v1]);
+        const dm=kr.map((x,i)=>x.demo?i:-1).filter(i=>i>=0); if(dm.length) r.dm=dm; return r});
       return o});
     const TC=get('time_category').sort(by('ord')), RT=get('rig_time');
     const rigOrd=[...new Set(RT.sort(by('ord')).map(r=>r.rig_code))];
@@ -1328,7 +1332,11 @@ const PulseRepo=(()=>{
       REV:(IND.find(k=>k.id==='rev')||{v:{}}).v,
       LOAD:{tot:Object.fromEntries(TC.map(c=>[c.name,c.total_days])),col:Object.fromEntries(TC.map(c=>[c.name,c.css_var])),
         rigs:rigOrd.map(code=>[code,...TC.map(c=>{const x=RT.find(r=>r.rig_code===code&&r.category===c.name); return x?x.days:0})])},
-      PER:Object.fromEntries(get('report_period').sort(by('ord')).map(p=>[p.id,flag(put({n:p.name,sh:p.short_name,s:p.note},'k',p.coef),'lock',p.locked)]))};
+      PER:Object.fromEntries(get('report_period').sort(by('ord')).map(p=>[p.id,flag(put({n:p.name,sh:p.short_name,s:p.note},'k',p.coef),'lock',p.locked)])),
+      /* второй уровень: заказчики отчётности → справочник, ковёр по месяцам, события НПВ */
+      CUID:Object.fromEntries(get('report_customer').map(c=>[c.name,c.customer_id])),
+      RTM:(()=>{const a=get('rig_time_month'), ci=Object.fromEntries(TC.map((c,i)=>[c.name,i])); return {year:a.length?a[0].year:null,demo:a.some(r=>r.demo)?1:0,rows:a.map(r=>[r.rig_code,r.month,ci[r.category],r.days,r.forecast?1:0])}})(),
+      NPVE:get('npv_event').sort(by('id')).map(e=>flag({g:e.incident_group,t:e.category_id,n:e.reason,well:e.well_no,rig:e.rig_code,h:e.hours,sh:e.share_pct},'demo',e.demo))};
     /* — строительство скважин (ГГД, схема бурения, история станка) */
     const CN=get('construction'), CS=get('construction_section'), CO=get('construction_operation').sort(by('seq')), CP=get('construction_depth_point').sort(by('seq')), SV=get('construction_survey').sort(by('md'));
     const g=(a,k)=>{const m=new Map(); a.forEach(x=>{const v=x[k]; m.has(v)?m.get(v).push(x):m.set(v,[x])}); return m};
@@ -1383,7 +1391,7 @@ const PulseRepo=(()=>{
     return out}
 
   /* проверка файла/ответа: формат, версия, обязательные таблицы и колонки */
-  const REQUIRED=['load_batch','norm','display_state','field_contour','customer','customer_alias','customer_group','customer_group_member','field','pad','rig','well_type','contract_type','well_status','well','section_type','npv_category','npv_reason','daily_report','rig_condition','sync_issue','summary_customer','summary_customer_month','summary_well','summary_rig_operation','report_period','report_customer','kpi','kpi_value','kpi_breakdown','kpi_breakdown_row','time_category','rig_time','construction','construction_section','construction_operation','construction_depth_point','construction_survey'];
+  const REQUIRED=['load_batch','norm','display_state','field_contour','customer','customer_alias','customer_group','customer_group_member','field','pad','rig','well_type','contract_type','well_status','well','section_type','npv_category','npv_reason','daily_report','rig_condition','sync_issue','summary_customer','summary_customer_month','summary_well','summary_rig_operation','report_period','report_customer','kpi','kpi_value','kpi_breakdown','kpi_breakdown_row','time_category','rig_time','construction','construction_section','construction_operation','construction_depth_point','construction_survey','rig_time_month','npv_event'];
   function check(db){
     if(!db||db.format!=='pulse2-db') throw new Error('Это не файл базы «Пульс 2»');
     if(db.collections&&!db.tables) throw new Error('Файл базы старого формата (до сборки 78). Нужен файл с таблицами хранилища — Pulse2-DB-….json версии '+SCHEMA);
@@ -1422,7 +1430,7 @@ async function pulseBoot(){
   const gate=document.getElementById('dbgate'), err=document.getElementById('dbgErr'), btn=document.getElementById('dbgPick'), inp=document.getElementById('dbgFile');
   const start=async()=>{gate.classList.add('busy'); err.textContent='';
     try{const [meta,dict,res,groups,syncFail,reports,wells,design,npvTypes,ui]=await Promise.all(['meta','dict','res','groups','syncFail','reports','wells','design','npvTypes','ui'].map(k=>PulseDB.get(k)));
-      gate.hidden=true; document.body.classList.remove('nodb'); window.__pulseStart({meta,dict,res,groups,syncFail,reports,wells,design,npvTypes,ui}); try{PulseAnimRep.attach(document.getElementById('repwrap'),{variant:'pen',speed:1/0.9})}catch(e){}}
+      gate.hidden=true; document.body.classList.remove('nodb'); window.__pulseStart({meta,dict,res,groups,syncFail,reports,wells,design,npvTypes,ui}); /* анимация отчётов — своя, в модуле R2 (сборка 95) */}
     catch(e){gate.classList.remove('busy'); gate.hidden=false; document.body.classList.add('nodb'); err.textContent=e.message||String(e)}};
   btn.onclick=()=>inp.click();
   inp.onchange=async()=>{const f=inp.files&&inp.files[0]; inp.value=''; if(!f) return; gate.classList.add('busy'); err.textContent='';
@@ -2520,7 +2528,7 @@ function renderChips(){const ch=[], atW=state.level==='well'&&state.well; /* н�
     else if(k==='field') go({level:'fields',field:null,cust:null,well:null}); else if(k==='cust') go({level:state.field?'field':'fields',cust:null,well:null}); else go({level:state.cust?'cust':state.field?'field':'fields',well:null})})}
 function renderSync(){const b=document.getElementById('syncBtn'); if(!b) return;
   const RH=document.getElementById('repHead');
-  if(state.mode==='rep'&&window.REP){b.hidden=true; document.getElementById('syncPop').hidden=true; if(RH){RH.hidden=false; RH.innerHTML=`<b>Отчётность · ${DB.meta.asof.slice(0,4)}</b><span class="rlg" aria-label="${esc(REP.pillLabel())}">${REP.legend()}</span>`} return}
+  if(state.mode==='rep'&&window.REP){b.hidden=true; document.getElementById('syncPop').hidden=true; if(RH){RH.hidden=false; RH.onclick=e=>{const b=e.target.closest('[data-rnav]'); if(b){e.stopPropagation(); REP.step(+b.dataset.rnav)}}; RH.innerHTML=`${REP.isInd&&REP.isInd()?'<button type="button" class="rnav" data-rnav="-1" aria-label="Предыдущий показатель">‹</button>':''}<b>${REP.title?REP.title():'Отчётность · '+DB.meta.asof.slice(0,4)}</b>${REP.isInd&&REP.isInd()?'<button type="button" class="rnav" data-rnav="1" aria-label="Следующий показатель">›</button>':''}<span class="rlg" aria-label="${esc(REP.pillLabel())}">${REP.legend()}</span>`} return}
   b.hidden=false; if(RH){RH.hidden=true; RH.innerHTML=''}
   const S=syncState();
   b.className='sync '+S.lvl; b.innerHTML=`<i class="dot"></i><span class="sl">Данные на</span><b>${fmtMsk(LOAD.at)}</b><span class="sm">МСК</span>${S.fails.length?`<em>${S.fails.length}</em>`:''}`;
@@ -3238,6 +3246,58 @@ h2{font-size:20px}
 .wide .tile .gwrap svg.gauge2{width:min(100%,380px)!important}
 .vizc .gwrap svg.gauge2{width:min(100%,360px)!important}
 @media (min-width:600px){.narrow .tiles{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))} .narrow .chart svg,.narrow .vizc>*{max-width:560px;margin-inline:auto} .narrow .tile .ch svg{max-height:200px}}
+
+/* ---------- сборка 95: экраны-плитки отчётов ---------- */
+.r2g{--good-bg:color-mix(in srgb,var(--good) 14%,transparent);--bad-bg:color-mix(in srgb,var(--bad) 16%,transparent);display:grid;gap:12px;font-variant-numeric:tabular-nums}
+.wide .r2g{flex:1;min-height:0}
+.r2g.m-n{display:flex;flex-direction:column;gap:10px}
+.r2t{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px 10px;display:flex;flex-direction:column;min-width:0;min-height:0;position:relative;text-align:left;color:var(--body);font:inherit;-webkit-tap-highlight-color:transparent}
+button.r2t{cursor:pointer;width:100%}
+.r2t.back-hl{box-shadow:0 0 0 2px var(--accent);transition:box-shadow .9s}
+.r2hd{display:flex;align-items:flex-start;gap:8px}
+.r2k{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;flex:1;min-width:0}
+.r2v{font:500 25px/1.15 var(--f-body);color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.r2v small{font-size:13px;color:var(--muted);margin-left:5px;font-weight:400}
+.r2s{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px}
+.r2chip{font-size:12px;padding:2px 7px;border-radius:6px;background:var(--band);color:var(--muted);white-space:nowrap}
+.r2chip b{font-weight:600}.r2chip.g{background:var(--good-bg);color:var(--good)}.r2chip.r{background:var(--bad-bg);color:var(--bad)}
+.r2dm{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--warn);background:color-mix(in srgb,var(--warn) 16%,transparent);border-radius:5px;padding:2px 6px;flex:none}
+.r2arr{color:var(--muted);font-size:18px;line-height:1}
+.r2srt{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;width:28px;height:26px;cursor:pointer;font-size:14px;line-height:24px;text-align:center;margin:-4px 0}
+.r2ch{flex:1;min-height:0;position:relative;margin-top:6px}
+.r2ch>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.r2ch.scr{overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;mask-image:linear-gradient(#000 calc(100% - 28px),transparent);-webkit-mask-image:linear-gradient(#000 calc(100% - 28px),transparent)}
+.r2ch.scr>svg{position:static;display:block;height:auto}
+.r2lg{display:flex;flex-wrap:wrap;gap:3px 12px;font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.3}
+.r2lg span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.r2lg i{display:inline-block;flex:none}.r2lg .l-sw{width:10px;height:10px;border-radius:3px}.r2lg .l-dt{width:10px;height:10px;border-radius:50%}
+.r2lg .l-rg{background:var(--surface);border:2px solid var(--muted);box-sizing:border-box}.r2lg .l-tk{width:3px;height:12px;border-radius:1px}
+.r2lg .l-ln{width:16px;height:4px;border-radius:2px;opacity:.7}.r2lg .l-ds{width:16px;height:0;border-top:2px dashed var(--ink);opacity:.6}
+.r2lg .l-ht{background:repeating-linear-gradient(45deg,var(--muted) 0 2px,transparent 2px 5px)}
+.r2ft{font-size:11.5px;color:var(--muted);margin-top:4px;line-height:1.3}
+.r2g svg text{font-family:var(--f-body);fill:var(--body)}
+.r2g .t-m{fill:var(--muted)}.r2g .t-i{fill:var(--ink)}.r2g .t-g{fill:var(--good)}.r2g .t-r{fill:var(--bad)}.r2g .t-w{fill:#fff}
+.r2g .gl{stroke:var(--grid);stroke-width:1}
+.r2g .hit{fill:transparent}
+.r2g [data-t]{cursor:pointer}
+.r2tip{position:fixed;z-index:50;pointer-events:none;background:var(--tip,#00234B);color:var(--tip-ink,#fff);font-size:12.5px;line-height:1.35;padding:7px 9px;border-radius:9px;max-width:260px;box-shadow:0 6px 18px rgba(0,25,55,.25);opacity:0;transition:opacity .12s}
+.r2tip.on{opacity:1}
+/* анимация: только при первом заходе на экран за сессию */
+.r2g.anim .gy{transform-box:fill-box;transform-origin:50% 100%;animation:r2gy .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+.r2g.anim .gyd{transform-box:fill-box;transform-origin:50% 0;animation:r2gy .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+.r2g.anim .gx{transform-box:fill-box;transform-origin:0 50%;animation:r2gx .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
+.r2g.anim .fd{animation:r2fd .5s ease both;animation-delay:calc(var(--d,0s) + .45s)}
+.r2g.anim .fdi{animation:r2fd .35s ease both;animation-delay:var(--d,0s)}
+.r2g.anim .arc{animation:r2arc 1s cubic-bezier(.3,.7,.3,1) both;animation-delay:var(--d,0s)}
+.r2g.anim .dr{stroke-dasharray:1;stroke-dashoffset:1;animation:r2dr 1.1s ease-out forwards;animation-delay:var(--d,0s)}
+.r2g.anim .pop{transform-box:fill-box;transform-origin:50% 50%;animation:r2pop .45s cubic-bezier(.3,1.5,.6,1) both;animation-delay:var(--d,0s)}
+.r2g.anim .ndl{animation:r2ndl 1.6s cubic-bezier(.3,1.35,.45,1) both;animation-delay:var(--d,.2s)}
+.r2g.anim .spinin{animation:r2spin 1.1s cubic-bezier(.25,.9,.3,1) both}
+.r2g .ndl{transform:rotate(var(--a))}
+@keyframes r2gy{from{transform:scaleY(0)}}@keyframes r2gx{from{transform:scaleX(0)}}@keyframes r2fd{from{opacity:0}}
+@keyframes r2arc{from{stroke-dasharray:0 1}}@keyframes r2dr{to{stroke-dashoffset:0}}@keyframes r2pop{from{transform:scale(0);opacity:0}}
+@keyframes r2ndl{from{transform:rotate(-90deg)}}@keyframes r2spin{from{transform:rotate(-200deg) scale(.55);opacity:0}60%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.r2g.anim *{animation:none!important}}
 `;
 let wide=false;
 const S={stack:[{t:'home'}],br:{},lf:null};
@@ -3309,13 +3369,484 @@ const saveRep=()=>{try{localStorage.setItem('pulse-rep',JSON.stringify({order:OR
   const RIGS_N=DICT.rigs.length, RIGS_ON=DICT.cur.filter(c=>{const s=STS_BY[c.st]; return !(s&&s.rs==='idle')}).length;
   const loadHead=()=>`<div class="v">${RIGS_ON}<small>из ${RIGS_N} БУ загружено</small></div>`;
 const SCR={home,ind,table,set};
+/* ===== Отчёты, сборка 95: первый и второй уровень — экраны-плитки (графики под размер плитки, легенды, прокрутка списков) ===== */
+const R2=(()=>{
+const PER3=['f25','bp','f'], PC={f25:'var(--c1)',bp:'var(--c2)',f:'var(--c3)'};
+let PN={f25:'2025',bp:'БП',f:'9+3'};
+let D={};
+const sum=a=>a.reduce((x,y)=>x+(y||0),0);
+/* данные экранов — из разделов, собранных PulseRepo из таблиц базы; периоды — по настройке сравнения (CMP) */
+function build(){const ps=CMP(), p0=ps[0], p1=ps[1], p2=ps[2]; PN={f25:PER[p0].sh,bp:PER[p1].sh,f:PER[p2].sh};
+  const RP=DB.reports, gI=k=>RP.IND.find(x=>x.id===k), vv=o=>({f25:val(o,p0),bp:val(o,p1),f:val(o,p2)});
+  const pb=p1==='f25'?'bp':p1, rv=r=>[r[0],p2==='f25'?r[1]:rowAt(r,p2),r[2]!=null&&typeof r[2]==='number'?rowAt(r,pb):null];
+  const brf=(I,n)=>{const b=I.br.find(b=>b.n===n)||{rows:[]}; return b.rows.map((r,i)=>{const a=r.slice(); if(b.dm&&b.dm.includes(i)) a.demo=1; return a})}, brb=(I,n)=>I.br.find(b=>b.n===n)||{};
+  const CI=Object.fromEntries(CUSTOMERS.map(c=>[c.id,c])), shortC=n=>{const id=RP.CUID[n]||(CUSTOMERS.find(c=>c.n===n)||{}).id; return id&&CI[id]?CI[id].short:n};
+  const o={};
+  ['drill','wells','speed','load','npv','rev','ebitda','cost'].forEach(k=>{const I=gI(k); o[k]={n:I.n,u:I.u,d:I.d,up:I.up,v:vv(I.v)}; if(I.per) o[k].per=vv(I.per);
+    if(I.split) o[k].split={f25:splitAt(I.split,p0),bp:splitAt(I.split,p1),f:splitAt(I.split,p2)}});
+  const N={}; PER3.forEach(p=>N[p]=o.rev.v[p]&&o.rev.per&&o.rev.per[p]?o.rev.v[p]/o.rev.per[p]:null); o.N=N;
+  o.ebitda.per={}; PER3.forEach(p=>o.ebitda.per[p]=o.ebitda.v[p]!=null&&N[p]?o.ebitda.v[p]/N[p]:null);
+  o.margin={}; PER3.forEach(p=>o.margin[p]=o.ebitda.v[p]!=null&&o.rev.v[p]?o.ebitda.v[p]/o.rev.v[p]*100:null);
+  const cust=k=>{const rows=brf(gI(k),'Заказчики').map(r=>{const x=rv(r); return [shortC(r[0]),x[1],x[2]]}), s1=sum(rows.map(r=>r[1])), s2=sum(rows.map(r=>r[2])), r0=(o[k].v.f||0)-s1, r1=(o[k].v.bp||0)-s2;
+    if(Math.abs(r0)>.5||Math.abs(r1)>.5) rows.push(['Прочие',Math.round(r0*10)/10,Math.round(r1*10)/10]); return rows};
+  ['ebitda','rev','cost','drill','wells'].forEach(k=>o[k].cust=cust(k));
+  const rigs=(k,n)=>brf(gI(k),n).map(r=>{const x=rv(r); return [r[0],x[1],x[2],r.demo?1:0]}).sort((a,b)=>b[1]-a[1]);
+  o.drill.rigs=rigs('drill','Станки'); o.speed.rigs=rigs('speed','Станки');
+  o.speed.cust=brf(gI('speed'),'Заказчики').map(r=>{const x=rv(r); return [shortC(r[0]),x[1],x[2]]});
+  o.rev.groups=brf(gI('rev'),'Группы').map(r=>[r[0],r[1],r[2]]);
+  /* EBITDA по группам заказчиков: заказчик → группа по справочнику групп */
+  const GR=DB.groups||[], gOf=id=>{const g=GR.find(g=>g.cust.includes(id)); return g?g.n:'Прочие'}, eg={};
+  brf(gI('ebitda'),'Заказчики').forEach(r=>{const g=gOf(RP.CUID[r[0]]); eg[g]=(eg[g]||0)+rv(r)[1]});
+  const et=sum(Object.values(eg)), gc=Object.fromEntries(o.rev.groups.map(g=>[g[0],g[2]]));
+  o.ebitda.groups=Object.entries(eg).map(([g,v])=>[g,v/et*100,gc[g]||'--other']).sort((a,b)=>b[1]-a[1]);
+  /* НПВ */
+  const nI=gI('npv'), tp=brf(nI,'Типы');
+  o.npv.types=NPV_T.map(c=>{const r=tp.find(x=>x[0]===c.n); return r?{n:c.n,full:c.full,c:c.c,own:c.own,v:r[1],demo:r.demo?1:0}:null}).filter(Boolean);
+  o.npv.tot=sum(o.npv.types.filter(x=>!x.demo).map(x=>x.v));
+  o.npv.cust=brf(nI,'Заказчики').map(r=>[shortC(r[0]),r[1],r[2]]);
+  o.npv.custd=brf(nI,'Заказчики · компенсация').map(r=>[shortC(r[0]),r[1],r[2]]).sort((a,b)=>b[1]-a[1]);
+  o.npv.rigs=brf(nI,'Станки').map(r=>[r[0],r[1],r.demo?1:0]).sort((a,b)=>b[1]-a[1]);
+  o.npv.wells=brf(nI,'Скважины').map(r=>[r[0],r[1],r.demo?1:0]).sort((a,b)=>b[1]-a[1]);
+  o.npv.wbp=brf(nI,'Виды работ к БП').map(r=>[r[0],r[1]]);
+  o.npv.incg=brf(nI,'Инциденты').map(r=>[r[0],r[1]]);
+  o.npv.ev=RP.NPVE||[];
+  /* Загрузка БУ */
+  const L=RP.LOAD, keys=Object.keys(L.tot); o.load.types=keys.map(n=>[n,L.col[n],L.tot[n]]);
+  o.load.rigsN=RIGS_N; o.load.rigsOn=RIGS_ON;
+  {const tot=sum(keys.map(k=>L.tot[k])), q=keys.map(k=>L.tot[k]/tot*RIGS_N), n=q.map(Math.floor), rest=RIGS_N-sum(n);
+   q.map((x,i)=>[x-n[i],i]).sort((a,b)=>b[0]-a[0]).slice(0,rest).forEach(([,i])=>n[i]++); o.load.state=keys.map((k,i)=>[k,L.col[k],n[i]])}
+  const RT=RP.RTM||{rows:[]}, mon=[...Array(12)].map(()=>keys.map(()=>0)), fc=Array(12).fill(0), byRig={};
+  RT.rows.forEach(([rig,m,c,d,f])=>{mon[m-1][c]+=d; if(f) fc[m-1]=1; (byRig[rig]||(byRig[rig]=keys.map(()=>0)))[c]+=d});
+  o.load.months=mon.map(r=>{const s=sum(r)||1; return r.map(x=>x/s)}); o.load.fc=fc;
+  o.load.rigdays=Object.entries(byRig).map(([rig,d])=>{const r=d.map(Math.round), i=r.indexOf(Math.max(...r)), t=Math.round(sum(d)); r[i]+=t-sum(r); return [rig,r]}).sort((a,b)=>b[1][0]-a[1][0]);
+  o.load.demoM=RT.demo;
+  const cnt={}; DICT.cur.forEach(c=>{const s=STS_BY[c.st]; if(s&&s.rs==='idle') return; cnt[c.cust]=(cnt[c.cust]||0)+1});
+  const bpR=brf(gI('load'),'Проекты · БП'), bpOf=id=>{const r=bpR.find(x=>(CUSTOMERS.find(c=>c.n===x[0])||{}).id===id); return r?r[1]:null};
+  o.load.cust=Object.entries(cnt).map(([id,v])=>[CI[id]?CI[id].short:id,v,bpOf(id)]).sort((a,b)=>b[1]-a[1]);
+  o.load.custDemo=!!brb(gI('load'),'Проекты · БП').demo;
+  return o}
+const nf=(x,d=0)=>x==null||!isFinite(x)?'—':(+x).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d}).replace(/ /g,' ');
+const sg=(x,d=1)=>(x>0?'+':x<0?'−':'')+nf(Math.abs(x),d);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const pct=(a,b)=>b?((a-b)/Math.abs(b)*100):null;
+const good=(dv,up)=>dv===0?'':((dv>0)===!!up?'g':'r');
+const chip=(a,b,up,lbl,d=1)=>{if(a==null||b==null) return `<span class="r2chip">${lbl} <b>нет данных</b></span>`; const p=pct(a,b); return `<span class="r2chip ${good(p,up)}">${lbl} <b>${sg(p,d)} %</b></span>`};
+const txt=(x,y,s,o={})=>`<text x="${x}" y="${y}" ${o.a?`text-anchor="${o.a}"`:''} class="${o.c||''}" font-size="${o.fs||12}" ${o.w?`font-weight="${o.w}"`:''} ${o.st?`style="${o.st}"`:''}>${esc(s)}</text>`;
+const T=(s)=>`data-t="${esc(s)}"`;
+const SHORT=n=>String(n).replace(/^(\d+)-[^-]+-(?:[^-]+-)?([^-]+-\d+\w*)$/,'$1 $2');
+
+/* ---------- графики: каждая функция получает реальный размер области (w,h) ---------- */
+function bars3(v,o,w,h){ // три периода; скобки отклонений к 9+3
+  const d=o.d||0, sp=o.split, ps=PER3, mx=Math.max(...ps.map(p=>v[p]||0))*1.04||1, top=o.br===false?24:(v.f25!=null&&v.bp!=null?84:60), base=h-20, slot=w/3, bw=Math.min(o.bw||70,slot*.52), cx=i=>slot*i+slot/2, y=x=>base-(x/mx)*(base-top);
+  let s=`<line x1="0" x2="${w}" y1="${base+.5}" y2="${base+.5}" class="gl"/>`;
+  ps.forEach((p,i)=>{const x=v[p], X=cx(i)-bw/2, dl=`style="--d:${i*.12}s"`;
+    if(x==null){s+=`<rect x="${X}" y="${base-3}" width="${bw}" height="3" rx="1.5" fill="var(--c1)"/>`+txt(cx(i),base-10,'нет данных',{a:'middle',c:'t-m',fs:11.5}); }
+    else if(sp&&sp[p]){let yy=base; const parts=[sp[p][0],sp[p][1],Math.max(0,x-sp[p][0]-sp[p][1])], op=[1,.6,.3]; parts.forEach((q,j)=>{if(!q) return; const hh=(q/mx)*(base-top); s+=`<rect class="gy" ${dl} x="${X}" y="${yy-hh}" width="${bw}" height="${Math.max(0,hh-(j<2&&parts[j+1]?1.5:0))}" rx="${j===2||!parts[j+1]?4:0}" fill="${PC[p]}" opacity="${op[j]}" ${T(PN[p]+' · '+['суточная ставка','под ключ','прочие'][j]+': '+nf(q,d)+' '+(o.u||''))}/>`; yy-=hh});}
+    else s+=`<rect class="gy" ${dl} x="${X}" y="${y(x)}" width="${bw}" height="${base-y(x)}" rx="4" fill="${PC[p]}" ${T(PN[p]+': '+nf(x,d)+' '+(o.u||''))}/>`;
+    if(x!=null) s+=txt(cx(i),y(x)-7,nf(x,d),{a:'middle',c:'t-i fd',fs:w<260?11.5:13,w:600,st:`--d:${i*.12}s`});
+    s+=txt(cx(i),h-4,PN[p],{a:'middle',c:p==='f'?'t-i':'t-m',fs:12,w:p==='f'?700:400});});
+  if(o.br!==false){[[1,top-28],[0,top-54]].forEach(([i,ly])=>{const a=v[ps[i]],b=v.f; if(a==null||b==null) return; const x1=cx(i),x2=cx(2)+(i?-6:6), y1=y(a)-24,y2=y(b)-24, p=pct(b,a), c=good(p,o.up)==='g'?'var(--good)':'var(--bad)';
+    s+=`<path class="fd" d="M${x1} ${y1}V${ly}H${x2}V${y2-4}" fill="none" stroke="var(--muted)" stroke-width="1.2" opacity=".7"/><path class="fd" d="M${x2-4} ${y2-9}l4 6 4-6" fill="none" stroke="var(--muted)" stroke-width="1.2"/><circle class="fd" cx="${x1}" cy="${y1}" r="2.5" fill="var(--muted)"/>`;
+    const lb=sg(p,1)+' %', tw=lb.length*7.2+14, mx2=(x1+x2)/2; s+=`<g class="fd"><rect x="${mx2-tw/2}" y="${ly-10}" width="${tw}" height="20" rx="10" fill="${c}"/>${txt(mx2,ly+4.5,lb,{a:'middle',c:'t-w',fs:12,w:600})}</g>`});}
+  return s}
+
+function perRows(v,o,w,h){ // «на станок»: горизонтальные полосы трёх периодов + метка БП
+  const d=o.d||0, L=46, R=70, mx=Math.max(...PER3.map(p=>v[p]||0))*1.05, rh=(h-8)/3, y0=2, X=x=>L+(x/mx)*(w-L-R);
+  let s='';
+  PER3.forEach((p,i)=>{const x=v[p], yy=y0+i*rh; s+=txt(0,yy+rh/2+4,PN[p],{c:p==='f'?'t-i':'t-m',w:p==='f'?700:400});
+    if(x==null){s+=txt(L,yy+rh/2+4,'нет данных',{c:'t-m',fs:11.5});return}
+    s+=`<rect class="gx" style="--d:${i*.12}s" x="${L}" y="${yy+rh/2-11}" width="${X(x)-L}" height="22" rx="3" fill="${PC[p]}" ${T(PN[p]+': '+nf(x,d)+' '+o.u)}/>`+txt(X(x)+6,yy+rh/2+4.5,nf(x,d),{c:'t-i fd',w:600,fs:13,st:`--d:${i*.12}s`})});
+  if(v.bp!=null){const xb=X(v.bp); s+=`<line class="fd" x1="${xb}" x2="${xb}" y1="${y0-4}" y2="${y0+rh*3+4}" stroke="var(--ink)" stroke-width="1.5" stroke-dasharray="3 3" opacity=".55"/>`}
+  return s}
+
+function coins(v,o,w,h){ // деньги: стопки монет по периодам
+  const d=o.d||0, mx=Math.max(...PER3.map(p=>v[p]||0)), step=o.step||niceStep(mx/11), slot=w/3, cw=Math.min(64,slot*.5), ch=Math.max(5,Math.min(9,(h-50)/((mx/step)+1.5))), base=h-22;
+  let s=`<line x1="0" x2="${w}" y1="${base+.5}" y2="${base+.5}" class="gl"/>`;
+  PER3.forEach((p,i)=>{const x=v[p], cx=slot*i+slot/2; s+=txt(cx,h-4,PN[p],{a:'middle',c:p==='f'?'t-i':'t-m',w:p==='f'?700:400});
+    if(x==null){s+=txt(cx,base-10,'нет данных',{a:'middle',c:'t-m',fs:11.5});return}
+    const n=x/step, full=Math.floor(n), fr=n-full; let yy=base;
+    for(let k=0;k<full+(fr>.15?1:0);k++){const part=k===full?fr:1, op=p==='f'?1:p==='bp'?.55:.4; yy-=ch;
+      s+=`<g class="drop" style="--d:${i*.25+k*.06}s" opacity="${op}"><ellipse cx="${cx}" cy="${yy+ch*.5}" rx="${cw/2}" ry="${ch*.55}" fill="var(--coin-d)"/><ellipse cx="${cx}" cy="${yy+ch*.25}" rx="${cw/2*(k===full?Math.max(.55,part):1)}" ry="${ch*.5}" fill="var(--coin)"/></g>`}
+    s+=txt(cx,yy-8,nf(x,d),{a:'middle',c:'t-i fd',w:600,fs:13,st:`--d:${i*.25+.4}s`});
+    s+=`<rect class="hit" x="${cx-cw/2}" y="${yy}" width="${cw}" height="${base-yy}" ${T(PN[p]+': '+nf(x,d)+' '+o.u)}/>`});
+  return s}
+function niceStep(x){const p=Math.pow(10,Math.floor(Math.log10(x))), m=x/p; return (m<1.5?1:m<3.5?2.5:m<7.5?5:10)*p}
+
+function ring(val,bp,o,w,h){ // рентабельность: кольцо с меткой БП
+  const R0=Math.min(w/2,h/2-14)-1, th=R0*.36, r=R0-th/2, cx=w/2, cy=h/2, C=2*Math.PI*r, a=val/100, ab=bp/100;
+  const pt=t=>[cx+r*Math.sin(2*Math.PI*t), cy-r*Math.cos(2*Math.PI*t)];
+  const [bx,by]=pt(ab), [bx1,by1]=[cx+(r+th/2+5)*Math.sin(2*Math.PI*ab), cy-(r+th/2+5)*Math.cos(2*Math.PI*ab)], [bx0,by0]=[cx+(r-th/2-5)*Math.sin(2*Math.PI*ab), cy-(r-th/2-5)*Math.cos(2*Math.PI*ab)];
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--band)" stroke-width="${th}"/>
+   <circle class="arc" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--c3)" stroke-width="${th}" stroke-linecap="butt" pathLength="1" stroke-dasharray="${a} 1" transform="rotate(-90 ${cx} ${cy})" style="stroke-dasharray:${a} 1;--d:.1s" ${T('9+3: '+nf(val,1)+' %')}/>
+   <line class="fd" x1="${bx0}" y1="${by0}" x2="${bx1}" y2="${by1}" stroke="var(--ink)" stroke-width="3"/>
+   ${txt(cx,cy+6,nf(val,1)+' %',{a:'middle',c:'t-i',fs:Math.max(18,(r-th/2)*.42),w:600})}${txt(cx,cy+24,'от выручки',{a:'middle',c:'t-m',fs:11.5})}`}
+
+function waterfall(st,steps,en,o,w,h){ // мост «БП → 9+3» по заказчикам
+  if(w<520) return waterfallH(st,steps,en,o,w,h);
+  const d=o.d||0, n=steps.length+2, top=26, base=h-30, slot=w/n, bw=Math.min(56,slot*.62);
+  let run=st.v, lo=Math.min(st.v,en.v), hi=Math.max(st.v,en.v); steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
+  const span=hi-lo, y0=Math.max(0,lo-span*.9), Y=x=>base-((x-y0)/(hi-y0))*(base-top);
+  let s=`<line x1="0" x2="${w}" y1="${base+.5}" y2="${base+.5}" class="gl"/>`, cur=st.v;
+  const nm=(i,l,b)=>{const fs=slot<78?10.5:11.5; let a=l,c=''; if(l.length*fs*.62>slot-6){const k=l.indexOf('-')>0?l.indexOf('-')+1:l.indexOf(' ')>0?l.indexOf(' '):-1; if(k>0){a=l.slice(0,k).trim(); c=l.slice(k).trim()}} return txt(slot*i+slot/2,base+14,a,{a:'middle',c:b?'t-i':'t-m',fs,w:b?700:400})+(c?txt(slot*i+slot/2,base+26,c,{a:'middle',c:'t-m',fs}):'')};
+  const bar=(i,v,lbl,col,dd)=>`<rect class="gy" style="--d:${dd}s" x="${slot*i+slot/2-bw/2}" y="${Y(v)}" width="${bw}" height="${base-Y(v)}" rx="4" fill="${col}" ${T(lbl+': '+nf(v,d)+' '+o.u)}/>`+txt(slot*i+slot/2,Y(v)-7,nf(v,v>=1000?0:d),{a:'middle',c:'t-i fd',w:700,fs:13,st:`--d:${dd}s`});
+  s+=bar(0,st.v,st.l,'var(--c2)',0)+nm(0,st.l,1);
+  // разрыв оси
+  s+=`<path d="M${slot/2-bw/2-3} ${base-14}l${bw/3} -5 ${bw/3} 5 ${bw/3+6} -5" stroke="var(--surface)" stroke-width="4" fill="none"/>`;
+  steps.forEach((r,i)=>{const a=cur, b=cur+r[1], x=slot*(i+1)+slot/2-bw/2, dd=.25+i*.12, gc=good(r[1],o.up)==='g'?'var(--good)':'var(--bad)';
+    s+=`<line class="fd" style="--d:${dd}s" x1="${x-slot+bw}" x2="${x}" y1="${Y(a)}" y2="${Y(a)}" stroke="var(--muted)" stroke-dasharray="2 3" opacity=".7"/>`;
+    s+=`<rect class="${r[1]>=0?'gy':'gyd'}" style="--d:${dd}s" x="${x}" y="${Y(Math.max(a,b))}" width="${bw}" height="${Math.max(1.5,Math.abs(Y(a)-Y(b)))}" rx="3" fill="${gc}" ${T(r[0]+': '+sg(r[1],d)+' '+o.u+(r[2]!=null?' (БП '+nf(r[2],d)+' → 9+3 '+nf(r[3],d)+')':''))}/>`;
+    s+=txt(x+bw/2,Y(Math.max(a,b))-6,sg(r[1],d),{a:'middle',c:(gc.includes('good')?'t-g':'t-r')+' fd',w:600,fs:12,st:`--d:${dd}s`})+nm(i+1,r[0]); cur=b});
+  s+=`<line class="fd" x1="${slot*(n-2)+slot/2+bw/2}" x2="${slot*(n-1)+slot/2-bw/2}" y1="${Y(cur)}" y2="${Y(cur)}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
+  s+=bar(n-1,en.v,en.l,'var(--c3)',.3+steps.length*.12)+nm(n-1,en.l,1);
+  s+=`<path d="M${slot*(n-1)+slot/2-bw/2-3} ${base-14}l${bw/3} -5 ${bw/3} 5 ${bw/3+6} -5" stroke="var(--surface)" stroke-width="4" fill="none"/>`;
+  return s}
+
+function waterfallH(st,steps,en,o,w,h){ // телефон: мост по горизонтали
+  const d=o.d||0, n=steps.length+2, rh=h/n, L=96, R=54; let run=st.v, lo=Math.min(st.v,en.v), hi=Math.max(st.v,en.v); steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
+  const x0=Math.max(0,lo-(hi-lo)*.6), X=x=>L+((x-x0)/(hi-x0))*(w-L-R); let s='', cur=st.v;
+  const row=(i,l,b)=>txt(L-8,i*rh+rh/2+4,l.length>14?l.slice(0,13)+'…':l,{a:'end',fs:12,c:b?'t-i':'t-m',w:b?700:400});
+  s+=row(0,st.l,1)+`<rect class="gx" x="${L}" y="${rh/2-11}" width="${X(st.v)-L}" height="22" rx="3" fill="var(--c2)"/>`+txt(X(st.v)+5,rh/2+4,nf(st.v,d),{fs:12,w:700,c:'t-i fd'});
+  steps.forEach((r,i)=>{const a=cur,b=cur+r[1], y=(i+1)*rh, dd=.2+i*.1, g=good(r[1],o.up)==='g'; s+=row(i+1,r[0]);
+    s+=`<rect class="gx" style="--d:${dd}s" x="${X(Math.min(a,b))}" y="${y+rh/2-11}" width="${Math.max(1.5,Math.abs(X(b)-X(a)))}" height="22" rx="3" fill="${g?'var(--good)':'var(--bad)'}" ${T(r[0]+': '+sg(r[1],d)+' '+o.u)}/>`+txt(w,y+rh/2+4,sg(r[1],d),{a:'end',fs:12,w:600,c:(g?'t-g':'t-r')+' fd',st:`--d:${dd}s`}); cur=b});
+  const y=(n-1)*rh; s+=row(n-1,en.l,1)+`<rect class="gx" style="--d:${.2+steps.length*.1}s" x="${L}" y="${y+rh/2-11}" width="${X(en.v)-L}" height="22" rx="3" fill="var(--c3)"/>`+txt(X(en.v)+5,y+rh/2+4,nf(en.v,d),{fs:12,w:700,c:'t-i fd'});
+  return s}
+function dumbbell(rows,o,w,h){ // по заказчикам/станкам: точка БП → точка 9+3
+  const d=o.d||0, n=rows.length, rh=h/n, L=Math.min(150,w*.34), R=w<420?58:96, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, mn=o.zero===false?Math.min(...rows.flatMap(r=>[r[1],r[2]||r[1]]))*.85:0, X=x=>L+((x-mn)/(mx-mn))*(w-L-R), y0=(h-rh*n)/2;
+  let s='';
+  rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, a=r[2], b=r[1], dd=i*.06, gc=a==null?'var(--muted)':good(b-a,o.up)==='g'?'var(--good)':good(b-a,o.up)==='r'?'var(--bad)':'var(--muted)';
+    s+=`<line x1="${L}" x2="${w-R}" y1="${y}" y2="${y}" class="gl"/>`+txt(L-10,y+4,r[0],{a:'end',fs:12.5,c:'t-i'});
+    if(a!=null) s+=`<line class="gx" style="--d:${dd}s" x1="${X(Math.min(a,b))}" x2="${X(Math.max(a,b))}" y1="${y}" y2="${y}" stroke="${gc}" stroke-width="6" stroke-linecap="round" opacity=".55"/><circle class="pop" style="--d:${dd}s" cx="${X(a)}" cy="${y}" r="5.5" fill="var(--surface)" stroke="var(--muted)" stroke-width="2"/>`;
+    s+=`<circle class="pop" style="--d:${dd+.25}s" cx="${X(b)}" cy="${y}" r="6.5" fill="var(--c3)" stroke="var(--surface)" stroke-width="2"/>`;
+    s+=txt(w-R+10,y+4.5,nf(b,d),{c:'t-i fd',w:600,fs:13,st:`--d:${dd}s`});
+    if(a!=null&&w>=420){const p=b-a; s+=txt(w,y+4.5,(o.abs?sg(p,d):sg(pct(b,a),0)+' %'),{a:'end',c:(gc.includes('good')?'t-g':gc.includes('bad')?'t-r':'t-m')+' fd',fs:12,w:600,st:`--d:${dd}s`})}
+    s+=`<rect class="hit" x="0" y="${y-rh/2}" width="${w}" height="${rh}" ${T(r[0]+' · 9+3: '+nf(b,d)+' '+o.u+(a!=null?' · БП: '+nf(a,d)+' · '+sg(b-a,d)+' '+o.u:''))}/>`});
+  return s}
+
+function donut(segs,o,w,h){
+  const tot=segs.reduce((a,s)=>a+s.v,0), below=h>w*.9, lgH=below?segs.length*24+8:0, lgW=!below&&w>330?Math.min(230,w*.52):0, r0=Math.min((w-lgW)/2,(h-lgH)/2)-4, th=Math.max(14,r0*.28), r=r0-th/2, cx=lgW?r0+2:w/2, cy=(h-lgH)/2;
+  let a0=0, s='';
+  segs.forEach((g,i)=>{const a=g.v/tot, gap=segs.length>1?.004:0; s+=`<circle class="arc" style="--d:${i*.15}s;stroke-dasharray:${Math.max(0,a-gap)} 1;stroke-dashoffset:${-a0}" cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${g.c}" stroke-width="${th}" pathLength="1" transform="rotate(-90 ${cx} ${cy})" ${g.pat?`stroke-opacity=".55"`:''} ${T(g.n+': '+(o.fmt?o.fmt(g):nf(a*100,1)+' %'))}/>`; a0+=a});
+  if(o.center) s+=txt(cx,cy+5,o.center,{a:'middle',c:'t-i',fs:Math.max(15,r*.3),w:600})+(o.sub?txt(cx,cy+5+Math.max(14,r*.22),o.sub,{a:'middle',c:'t-m',fs:11}):'');
+  if(lgW||below){const lh=below?24:Math.min(26,h/segs.length), ly=below?h-lgH+16:(h-lh*segs.length)/2+lh/2; segs.forEach((g,i)=>{const x=below?Math.max(0,w/2-130):w-lgW, y=ly+i*lh, w2=below?Math.min(w,w/2+130):w; s+=`<rect x="${x}" y="${y-6}" width="11" height="11" rx="3" fill="${g.c}" ${g.pat?'opacity=".55"':''}/>`+txt(x+18,y+4,g.n,{fs:12.5,c:'t-i'})+txt(w2,y+4,o.fmt?o.fmt(g):nf(g.v/tot*100,1)+' %',{a:'end',fs:12.5,w:600,c:'t-i'})})}
+  return s}
+
+function wellbores(rows,o,w,h){ // бурение: каждый заказчик — ствол, уходящий вниз на проходку 9+3; пунктир — план БП
+  if(w/rows.length<52) return dumbbell([...rows].sort((a,b)=>b[1]-a[1]),{d:1,u:o.u,up:o.up},w,h);
+  const d=o.d||0, n=rows.length, slot=w/n, G=58, base=h-34, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.02, Y=x=>G+(x/mx)*(base-G), bw=Math.min(22,slot*.32);
+  let s=`<rect x="0" y="${G}" width="${w}" height="${h-G-20}" fill="var(--band)" opacity=".55" rx="6"/><line x1="0" x2="${w}" y1="${G}" y2="${G}" stroke="var(--ground)" stroke-width="2.5"/>`;
+  for(let k=1;k<=3;k++){const yy=G+(base-G)*k/3; s+=`<line x1="0" x2="${w}" y1="${yy}" y2="${yy}" class="gl" stroke-dasharray="2 4"/>`}
+  rows.forEach((r,i)=>{const cx=slot*i+slot/2, y=Y(r[1]), dd=.1+i*.1, p=r[2]?pct(r[1],r[2]):null, gc=p==null?'t-m':good(p,o.up)==='g'?'t-g':'t-r', fs=slot<72?10.5:11.5;
+    // вышка
+    s+=`<g class="fd" style="--d:${dd-.1}s"><path d="M${cx-9} ${G}L${cx} ${G-20}L${cx+9} ${G}M${cx-6} ${G-7}H${cx+6}M${cx-3.5} ${G-13}H${cx+3.5}" fill="none" stroke="var(--ink)" stroke-width="1.6"/><circle cx="${cx}" cy="${G-21}" r="1.8" fill="var(--st-npv)"/></g>`;
+    const nm=r[0], ks=nm.search(/[- .]/), parts=nm.length*fs*.56>slot-2&&ks>0?[nm.slice(0,ks+1).trim(),nm.slice(ks+1).trim()]:[nm];
+    parts.forEach((t,j)=>s+=txt(cx,G-26-(parts.length-1-j)*12-2,t,{a:'middle',c:'t-i',fs}));
+    s+=`<rect class="bore" style="--d:${dd}s" x="${cx-bw/2}" y="${G}" width="${bw}" height="${y-G}" fill="var(--c3)" opacity=".9" ${T(r[0]+' · проходка 9+3: '+nf(r[1],1)+' '+o.u+(r[2]?' · БП: '+nf(r[2],1):''))}/>`;
+    s+=`<rect class="bore" style="--d:${dd}s" x="${cx-bw/2}" y="${G}" width="${bw*.28}" height="${y-G}" fill="#fff" opacity=".25"/>`;
+    if(r[2]){const yb=Y(r[2]); s+=`<line class="fd" style="--d:${dd+1}s" x1="${cx-bw}" x2="${cx+bw}" y1="${yb}" y2="${yb}" stroke="var(--ink)" stroke-width="1.6" stroke-dasharray="3 2"/>`}
+    s+=`<g class="bit" style="--d:${dd}s;--y:${y-G}px"><path d="M${cx-bw/2-2} ${y}h${bw+4}l-${bw/2+2} ${Math.min(12,bw*.7)}z" fill="var(--ink)"/></g>`;
+    const yl=Math.max(y+Math.min(12,bw*.7),r[2]?Y(r[2])+2:0); s+=txt(cx,Math.min(h-20,yl+15),nf(r[1],r[1]<100?1:0),{a:'middle',c:'t-i fd',w:700,fs:12.5,st:`--d:${dd+1}s`});
+    if(p!=null) s+=txt(cx,Math.min(h-6,yl+29),sg(p,0)+' %',{a:'middle',c:gc+' fd',fs:11,w:600,st:`--d:${dd+1}s`});
+    s+=`<rect class="hit" x="${cx-slot/2}" y="0" width="${slot}" height="${h}" ${T(r[0]+' · 9+3: '+nf(r[1],1)+' '+o.u+(r[2]?' · БП: '+nf(r[2],1)+' · '+sg(p,1)+' %':''))}/>`});
+  return s}
+
+function lolli(rows,o,w,h){ // ранжированный список: точка 9+3, штрих — БП
+  const d=o.d||0, n=rows.length, rh=h/n, L=Math.min(120,w*.36), R=52, mx=Math.max(...rows.flatMap(r=>[r[1],r[2]||0]))*1.04, X=x=>L+(x/mx)*(w-L-R), y0=(h-rh*n)/2;
+  let s='';
+  rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, dd=Math.min(i,14)*.07, p=r[2]!=null?good(r[1]-r[2],o.up):'', c=p==='g'?'var(--good)':p==='r'?'var(--bad)':'var(--c3)';
+    s+=`<g ${r[3]?'opacity=".55"':''}>`+txt(L-8,y+4,o.short?SHORT(r[0]):r[0],{a:'end',fs:12,c:'t-i'});
+    s+=`<line class="gx" style="--d:${dd}s" x1="${L}" x2="${X(r[1])}" y1="${y}" y2="${y}" stroke="var(--c3)" stroke-width="22" stroke-linecap="butt"/>`;
+    if(r[2]!=null) s+=`<line class="fd" style="--d:${dd}s" x1="${X(r[2])}" x2="${X(r[2])}" y1="${y-15}" y2="${y+15}" stroke="var(--ink)" stroke-width="2.5" opacity=".6"/>`;
+    s+=`<circle class="pop" style="--d:${dd+.5}s" cx="${X(r[1])}" cy="${y}" r="8" fill="${c}" stroke="var(--surface)" stroke-width="2"/>`+txt(w-R+8,y+4.5,nf(r[1],d),{c:'t-i fd',w:600,fs:12.5,st:`--d:${dd}s`})+'</g>';
+    s+=`<rect class="hit" x="0" y="${y-rh/2}" width="${w}" height="${rh}" ${T(r[0]+' · 9+3: '+nf(r[1],d)+' '+o.u+(r[2]!=null?' · БП: '+nf(r[2],d):''))}/>`});
+  return s}
+
+function waffle(rows,o,w,h){ // каждая законченная скважина — клетка, цвет — заказчик
+  const tot=rows.reduce((a,r)=>a+r[1],0), lgW=w>520?220:0, AW=w-lgW-8, AH=h-(lgW?0:Math.ceil(rows.length/2)*20+6);
+  let best=null; for(let c=8;c<=60;c++){const rr=Math.ceil(tot/c), sz=Math.min(AW/c,AH/rr); if(!best||sz>best.sz) best={c,rr,sz}}
+  const {c:cols,sz}=best, g=Math.max(1,sz*.14), q=sz-g; let s='', k=0;
+  rows.forEach((r,ri)=>{for(let j=0;j<r[1];j++,k++){const x=(k%cols)*sz, y=Math.floor(k/cols)*sz; s+=`<rect class="pop" style="--d:${(k*0.004).toFixed(3)}s" x="${x}" y="${y}" width="${q}" height="${q}" rx="${Math.min(3,q*.25)}" fill="${r[3]}" ${T(r[0]+': '+r[1]+' скв.'+(r[2]!=null?' · БП '+r[2]:''))}/>`}});
+  if(lgW){const lh=Math.min(26,h/rows.length), x=w-lgW+10; rows.forEach((r,i)=>{const y=i*lh+lh/2+2, p=r[2]!=null?r[1]-r[2]:null; s+=`<rect x="${x}" y="${y-6}" width="11" height="11" rx="3" fill="${r[3]}"/>`+txt(x+18,y+4,r[0],{fs:12.5,c:'t-i'})+txt(w-44,y+4,nf(r[1]),{a:'end',fs:12.5,w:700,c:'t-i'})+(p!=null?txt(w,y+4,p?sg(p,0):'0',{a:'end',fs:11.5,w:600,c:p>0?'t-g':p<0?'t-r':'t-m'}):'')});
+    s+=txt(w,-4,'9+3 · к БП',{a:'end',fs:10.5,c:'t-m'})}
+  else{rows.forEach((r,i)=>{const x=(i%2)*(w/2), y=h-Math.ceil(rows.length/2)*20+Math.floor(i/2)*20+12; s+=`<rect x="${x}" y="${y-8}" width="10" height="10" rx="2" fill="${r[3]}"/>`+txt(x+15,y+1,r[0]+' '+r[1],{fs:11.5,c:'t-i'})})}
+  return s}
+
+function stackM(months,types,o,w,h){ // ковёр помесячно: 100 % станко-суток по видам работ
+  const L=30, top=8, base=h-20, n=12, slot=(w-L)/n, bw=slot*.78, M=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+  let s=''; [0,.5,1].forEach(t=>{const y=base-(base-top)*t; s+=`<line x1="${L}" x2="${w}" y1="${y}" y2="${y}" class="gl"/>`+txt(L-4,y+4,nf(t*100)+'%',{a:'end',c:'t-m',fs:10})});
+  months.forEach((m,i)=>{let y=base; const x=L+slot*i+(slot-bw)/2, fc=!!(D.load.fc&&D.load.fc[i]); m.forEach((q,j)=>{const hh=q*(base-top); s+=`<rect class="gy" style="--d:${i*.07}s" x="${x}" y="${y-hh}" width="${bw}" height="${Math.max(0,hh-1.5)}" rx="${j===m.length-1?3:1}" fill="var(${types[j][1]})" opacity="${fc?.55:1}" ${T(M[i]+(fc?' (прогноз)':'')+' · '+types[j][0]+': '+nf(q*100,1)+' %')}/>`; y-=hh});
+    s+=txt(x+bw/2,h-4,slot<34?'ЯФМАМИИАСОНД'[i]:M[i],{a:'middle',c:fc?'t-m':'t-i',fs:slot<40?10.5:11.5})});
+  {const fi=(D.load.fc||[]).indexOf(1); if(fi>0) s+=`<line x1="${L+slot*fi}" x2="${L+slot*fi}" y1="${top-4}" y2="${base}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".5"/>`}
+  return s}
+
+function carpet(rows,types,o,w,h){ // ковёр по станкам: строка — станок, столбец — месяц (или наоборот на широком экране)
+  const M='ЯФМАМИИАСОНД', tr=w>h*1.25, n=rows.length; let s='';
+  if(tr){const L=18, B=68, cw=(w-L)/n, chh=(h-B-4)/12;
+    for(let m=0;m<12;m++) s+=txt(L-5,4+m*chh+chh/2+4,M[m],{a:'end',c:m>=9?'t-m':'t-i',fs:10.5});
+    rows.forEach((r,i)=>{const x=L+i*cw; r[1].forEach((sh,m)=>{let y=4+m*chh; const id=o.idle.includes(r[0])&&sh[4]===1;
+      s+=`<g class="fdi" style="--d:${(i*0.03+m*0.01).toFixed(2)}s" opacity="${m>=9?.55:1}">`; sh.forEach((q,j)=>{if(!q) return; const hh=q*(chh-1.5); s+=`<rect x="${x+.5}" y="${y}" width="${cw-1.5}" height="${hh}" fill="${id?'var(--other)':`var(${types[j][1]})`}"/>`; y+=hh}); s+=`</g>`;
+      s+=`<rect class="hit" x="${x}" y="${4+m*chh}" width="${cw}" height="${chh}" ${T(r[0]+' · '+['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'][m]+(m>=9?' (прогноз)':'')+' — '+types.map((t,j)=>sh[j]>=.05?t[0]+' '+nf(sh[j]*100)+'%':'').filter(Boolean).join(', '))}/>`});
+      s+=`<text transform="translate(${x+cw/2+3} ${h-B+8}) rotate(-60)" text-anchor="end" font-size="${cw<22?9.5:10.5}" class="${o.idle.includes(r[0])?'t-m':'t-i'}">${esc(SHORT(r[0]))}</text>`});
+    s+=`<line x1="${L}" x2="${w}" y1="${4+9*chh}" y2="${4+9*chh}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".6"/>`}
+  else{const L=86, top=16, rh=(h-top)/n, cw=(w-L)/12;
+    for(let m=0;m<12;m++) s+=txt(L+m*cw+cw/2,11,M[m],{a:'middle',c:m>=9?'t-m':'t-i',fs:10.5});
+    rows.forEach((r,i)=>{const y=top+i*rh; s+=txt(L-6,y+rh/2+3.5,SHORT(r[0]),{a:'end',fs:Math.min(11,rh*.8),c:o.idle.includes(r[0])?'t-m':'t-i'});
+      r[1].forEach((sh,m)=>{let x=L+m*cw; const id=o.idle.includes(r[0])&&sh[4]===1; s+=`<g class="fdi" style="--d:${(m*0.06+i*0.008).toFixed(2)}s" opacity="${m>=9?.55:1}">`; sh.forEach((q,j)=>{if(!q) return; const ww=q*(cw-1.5); s+=`<rect x="${x}" y="${y+.5}" width="${ww}" height="${rh-1.5}" fill="${id?'var(--other)':`var(${types[j][1]})`}"/>`; x+=ww}); s+=`</g><rect class="hit" x="${L+m*cw}" y="${y}" width="${cw}" height="${rh}" ${T(r[0]+' · месяц '+(m+1)+' — '+types.map((t,j)=>sh[j]>=.05?t[0]+' '+nf(sh[j]*100)+'%':'').filter(Boolean).join(', '))}/>`})});
+    s+=`<line x1="${L+9*cw}" x2="${L+9*cw}" y1="${top}" y2="${h}" stroke="var(--ink)" stroke-dasharray="3 3" opacity=".6"/>`}
+  return s}
+
+function semi(types0,val,w,h){ // полукруг как кольцо 2-го уровня: наружный край общий, слева направо от большего (толще) к меньшему (тоньше)
+  const types=[...types0].sort((a,b)=>b[2]-a[2]), n=types.length, tot=types.reduce((a,x)=>a+x[2],0), R=Math.min(w/2-30,h-24), cx=w/2, cy=h-4;
+  const P=(a,r)=>[cx-r*Math.cos(a),cy-r*Math.sin(a)], ri=i=>R-SECW(i,n,R,SEMI_K); let a0=0, g='', lb='';
+  types.forEach((x,i)=>{const f=x[2]/tot, a1=a0+f*Math.PI, r0=ri(i), [x1,y1]=P(a0,R),[x2,y2]=P(a1,R),[x3,y3]=P(a1,r0),[x4,y4]=P(a0,r0);
+    g+=`<path d="M${x1} ${y1}A${R} ${R} 0 0 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 0 0 ${x4} ${y4}Z" fill="var(${x[1]})" ${T(x[0]+': '+nf(f*100,0)+' % · '+nf(x[2])+' станко-сут')}/>`;
+    const [lx,ly]=P((a0+a1)/2,(r0+R)/2), fs=Math.max(11,Math.min(20,(R-r0)*.42)); // как у кольца 2-го уровня: внутри сектора, прямо, тёмные
+    if(f>.03) lb+=txt(lx,ly+fs*.36,nf(f*100,0)+'%',{a:'middle',fs,w:700,c:'fd',st:`--d:${1.05+i*.08}s;fill:var(--ink);pointer-events:none`}); a0=a1});
+  let s=`<g class="spinin" style="transform-origin:${cx}px ${cy}px">${g}</g>`+lb;
+  const fz=Math.max(16,R*.22); s+=txt(cx,cy-16,nf(val,1)+' %',{a:'middle',c:'t-i fd',fs:fz,w:600,st:'--d:.8s'})+txt(cx,cy,'загрузка',{a:'middle',c:'t-m fd',fs:11.5,st:'--d:.8s'});
+  return s}
+function speedo(v,o,w,h){ // спидометр: стрелка — 9+3, метки — БП и 2025
+  const mx=o.max, R0=Math.min(w/2-30,h-40), th=R0*.3, r=R0-th/2, cx=w/2, cy=h-26, A=x=>-90+180*x/mx, P=(x,rr)=>{const a=(A(x)-90)*Math.PI/180; return [cx+rr*Math.cos(a),cy+rr*Math.sin(a)]};
+  const arc=(a,b,rr)=>{const [x1,y1]=P(a,rr),[x2,y2]=P(b,rr); return `M${x1} ${y1}A${rr} ${rr} 0 0 1 ${x2} ${y2}`};
+  let s=`<path d="${arc(0,mx,r)}" fill="none" stroke="var(--band)" stroke-width="${th}"/>`;
+  s+=`<path class="dr" d="${arc(0,v.f,r)}" pathLength="1" fill="none" stroke="var(--c3)" stroke-width="${th}" style="--d:.2s"/>`;
+  for(let k=0;k<=mx;k++){const [x1,y1]=P(k,r+th/2+2),[x2,y2]=P(k,r+th/2+8),[tx,ty]=P(k,r+th/2+18); s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--muted)" stroke-width="1.2"/>`+txt(tx,ty+4,k,{a:'middle',c:'t-m',fs:11})}
+  [['bp','БП'],['f25','2025']].forEach(([p,l],i)=>{if(v[p]==null) return; const [x1,y1]=P(v[p],r-th/2-1),[x2,y2]=P(v[p],r+th/2+1); s+=`<line class="fd" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${p==='bp'?'var(--ink)':'var(--c1)'}" stroke-width="3" ${T(l+': '+nf(v[p],2)+' '+o.u)}/>`;
+});
+  s+=`<g class="ndl" style="transform-origin:${cx}px ${cy}px;--a:${A(v.f)}deg"><path d="M${cx-4} ${cy}L${cx} ${cy-r+th/2+6}L${cx+4} ${cy}z" fill="var(--ink)"/></g><circle cx="${cx}" cy="${cy}" r="8" fill="var(--ink)"/><circle cx="${cx}" cy="${cy}" r="3" fill="var(--surface)"/>`;
+  s+=txt(cx,cy+22,'т. м на станко-месяц',{a:'middle',c:'t-m',fs:11});
+  return s}
+
+function hlist(rows,o,w,h){ // горизонтальные полосы с подписью значения
+  const n=rows.length, rh=h/n, L=o.L||Math.min(150,w*.36), R=o.R||92, mx=Math.max(...rows.map(r=>r.v||0))*1.02, X=x=>L+(x/mx)*(w-L-R), y0=o.top?0:(h-rh*n)/2;
+  let s='';
+  rows.forEach((r,i)=>{const y=y0+i*rh+rh/2, dd=i*.08;
+    const mc=Math.floor((L-10)/6.6), nm=r.n.length>mc?r.n.slice(0,mc-1)+'…':r.n; s+=txt(L-8,y+(r.sub?0:4),nm,{a:'end',fs:12.5,c:'t-i'})+(r.sub?txt(L-8,y+13,r.sub,{a:'end',fs:10.5,c:'t-m'}):'');
+    s+=`<rect class="gx" style="--d:${dd}s" x="${L}" y="${y-11}" width="${Math.max(2,X(r.v)-L)}" height="22" rx="3" fill="${r.c}" ${r.demo?'opacity=".5"':''} ${T(r.tip||r.n)}/>`;
+    if(r.demo) s+=`<rect x="${L}" y="${y-11}" width="${Math.max(2,X(r.v)-L)}" height="22" rx="3" fill="url(#hatch)" class="gx" style="--d:${dd}s"/>`;
+    s+=txt(X(r.v)+7,y+4.5,r.lab,{c:'t-i fd',w:600,fs:12.5,st:`--d:${dd}s`})+(r.r?txt(w,y+4.5,r.r,{a:'end',c:'t-m fd',fs:11.5,st:`--d:${dd}s`}):'');
+    s+=`<rect class="hit" x="0" y="${y-rh/2}" width="${w}" height="${rh}" ${T(r.tip||r.n)}/>`});
+  return s}
+
+function split2(a,b,o,w,h){ // собственное / по вине заказчика
+  const t=a.v+b.v, bh=Math.min(44,h*.28), y=h*.42, xa=w*a.v/t;
+  let s=txt(0,y-bh/2-30,nf(a.v/t*100,1)+' %',{c:'t-i',fs:Math.min(30,w*.08),w:600})+txt(0,y-bh/2-12,a.n+' · '+nf(a.v,1)+' млн ₽',{c:'t-m',fs:12});
+  s+=txt(w,y-bh/2-30,nf(b.v/t*100,1)+' %',{a:'end',c:'t-i',fs:Math.min(30,w*.08),w:600})+txt(w,y-bh/2-12,b.n+' · '+nf(b.v,1)+' млн ₽',{a:'end',c:'t-m',fs:12});
+  s+=`<rect class="gx" x="0" y="${y-bh/2}" width="${xa-2}" height="${bh}" rx="6" fill="${a.c}" ${T(a.n+': '+nf(a.v,1)+' млн ₽')}/><rect class="gx" style="--d:.5s" x="${xa+2}" y="${y-bh/2}" width="${w-xa-2}" height="${bh}" rx="6" fill="${b.c}" ${T(b.n+': '+nf(b.v,1)+' млн ₽')}/>`;
+  s+=txt(0,y+bh/2+20,a.list,{c:'t-m fd',fs:11.5})+txt(w,y+bh/2+20,b.list,{a:'end',c:'t-m fd',fs:11.5});
+  return s}
+
+function splits(L,w,h){ // две полосы «доля А / доля Б» одна под другой
+  const bh=Math.min(30,h*.13), blk=h/L.length; let s='';
+  L.forEach((q,i)=>{const y=i*blk+blk*.5, t=q.a.v+q.b.v, xa=w*q.a.v/t, dd=i*.4;
+    s+=txt(0,y-bh/2-30,q.t,{c:'t-m',fs:11,w:600,st:'letter-spacing:.06em;text-transform:uppercase'})+(q.demo?`<g><rect x="${q.t.length*7.4+8}" y="${y-bh/2-42}" width="44" height="17" rx="5" fill="#FFF1D6"/>${txt(q.t.length*7.4+30,y-bh/2-29.5,'ДЕМО',{a:'middle',fs:10,w:700,st:'fill:#8A5A00'})}</g>`:'');
+    const pa=nf(q.a.v/t*100,1)+' %'; s+=txt(0,y-bh/2-9,pa,{c:'t-i',fs:17,w:600})+txt(pa.length*9.6+6,y-bh/2-9,q.a.n,{c:'t-m',fs:11.5});
+    s+=txt(w,y-bh/2-9,q.b.n+' · '+nf(q.b.v/t*100,1)+' %',{a:'end',c:'t-m',fs:11.5});
+    s+=`<rect class="gx" style="--d:${dd}s" x="0" y="${y-bh/2}" width="${xa-2}" height="${bh}" rx="6" fill="${q.a.c}" ${T(q.a.n+': '+nf(q.a.v,1)+' млн ₽')}/><rect class="gx" style="--d:${dd+.35}s" x="${xa+2}" y="${y-bh/2}" width="${w-xa-2}" height="${bh}" rx="6" fill="${q.b.c}" ${T(q.b.n+': '+nf(q.b.v,1)+' млн ₽')}/>`;
+    s+=txt(0,y+bh/2+16,q.a.list,{c:'t-m fd',fs:11})+txt(w,y+bh/2+16,q.b.list,{a:'end',c:'t-m fd',fs:11})});
+  return s}
+let SORT={}, NPVX=null;
+const sorted=(a,k)=>[...a].sort((x,y)=>SORT[k]?x[1]-y[1]:y[1]-x[1]);
+function treemap(types,w,h){ // плитки типов: площадь — млн ₽
+  const it=[...types].sort((a,b)=>b.v-a.v), tot=sum(it.map(x=>x.v)); let s='', k=0;
+  const lay=(arr,x,y,W,H)=>{if(!arr.length) return; if(arr.length===1){const t=arr[0], g=2, dd=(k++)*.1, big=W>70&&H>44;
+      s+=`<g class="pop" style="--d:${dd}s"><rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="${t.c}" ${t.demo?'opacity=".55"':''} ${T((t.full||t.n)+': '+nf(t.v,1)+' млн ₽ · '+nf(t.v/tot*100,0)+' %'+(t.demo?' (демо)':''))}/>${t.demo?`<rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="url(#hatch)" pointer-events="none"/>`:''}`;
+      const fg=(t.n==='Ремонт'||t.c==='var(--other)')?'var(--ink)':'#fff';
+      if(W>46&&H>30) s+=`<text x="${x+8}" y="${y+18}" font-size="${big?12.5:10.5}" style="fill:${fg}" pointer-events="none">${esc((m=>t.n.length>m?t.n.slice(0,Math.max(3,m-1))+'.':t.n)(Math.floor((W-14)/(big?7.4:6.4))))}</text><text x="${x+W-8}" y="${y+H-9}" text-anchor="end" font-size="${big?Math.min(22,H*.3):12}" font-weight="700" style="fill:${fg}" pointer-events="none">${nf(t.v/tot*100,0)}%</text>`;
+      s+='</g>'; return}
+    const S=sum(arr.map(z=>z.v)); let acc=0,i=0; while(i<arr.length-1&&acc+arr[i].v<S/2){acc+=arr[i].v;i++} if(i===0){acc=arr[0].v;i=1}
+    const f=acc/S; if(W>=H){lay(arr.slice(0,i),x,y,W*f,H);lay(arr.slice(i),x+W*f,y,W*(1-f),H)} else {lay(arr.slice(0,i),x,y,W,H*f);lay(arr.slice(i),x,y+H*f,W,H*(1-f))}};
+  lay(it,0,0,w,h); return s}
+function wfZero(steps,o,w,h){ // водопад от нуля: шаги по видам работ → итого (как «НПВ общее БП»)
+  const n=steps.length+1, top=22, bot=h-38, slot=w/n, bw=Math.min(64,slot*.62); let run=0, lo=0, hi=0; steps.forEach(s=>{run+=s[1]; lo=Math.min(lo,run); hi=Math.max(hi,run)});
+  const Y=v=>top+((hi-v)/((hi-lo)||1))*(bot-top); let s=`<line x1="0" x2="${w}" y1="${Y(0)}" y2="${Y(0)}" stroke="var(--muted)" stroke-width="1" opacity=".5"/>`, cur=0;
+  const lab=(i,l)=>{const m=Math.floor((slot-4)/6.4); return txt(slot*i+slot/2,h-4,l.length>m?l.slice(0,Math.max(3,m-1))+'.':l,{a:'middle',fs:10.5,c:i===n-1?'t-i':'t-m',w:i===n-1?700:400})};
+  steps.forEach((r,i)=>{const a=cur,b=cur+r[1], x=slot*i+slot/2-bw/2, dd=i*.18, g=r[1]>=0;
+    if(i) s+=`<line class="fd" style="--d:${dd}s" x1="${x-slot+bw}" x2="${x}" y1="${Y(a)}" y2="${Y(a)}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
+    s+=`<rect class="${g?'gy':'gyd'}" style="--d:${dd}s" x="${x}" y="${Y(Math.max(a,b))}" width="${bw}" height="${Math.max(2,Math.abs(Y(a)-Y(b)))}" rx="4" fill="${g?'var(--good)':'var(--bad)'}" ${T(r[0]+': '+sg(r[1],0)+' '+o.u)}/>`;
+    s+=txt(x+bw/2,g?Y(b)-6:Y(b)+14,sg(r[1],0),{a:'middle',fs:12,w:600,c:(g?'t-g':'t-r')+' fd',st:`--d:${dd}s`})+lab(i,r[0]); cur=b});
+  const x=slot*(n-1)+slot/2-bw/2, dd=steps.length*.18;
+  s+=`<line class="fd" style="--d:${dd}s" x1="${x-slot+bw}" x2="${x}" y1="${Y(cur)}" y2="${Y(cur)}" stroke="var(--muted)" stroke-dasharray="2 3"/>`;
+  s+=`<rect class="${cur>=0?'gy':'gyd'}" style="--d:${dd}s" x="${x}" y="${Y(Math.max(0,cur))}" width="${bw}" height="${Math.abs(Y(0)-Y(cur))}" rx="4" fill="var(--ink)" ${T('Итого: '+sg(cur,0)+' '+o.u)}/>`+txt(x+bw/2,cur<0?Y(cur)+15:Y(cur)-6,sg(cur,0),{a:'middle',fs:12.5,w:700,c:'t-i fd',st:`--d:${dd}s`})+lab(n-1,'Итого');
+  return s}
+const SECW=(i,n,R,k=1)=>R*k*(.24+.18*(n>1?(n-1-i)/(n-1):1)); // доля радиуса; k — понижающий коэффициент для 1-го уровня
+const SEMI_K=.7; // i — место по убыванию
+function ringCount(st0,w,h){ // наружный край общий; сектора от большего (толще) к меньшему (тоньше) по часовой; при появлении кольцо прокручивается
+  const st=[...st0].sort((a,b)=>b[2]-a[2]||a[0].localeCompare(b[0])), n=st.length;
+  const tot=sum(st.map(x=>x[2])), lgW=w>520?150:0, R=Math.min((w-lgW)/2,h/2-14)-1, cx=lgW?(w-lgW)/2:w/2, cy=h/2, P=(a,r)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)];
+  const ri=i=>R-SECW(i,n,R); let a0=-Math.PI/2, g='', lb='';
+  st.forEach((x,i)=>{const f=x[2]/tot, a1=a0+f*2*Math.PI, r0=ri(i), big=(a1-a0)>Math.PI?1:0, [x1,y1]=P(a0,R),[x2,y2]=P(a1,R),[x3,y3]=P(a1,r0),[x4,y4]=P(a0,r0);
+    g+=`<path d="M${x1} ${y1}A${R} ${R} 0 ${big} 1 ${x2} ${y2}L${x3} ${y3}A${r0} ${r0} 0 ${big} 0 ${x4} ${y4}Z" fill="var(${x[1]})" ${T(x[0]+': '+x[2]+' БУ · '+nf(f*100,0)+' %')}/>`;
+    const [lx,ly]=P((a0+a1)/2,(r0+R)/2), fs=Math.max(11,Math.min(20,(R-r0)*.42));
+    if(f>.03) lb+=txt(lx,ly+fs*.36,x[2],{a:'middle',fs,w:700,c:'fd',st:`--d:${1.05+i*.08}s;fill:var(--ink);pointer-events:none`}); a0=a1});
+  let s=`<g class="spinin" style="transform-origin:${cx}px ${cy}px">${g}</g>`+lb;
+  s+=txt(cx,cy+R*.13,tot,{a:'middle',c:'t-i fd',fs:Math.max(26,R*.36),w:700,st:'--d:.8s'});
+  if(lgW){const lh=26, y0=cy-lh*n/2+lh/2; st.forEach((x,i)=>{const y=y0+i*lh; s+=`<rect x="${w-lgW+10}" y="${y-7}" width="13" height="13" rx="3" fill="var(${x[1]})"/>`+txt(w-lgW+30,y+4,x[0],{fs:13,c:'t-i'})+txt(w,y+4,x[2],{a:'end',fs:13,w:700,c:'t-i'})})}
+  return s}
+function pairBars(rows,o,w,h){ // как «Детализация» в приложении: две тонкие полосы (сейчас / БП) и разница
+  const n=rows.length, rh=Math.max(54,h/n), L=Math.min(104,w*.32), mx=Math.max(...rows.flatMap(r=>[r[1],r[2]])), X=v=>(v/mx)*(w-L-8-20-40); let s='';
+  rows.forEach((r,i)=>{const y=i*rh+rh/2, d=r[2]==null?0:r[1]-r[2], dd=i*.06;
+    s+=txt(L-8,y+4,r[0].length>15?r[0].slice(0,14)+'…':r[0],{a:'end',fs:12,c:'t-i'});
+    s+=`<rect class="gx" style="--d:${dd}s" x="${L}" y="${y-23}" width="${Math.max(2,X(r[1]))}" height="22" rx="3" fill="var(--c3)" ${T(r[0]+': сейчас '+r[1]+' '+o.u)}/>`+txt(L+X(r[1])+5,y-8,r[1],{fs:11.5,w:700,c:'t-i fd'});
+    s+=`<rect class="gx" style="--d:${dd+.1}s" x="${L}" y="${y+1}" width="${Math.max(2,X(r[2]||0))}" height="22" rx="3" fill="var(--c2)" ${T(r[0]+': БП '+r[2]+' '+o.u)}/>`+txt(L+X(r[2]||0)+5,y+16,r[2]==null?'—':r[2],{fs:10.5,c:'t-m fd'});
+    const lb=d?sg(d,0):'0', cw=lb.length*7+12; s+=`<g class="fd"><rect x="${w-cw}" y="${y-9}" width="${cw}" height="18" rx="6" fill="${d>0?'var(--good-bg)':d<0?'var(--bad-bg)':'var(--band)'}"/>${txt(w-cw/2,y+4,lb,{a:'middle',fs:11.5,w:700,c:d>0?'t-g':d<0?'t-r':'t-m'})}</g>`});
+  return s}
+function rigStack(rows,types,w,h){ // каждая БУ — полоса на 365 дней, сегменты — дни по видам работ
+  const L=Math.min(104,w*.3), R=34, B=20, list=SORT.ld?[...rows].reverse():rows, n=list.length, rh=Math.max(34,(h-B)/n), X=d=>L+(d/365)*(w-L-R), M=['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'], md=[31,28,31,30,31,30,31,31,30,31,30,31];
+  let s='', acc=0; md.forEach((d,m)=>{const x=X(acc); s+=`<line x1="${x}" x2="${x}" y1="${B-4}" y2="${B+n*rh}" class="gl"/>`+txt(X(acc+d/2),12,(w-L)/12<34?M[m][0]:M[m],{a:'middle',fs:10.5,c:'t-m'}); acc+=d});
+  list.forEach((r,i)=>{const y=B+i*rh+rh/2, dd=Math.min(i,14)*.05; let x=L; s+=txt(L-8,y+4,SHORT(r[0]),{a:'end',fs:12,c:'t-i'});
+    r[1].forEach((d,j)=>{if(!d) return; const ww=X(d)-L; s+=`<rect class="gx" style="--d:${dd}s" x="${x}" y="${y-11}" width="${Math.max(0,ww-1.5)}" height="22" rx="3" fill="var(${types[j][1]})" ${T(r[0]+' · '+types[j][0]+': '+d+' дн.')}/>`;
+      if(ww>22) s+=txt(x+ww/2,y+4,d,{a:'middle',fs:10.5,w:600,c:(types[j][1]==='--other'?'t-i':'t-w')+' fd',st:`--d:${dd}s`}); x+=ww});
+    s+=txt(w,y+4,sum(r[1]),{a:'end',fs:11.5,c:'t-m'})});
+  return s}
+function diverge(rows,w,h){ // по заказчикам: влево — потери ЭНГС, вправо — компенсирует заказчик
+  const n=rows.length, rh=h/n, C=w*.56, L=Math.min(100,w*.36), mx=Math.max(...rows.map(r=>Math.max(r[1]-r[2],r[2]))), Xl=v=>(v/mx)*(C-L-34), Xr=v=>(v/mx)*(w-C-36); let s='';
+  s+=`<line x1="${C}" x2="${C}" y1="0" y2="${h}" stroke="var(--line)" stroke-width="1.5"/>`;
+  rows.forEach((r,i)=>{const y=i*rh+rh/2, lo=r[1]-r[2], dd=i*.08, nm=r[0].length>13?r[0].slice(0,12)+'…':r[0];
+    s+=txt(0,y+4,nm,{fs:12,c:'t-i'});
+    s+=`<rect class="gx" style="--d:${dd}s;transform-origin:100% 50%" x="${C-2-Xl(lo)}" y="${y-11}" width="${Xl(lo)}" height="22" rx="3" fill="var(--st-npv)" ${T(r[0]+': потери ЭНГС '+nf(lo,1)+' млн ₽')}/>`+txt(C-6-Xl(lo),y+4,'−'+nf(lo,lo<10?1:0),{a:'end',fs:11.5,c:'t-r fd',w:600});
+    s+=`<rect class="gx" style="--d:${dd+.2}s" x="${C+2}" y="${y-11}" width="${Xr(r[2])}" height="22" rx="3" fill="var(--c1)" ${T(r[0]+': компенсирует заказчик '+nf(r[2],1)+' млн ₽')}/>`+txt(C+6+Xr(r[2]),y+4,'+'+nf(r[2],r[2]<10?1:0),{fs:11.5,c:'t-m fd',w:600})});
+  return s}
+const incOf=g=>{const nm=D.npv.incg[g][0]; return D.npv.ev.filter(e=>e.g===nm).map(e=>[e.n,(e.well?'скв. '+e.well+' · ':'')+SHORT(e.rig||''),e.sh])};
+function incTree(w,h){ // группы инцидентов (% стоимости) с раскрытием
+  const L=Math.min(150,w*.48), R=46, mx=Math.max(...D.npv.incg.map(x=>Math.abs(x[1]))), X=v=>(Math.abs(v)/mx)*(w-L-R-26), nr=D.npv.incg.length+(NPVX!=null?incOf(NPVX).length:0); let s='', y=0, rh=Math.max(34,h/nr);
+  D.npv.incg.forEach((g,i)=>{const op=NPVX===i, dd=i*.08, cy=y+rh/2;
+    s+=`<g data-xg="${i}" style="cursor:pointer"><rect x="0" y="${y}" width="${w}" height="${rh}" fill="transparent"/>${txt(0,cy+4,(m=>g[0].length>m?g[0].slice(0,m-1)+'…':g[0])(Math.floor((L-8)/6.8)),{fs:12,c:'t-i',w:op?700:400})}
+      <rect class="gx" style="--d:${dd}s" x="${L}" y="${cy-11}" width="${Math.max(2,X(g[1]))}" height="22" rx="3" fill="var(--rs-vmr)" opacity="${g[1]<0?.4:1}"/>${txt(L+Math.max(2,X(g[1]))+6,cy+4,nf(g[1],0)+' %',{fs:12,w:600,c:'t-i fd'})}
+      <path d="${op?`M${w-14} ${cy+3}l5 -5 5 5`:`M${w-14} ${cy-3}l5 5 5 -5`}" fill="none" stroke="var(--muted)" stroke-width="1.8"/></g>`; y+=rh;
+    if(op) incOf(i).forEach(r=>{const m=y+rh/2; s+=`<g class="fdi">${txt(12,m-1,r[0],{fs:11.5,c:'t-i'})}${txt(12,m+12,r[1],{fs:10,c:'t-m'})}${txt(w,m+4,nf(r[2],0)+' %',{a:'end',fs:11.5,c:'t-m'})}</g>`; y+=rh})});
+  return s}
+/* ---------- экраны ---------- */
+const CPAL=['var(--q1)','var(--q2)','var(--q3)','var(--q4)','var(--ink)','var(--q6)'];
+function custBridge(k){const r=D[k].cust; return r.map(x=>[x[0],x[1]-(x[2]||0),x[2],x[1]]).sort((a,b)=>b[1]-a[1])}
+const v0=k=>D[k].v.f, bpChip=(k,lbl='к БП')=>chip(D[k].v.f,D[k].v.bp,D[k].up,lbl), f25Chip=k=>chip(D[k].v.f,D[k].v.f25,D[k].up,'к 2025');
+const perV=k=>D[k].per;
+let SC={}; const mkSC=()=>({
+ ebitda:{n:'EBITDA',W:['"a b c g" "d d d d"','1.1fr 1fr','1fr 1fr 1fr 1fr'],P:['"a b" "c g" "d d"','1fr 1fr 1.15fr'],tiles:[
+  {a:'a',k:'EBITDA',v:()=>[v0('ebitda'),0,'млн ₽'],ch:(w,h)=>bars3(D.ebitda.v,{d:0,up:1,u:'млн ₽'},w,h),hn:250},
+  {a:'b',k:'Рентабельность по EBITDA',v:()=>[D.margin.f,1,'%'],s:()=>`<span class="r2chip g">к БП <b>${sg(D.margin.f-D.margin.bp,1)} п.п.</b></span>`,ch:(w,h)=>ring(D.margin.f,D.margin.bp,{},w,h),hn:300},
+  {a:'c',k:'EBITDA на станок',v:()=>[D.ebitda.per.f,1,'млн ₽'],s:()=>chip(D.ebitda.per.f,D.ebitda.per.bp,1,'к БП'),ch:(w,h)=>perRows(D.ebitda.per,{d:1,u:'млн ₽'},w,h),ft:()=>'EBITDA ÷ среднее число работающих БУ за год ('+nf(D.N.f,1)+')',hn:190},
+  {a:'g',k:'EBITDA по группам заказчиков',v:()=>[v0('ebitda'),0,'млн ₽ · 9+3'],ch:(w,h)=>treemap(D.ebitda.groups.map(g=>({n:g[0],v:g[1]/100*v0('ebitda'),c:`var(${g[2]})`,full:g[0]})),w,h),hn:300},
+  {a:'d',k:'EBITDA по заказчикам · от БП к 9+3',v:()=>[v0('ebitda')-D.ebitda.v.bp,0,'млн ₽ к БП',1],ch:(w,h)=>waterfall({l:'БП',v:D.ebitda.v.bp},custBridge('ebitda'),{l:'9+3',v:v0('ebitda')},{u:'млн ₽',up:1},w,h),hn:380}]},
+ rev:{n:'Выручка',W:['"a b d" "c c c"','1fr 1.15fr','1fr 1fr 1fr'],P:['"a b" "d d" "c c"','1fr .9fr 1.25fr'],tiles:[
+  {a:'a',k:'Выручка',v:()=>[v0('rev'),0,'млн ₽'],ch:(w,h)=>bars3(D.rev.v,{d:0,up:1,u:'млн ₽',split:D.rev.split},w,h),hn:250},
+  {a:'b',k:'Выручка на станок',v:()=>[D.rev.per.f,0,'млн ₽'],s:()=>chip(D.rev.per.f,D.rev.per.bp,1,'к БП')+chip(D.rev.per.f,D.rev.per.f25,1,'к 2025'),ch:(w,h)=>perRows(D.rev.per,{d:0,u:'млн ₽'},w,h),hn:190},
+  {a:'d',k:'Выручка по группам заказчиков',v:()=>[v0('rev'),0,'млн ₽ · 9+3'],ch:(w,h)=>treemap(D.rev.groups.map(g=>({n:g[0],v:g[1]/100*v0('rev'),c:`var(${g[2]})`,full:g[0]})),w,h),hn:300},
+  {a:'c',k:'Выручка по заказчикам · от БП к 9+3',v:()=>[v0('rev')-D.rev.v.bp,0,'млн ₽ к БП',1],ch:(w,h)=>waterfall({l:'БП',v:D.rev.v.bp},custBridge('rev'),{l:'9+3',v:v0('rev')},{u:'млн ₽',up:1},w,h),hn:380}]},
+ drill:{n:'Проходка',W:['"a b c" "d d c"','1fr 1.35fr','1fr 1fr 1fr'],P:['"a c" "b c" "d d"','1fr .8fr 1.35fr'],tiles:[
+  {a:'a',k:'Проходка',v:()=>[v0('drill'),0,'тыс. м'],ch:(w,h)=>bars3(D.drill.v,{d:0,up:1,u:'тыс. м'},w,h),hn:250},
+  {a:'b',k:'Проходка на станок',v:()=>[D.drill.per.f,2,'тыс. м'],s:()=>chip(D.drill.per.f,D.drill.per.bp,1,'к БП')+chip(D.drill.per.f,D.drill.per.f25,1,'к 2025'),ch:(w,h)=>perRows(D.drill.per,{d:2,u:'тыс. м'},w,h),hn:190},
+  {a:'c',k:'По станкам · '+D.drill.rigs.length+' БУ',dm:1,srt:'dr',rows:()=>D.drill.rigs.length,v:()=>[sorted(D.drill.rigs,'dr')[0][1],1,'тыс. м · '+(SORT.dr?'минимум':'лидер')],ft:()=>'в базе '+D.drill.rigs.filter(r=>!r[3]).length+' БУ, остальные — демо',ch:(w,h)=>lolli(sorted(D.drill.rigs,'dr'),{d:1,u:'тыс. м',up:1,short:1},w,h),hn:360},
+  {a:'d',k:'Проходка по заказчикам · от БП к 9+3',v:()=>[v0('drill')-D.drill.v.bp,0,'тыс. м к БП',1],ch:(w,h)=>waterfall({l:'БП',v:D.drill.v.bp},custBridge('drill'),{l:'9+3',v:v0('drill')},{u:'тыс. м',up:1,d:1},w,h),hn:380}]},
+ wells:{n:'Законченные скважины',W:['"a c c" "b c c"','1fr 1fr','1fr 1fr 1fr'],P:['"a b" "c c"','1fr 1.6fr'],tiles:[
+  {a:'a',k:'Законченные скважины',v:()=>[v0('wells'),0,'ед.'],ch:(w,h)=>bars3(D.wells.v,{d:0,up:1,u:'ед.'},w,h),hn:250},
+  {a:'b',k:'Скважин на станок',v:()=>[D.wells.per.f,2,'ед.'],s:()=>chip(D.wells.per.f,D.wells.per.bp,1,'к БП')+chip(D.wells.per.f,D.wells.per.f25,1,'к 2025'),ch:(w,h)=>perRows(D.wells.per,{d:2,u:'ед.'},w,h),hn:190},
+  {a:'c',k:'Скважины по заказчикам · от БП к 9+3',v:()=>[v0('wells')-D.wells.v.bp,0,'скв. к БП',1],ch:(w,h)=>waterfall({l:'БП',v:D.wells.v.bp},custBridge('wells'),{l:'9+3',v:v0('wells')},{u:'скв.',up:1},w,h),hn:400}]},
+ load:{n:'Загрузка БУ',W:['"a b m" "c c c"','1.3fr 1fr','1fr 1fr 1.15fr'],P:['"a b" "m m" "c c"','1.2fr .75fr 1.2fr'],tiles:[
+  {a:'a',k:'Загрузка буровых установок',v:()=>[D.load.v.f,1,'% · '+D.load.rigsOn+' из '+D.load.rigsN+' БУ · к БП '+sg(pct(D.load.v.f,D.load.v.bp),1)+' %'],ch:(w,h)=>ringCount(D.load.state,w,h),hn:300},
+  {a:'b',k:'Загрузка БУ по проектам',dm:1,rh:54,rows:()=>D.load.cust.length,v:()=>[D.load.rigsOn,0,'БУ в работе'],ch:(w,h)=>pairBars(D.load.cust,{u:'БУ'},w,h),hn:300},
+  {a:'m',k:'Ковёр бурения · помесячно',dm:1,v:()=>[null],ch:(w,h)=>stackM(D.load.months,D.load.types,{},w,h),hn:260},
+  {a:'c',k:'Ковёр бурения по станкам · дни по видам работ',dm:1,srt:'ld',rows:()=>D.load.rigdays.length,v:()=>[null],ch:(w,h)=>rigStack(D.load.rigdays,D.load.types,w,h),hn:400}]},
+ speed:{n:'Коммерческая скорость',W:['"a b" "c b"','1fr 1fr','1fr 1fr'],P:['"a b" "c b"','1fr 1fr'],tiles:[
+  {a:'a',k:'Коммерческая скорость',v:()=>[v0('speed'),2,'т. м/ст-мес'],ch:(w,h)=>bars3(D.speed.v,{d:2,up:1,u:'т. м/ст-мес'},w,h),hn:250},
+  {a:'b',k:'По станкам · '+D.speed.rigs.length+' БУ',dm:1,srt:'sr',rows:()=>D.speed.rigs.length,v:()=>[sorted(D.speed.rigs,'sr')[0][1],2,SORT.sr?'минимум':'лидер'],ch:(w,h)=>lolli(sorted(D.speed.rigs,'sr'),{d:2,u:'т. м/ст-мес',up:1,short:1},w,h),hn:360},
+  {a:'c',k:'По заказчикам',dm:1,srt:'sc',rows:()=>D.speed.cust.length,v:()=>[sorted(D.speed.cust,'sc')[0][1],2,SORT.sc?'минимум':'лидер'],ch:(w,h)=>lolli(sorted(D.speed.cust,'sc'),{d:2,u:'т. м/ст-мес',up:1},w,h),hn:330}]},
+ npv:{n:'НПВ',W:['"a b b c" "e f g d"','1fr 1fr','1fr 1fr 1fr 1fr'],P:['"a b" "c d" "e f" "g g"','1fr 1fr 1fr .8fr'],tiles:[
+  {a:'a',k:'НПВ общее',v:()=>[v0('npv'),2,'% · '+nf(D.npv.tot,0)+' млн ₽'],s:()=>{const t=D.npv.types.filter(x=>!x.demo), o=sum(t.filter(x=>x.own).map(x=>x.v))/sum(t.map(x=>x.v)); return `<span class="r2chip">собственное <b>${nf(v0('npv')*o,2)} %</b></span><span class="r2chip">весь <b>${nf(v0('npv'),2)} %</b></span>`},ch:(w,h)=>bars3(D.npv.v,{d:2,up:0,u:'%'},w,h),hn:250},
+  {a:'b',k:'НПВ по типам',v:()=>[D.npv.tot,0,'млн ₽'],ch:(w,h)=>treemap(D.npv.types,w,h),hn:250},
+  {a:'c',k:'НПВ по станкам',dm:1,srt:'r',rows:()=>D.npv.rigs.length,v:()=>[sorted(D.npv.rigs,'r')[0][1],1,'млн ₽ · '+(SORT.r?'минимум':'максимум')],ch:(w,h)=>hlist(sorted(D.npv.rigs,'r').map(x=>({n:SHORT(x[0]),v:x[1],c:'var(--c1)',demo:x[2],lab:nf(x[1],1),tip:x[0]+': '+nf(x[1],1)+' млн ₽'+(x[2]?' (демо)':'')})),{L:Math.min(112,w*.4),R:44},w,h),ft:()=>'в базе '+D.npv.rigs.filter(r=>!r[2]).length+' БУ, остальные — демо',hn:300},
+  {a:'d',k:'НПВ по скважинам',dm:1,srt:'w',rows:()=>D.npv.wells.length,v:()=>[sorted(D.npv.wells,'w')[0][1],1,'млн ₽ · '+(SORT.w?'минимум':'максимум')],ch:(w,h)=>hlist(sorted(D.npv.wells,'w').map(x=>({n:'скв. '+x[0],v:x[1],c:'var(--c1)',demo:x[2],lab:nf(x[1],1),tip:'скв. '+x[0]+': '+nf(x[1],1)+' млн ₽'+(x[2]?' (демо)':'')})),{L:Math.min(112,w*.4),R:44},w,h),ft:()=>'в базе '+D.npv.wells.filter(r=>!r[2]).length+' скв., остальные — демо',hn:300},
+  {a:'e',k:'НПВ к БП · по видам работ',dm:1,v:()=>[sum(D.npv.wbp.map(x=>x[1])),0,'млн ₽ к БП',1],ch:(w,h)=>wfZero(D.npv.wbp,{u:'млн ₽'},w,h),hn:280},
+  {a:'f',k:'НПВ по заказчикам',dm:1,rows:()=>D.npv.custd.length,v:()=>[sum(D.npv.custd.map(x=>x[1])),0,'млн ₽'],ch:(w,h)=>diverge(D.npv.custd,w,h),hn:260},
+  {a:'g',k:'Инциденты с начала года',xg:1,rows:()=>D.npv.incg.length+(NPVX!=null?incOf(NPVX).length:0),v:()=>[null],ch:(w,h)=>incTree(w,h),hn:280}]},
+ cost:{n:'Затраты',W:['"a c c" "b c c"','1fr 1fr','1fr 1fr 1fr'],P:['"a b" "c c"','1fr 1.5fr'],tiles:[
+  {a:'a',k:'Затраты',v:()=>[v0('cost'),0,'млн ₽'],ch:(w,h)=>bars3(D.cost.v,{d:0,up:0,u:'млн ₽',split:D.cost.split},w,h),hn:250},
+  {a:'b',k:'Затраты на станок',v:()=>[D.cost.per.f,0,'млн ₽'],s:()=>chip(D.cost.per.f,D.cost.per.bp,0,'к БП')+chip(D.cost.per.f,D.cost.per.f25,0,'к 2025'),ch:(w,h)=>perRows(D.cost.per,{d:0,u:'млн ₽'},w,h),hn:190},
+  {a:'c',k:'Затраты по заказчикам · от БП к 9+3',v:()=>[v0('cost')-D.cost.v.bp,0,'млн ₽ к БП',1],ch:(w,h)=>waterfall({l:'БП',v:D.cost.v.bp},custBridge('cost'),{l:'9+3',v:v0('cost')},{u:'млн ₽',up:0},w,h),hn:400}]}
+});
+/* первый уровень (предложение): те же плитки, у Ком. скорости — спидометр */
+
+/* ---------- легенды: у каждого графика ---------- */
+const LI={sw:(c,n,op)=>`<span><i class="l-sw" style="background:${c};${op?'opacity:'+op:''}"></i>${n}</span>`,
+  dot:(c,n)=>`<span><i class="l-dt" style="background:${c}"></i>${n}</span>`, ring:(n)=>`<span><i class="l-dt l-rg"></i>${n}</span>`,
+  tick:(c,n)=>`<span><i class="l-tk" style="background:${c}"></i>${n}</span>`, dash:(n)=>`<span><i class="l-ds"></i>${n}</span>`,
+  line:(c,n)=>`<span><i class="l-ln" style="background:${c}"></i>${n}</span>`, hatch:(n)=>`<span><i class="l-sw l-ht"></i>${n}</span>`,
+  coin:(n)=>`<span><i class="l-dt" style="background:var(--coin);box-shadow:0 2px 0 var(--coin-d)"></i>${n}</span>`};
+const LP=()=>[LI.sw('var(--c1)',PN.f25),LI.sw('var(--c2)',PN.bp),LI.sw('var(--c3)',PN.f)];
+const LSPL=k=>{const v=D[k].v, sp=D[k].split, rest=PER3.some(p=>sp[p]&&v[p]-sp[p][0]-sp[p][1]>v[p]*.01); return [LI.sw('var(--c3)','суточная ставка'),LI.sw('var(--c3)','под ключ',.6)].concat(rest?[LI.sw('var(--c3)','прочие (не разнесены по договорам)',.3)]:[])};
+const LPER=()=>[LI.sw('var(--c3)','9+3'),LI.sw('var(--c2)','БП'),LI.sw('var(--c1)','2025'),LI.dash('план (БП)')];
+const LDB=()=>[LI.ring('БП'),LI.dot('var(--c3)','9+3'),LI.line('var(--good)','лучше БП'),LI.line('var(--bad)','хуже БП')];
+const LLO=()=>[LI.line('var(--c3)','9+3'),LI.tick('var(--ink)','БП'),LI.dot('var(--good)','выше БП'),LI.dot('var(--bad)','ниже БП')];
+const LWF=(up)=>[LI.sw('var(--c2)','БП'),LI.sw('var(--good)',up?'рост к БП':'экономия к БП'),LI.sw('var(--bad)',up?'снижение к БП':'перерасход к БП'),LI.sw('var(--c3)','9+3')];
+const LTY=(fc)=>D.load.types.map(x=>LI.sw(`var(${x[1]})`,x[0])).concat(fc?[LI.sw('var(--c3)','прогноз окт–дек',.45)]:[]);
+const LSP=()=>[LI.sw('var(--c3)','9+3 · '+nf(D.speed.v.f,2)),LI.tick('var(--ink)','БП · '+nf(D.speed.v.bp,2)),LI.tick('var(--c1)','2025 · '+nf(D.speed.v.f25,2))];
+const LG={
+ 'ebitda.a':LP,'ebitda.b':()=>[LI.sw('var(--c3)','9+3 · '+nf(D.margin.f,1)+' %'),LI.tick('var(--ink)','БП · '+nf(D.margin.bp,1)+' %')],'ebitda.c':LPER,'ebitda.d':()=>LWF(1),'ebitda.g':()=>[`<span>цвет — группа, площадь — доля EBITDA 9+3</span>`],
+ 'rev.a':()=>LSPL('rev'),'rev.b':LPER,'rev.c':()=>LWF(1),
+ 'drill.a':LP,'drill.b':LPER,'drill.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'drill.d':()=>LWF(1),'wells.c':()=>LWF(1),'rev.d':()=>[`<span>цвет — группа, площадь — доля выручки 9+3</span>`],
+ 'wells.a':LP,'wells.b':LPER,
+ 'load.a':()=>LTY(0),'load.b':()=>[LI.sw('var(--c3)','сейчас'),LI.sw('var(--c2)','БП (демо)'),`<span>справа — разница</span>`],'load.m':()=>LTY(1),'load.c':()=>LTY(0).concat([`<span>шкала — дни года · ↕ — сортировка</span>`]),
+ 'speed.a':LP,'speed.b':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'speed.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),
+ 'npv.a':LP,'npv.b':()=>[`<span>цвет — тип НПВ, площадь — млн ₽</span>`,LI.hatch('демо')],'npv.c':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],'npv.d':()=>[LI.sw('var(--c1)','млн ₽'),LI.sw('var(--c1)','демо',.45),`<span>↕ — сортировка</span>`],
+ 'npv.e':()=>[LI.sw('var(--bad)','потери к БП'),LI.sw('var(--good)','лучше БП'),LI.sw('var(--ink)','итого')],'npv.f':()=>[LI.sw('var(--st-npv)','НПВ — потери ЭНГС'),LI.sw('var(--c1)','компенсирует заказчик (сут. ставка)')],
+ 'npv.g':()=>[LI.sw('var(--rs-vmr)','доля стоимости инцидентов'),`<span>⌄ — состав группы (демо)</span>`],'npv.h':()=>[LI.sw('#7A2328','ЭНГС'),LI.sw('var(--c1)','заказчик')],
+ 'cost.a':()=>LSPL('cost'),'cost.b':LPER,'cost.c':()=>LWF(0),
+ 'home.ebitda':LP,'home.rev':()=>LSPL('rev'),'home.drill':LP,'home.wells':LP,'home.load':()=>LTY(0),'home.speed':LSP,'home.npv':()=>[LI.sw('var(--st-npv)','млн ₽, цвет — тип'),LI.hatch('демо')],'home.cost':()=>LSPL('cost')};
+
+/* ---------- первый уровень: плитки по настройке (порядок, скрытые), у каждой — свой график ---------- */
+const HCH={load:(w,h)=>semi(D.load.types,D.load.v.f,w,h), speed:(w,h)=>speedo(D.speed.v,{max:6,u:'т. м/ст-мес'},w,h), npv:(w,h)=>treemap(D.npv.types,w,h)};
+function homeSpec(){const ids=TILES().map(I=>I.id), n=ids.length, c=n<=3?Math.max(1,n):n<=6?3:4;
+  return {n:'Отчётность',cols:c,rows:Math.max(1,Math.ceil(n/c)),tiles:ids.map(k=>{const s=SC[k].tiles[0]; return {...s,a:k,go:'ind:'+k,k:k==='npv'?'НПВ · по типам':s.k,
+    s:k==='speed'?()=>bpChip('speed')+f25Chip('speed'):k==='npv'?SC.npv.tiles[0].s:s.s, ch:HCH[k]||s.ch, ft:null, dm:false, hn:250}})}}
+
+/* ---------- раскладка и отрисовка ---------- */
+let seen=new Set(), lastInd=null, SPEC=null, KEY='';
+const layout=()=>{const w=innerWidth,h=innerHeight; return w>900&&h>=560?'w':(w>=700&&h>=900?'p':'n')};
+function tileHTML(t,key){const vv=t.v?t.v():[null], v0_=vv[0];
+  const v=v0_==null||!isFinite(v0_)?'':`<div class="r2v"><span class="num" data-v="${v0_}" data-d="${vv[1]}" data-sg="${vv[3]?1:0}">${vv[3]?sg(v0_,vv[1]):nf(v0_,vv[1])}</span><small>${esc(vv[2]||'')}</small></div>`;
+  const lf=LG[key+'.'+t.a], lg=lf?`<div class="r2lg">${lf().join('')}</div>`:'';
+  const tag=t.go?'button':'div';
+  return `<${tag} ${t.go?'type="button"':''} class="r2t" style="grid-area:${t.a}" ${t.go?`data-go="${t.go}"`:''}><div class="r2hd"><div class="r2k">${esc(t.k)}</div>${t.dm?'<span class="r2dm">демо</span>':''}${t.srt?`<span class="r2srt" role="button" tabindex="0" data-srt="${t.srt}" aria-label="Сортировка">${SORT[t.srt]?'↑':'↓'}</span>`:''}${t.go?'<span class="r2arr">›</span>':''}</div>${v}${t.s?`<div class="r2s">${t.s()}</div>`:''}<div class="r2ch"></div>${lg}${t.ft?`<div class="r2ft">${esc(t.ft())}</div>`:''}</${tag}>`}
+function screen(key){D=build(); SC=mkSC(); if(key!=='home'&&!SC[key]) key='ebitda'; const md=layout();
+  SPEC=key==='home'?homeSpec():SC[key]; KEY=key;
+  let st='';
+  if(key==='home'){if(md==='w') st=`grid-template-columns:repeat(${SPEC.cols},minmax(0,1fr));grid-template-rows:repeat(${SPEC.rows},minmax(0,1fr))`; else if(md==='p') st=`grid-template-columns:1fr 1fr;grid-template-rows:repeat(${Math.ceil(SPEC.tiles.length/2)},minmax(0,1fr))`;}
+  else if(md!=='n'){const L=md==='w'?SPEC.W:SPEC.P; st=`grid-template-areas:${L[0].replace(/"/g,"'")};grid-template-rows:${L[1]};grid-template-columns:${md==='w'?(L[2]||'1fr 1fr 1fr'):'1fr 1fr'}`}
+  return `<div class="r2g m-${md}" style="${st}">${SPEC.tiles.map(t=>tileHTML(t,key==='home'?'home':key).replace(key==='home'?`grid-area:${t.a}`:'\u0000','')).join('')}</div><div class="r2tip"></div>`}
+function countUp(g){g.querySelectorAll('.num').forEach(n=>{const v=+n.dataset.v, d=+n.dataset.d, s=+n.dataset.sg, t0=performance.now(), dur=900; const f=t=>{const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3); n.textContent=s?sg(v*e,d):nf(v*e,d); if(k<1) requestAnimationFrame(f)}; requestAnimationFrame(f)})}
+function post(keep){const g=shadow.querySelector('.r2g'); if(!g) return; const md=layout(), key=KEY, anim=!seen.has(key); seen.add(key);
+  if(md==='p'){const r=g.getBoundingClientRect(), tb=document.querySelector('.tabbar'), tbr=tb?tb.getBoundingClientRect():{top:innerHeight,height:0,width:1}; const bottom=tbr.height>tbr.width?innerHeight:tbr.top; g.style.height=Math.max(600,bottom-r.top-10)+'px'}
+  [...g.children].forEach((el,i)=>{const t=SPEC.tiles[i]; if(md==='n'){if(t.rows){const full=t.rows()*(t.rh||34)+130, half=Math.round(innerHeight*.5); el.style.height=Math.min(full,half)+'px'} else el.style.minHeight=(t.hn+90)+'px'}});
+  if(anim) g.classList.add('anim');
+  [...g.children].forEach((el,i)=>{const t=SPEC.tiles[i], ch=el.querySelector('.r2ch'); let w=ch.clientWidth, h=ch.clientHeight; if(w<40||h<40) return;
+    if(t.rows){const need=t.rows()*(t.rh||34)+(t.a==='c'&&key==='load'?26:6); if(need>h){ch.classList.add('scr'); w=ch.clientWidth-6; h=need}}
+    try{ch.innerHTML=`<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}"><defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--surface)" stroke-width="2.2"/></pattern></defs>${t.ch(w,h)}</svg>`}catch(e){ch.innerHTML='<p class="r2ft">Нет данных для графика</p>'; console.error(e)}});
+  if(anim) countUp(g);
+  if(key==='home'&&lastInd){const el=g.querySelector(`[data-go="ind:${lastInd}"]`); lastInd=null; if(el){const r=el.getBoundingClientRect(); if(r.top<60||r.bottom>innerHeight-70) el.scrollIntoView({block:'center'}); el.classList.add('back-hl'); setTimeout(()=>el.classList.remove('back-hl'),900)}}
+  if(key!=='home') lastInd=key}
+/* подсказки по касанию/наведению */
+function tipAt(e){const tip=shadow.querySelector('.r2tip'); if(!tip) return; const el=e.target.closest&&e.target.closest('[data-t]'); if(!el){tip.classList.remove('on'); return}
+  tip.textContent=el.dataset.t; tip.classList.add('on'); const x=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12), y=Math.max(60,e.clientY-tip.offsetHeight-12); tip.style.left=x+'px'; tip.style.top=y+'px'}
+shadow.addEventListener('pointermove',e=>{if(e.pointerType==='mouse') tipAt(e)});
+shadow.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){tipAt(e); const tip=shadow.querySelector('.r2tip'); clearTimeout(tipAt._t); tipAt._t=setTimeout(()=>tip&&tip.classList.remove('on'),2200)}});
+/* сортировка списков, раскрытие групп инцидентов — без перехода на другой экран */
+shadow.addEventListener('click',e=>{const sr=e.target.closest('[data-srt]'); if(sr){e.stopPropagation(); e.preventDefault(); SORT[sr.dataset.srt]=!SORT[sr.dataset.srt]; render(true); return}
+  const xg=e.target.closest('[data-xg]'); if(xg){e.stopPropagation(); const i=+xg.dataset.xg; NPVX=NPVX===i?null:i; render(true)}},true);
+/* листать показатели на втором уровне: свайп влево/вправо и стрелки в шапке */
+const ORDERI=()=>TORD.slice();
+function step(k){const t=top(); if(t.t!=='ind') return; const L=ORDERI(), i=L.indexOf(t.id); t.id=L[(i+k+L.length)%L.length]; render()}
+let sx=null, sy=0; host.addEventListener('touchstart',e=>{if(top().t!=='ind'||e.target.closest&&e.target.closest('.scr')) {sx=null; return} sx=e.touches[0].clientX; sy=e.touches[0].clientY},{passive:true});
+host.addEventListener('touchend',e=>{if(sx==null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; sx=null; if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6) step(dx<0?1:-1)},{passive:true});
+const title=()=>{const t=top(), y=DB.meta.asof.slice(0,4); return t.t==='ind'&&SC[t.id]?SC[t.id].n+' · '+y:'Отчётность · '+y};
+return {home:()=>screen('home'), ind:it=>screen(it.id), post, title, step, isInd:()=>top().t==='ind'}})();
+SCR.home=R2.home; SCR.ind=R2.ind;
+
 const APPS=[{render:k=>{saveRep(); render(k); if(typeof renderSync==='function') renderSync()}}];
 function render(keep){wide=innerWidth>900&&innerHeight>=560;
   const old=$('.rb'), st=old?old.scrollTop:0;
   const gl=document.documentElement.classList.contains('glass');
   shadow.innerHTML=`<style>${RCSS}</style><div class="rp ${wide?'wide':'narrow'}${gl?' glass':''}"><div class="rb">${SCR[top().t](top())}</div></div>`;
   if(keep&&wide) $('.rb').scrollTop=st; if(!keep){const a=document.querySelector('.app'); if(a) a.scrollTop=0; host.scrollTop=0}
-  bindDrag(); if(wide&&top().t==='home') fitTiles(); const det=$('.det'); if(det&&!keep) det.scrollTop=0;
+  bindDrag(); R2.post(keep); if(typeof renderSync==='function') renderSync(); const det=$('.det'); if(det&&!keep) det.scrollTop=0;
   if(typeof updBack==='function') updBack(); if(typeof setTabs==='function') setTabs()}
 function toast(){}
   shadow.addEventListener('click',e=>{if(e.target.closest('[data-dm]')){e.stopPropagation(); DM=DM==='pct'?'abs':'pct'; APPS.forEach(x=>x.render(true)); return}
@@ -3332,7 +3863,7 @@ function toast(){}
       toast('В макете оперативный режим показан заглушкой')}});
 
 let rz; addEventListener('resize',()=>{clearTimeout(rz); rz=setTimeout(()=>{if(!host.hidden) render(true)},150)});
-window.REP={render,
+window.REP={render,title:()=>R2.title(),step:k=>R2.step(k),isInd:()=>R2.isInd(),
   tab:()=>S.stack.length>1&&(S.stack[1].t==='table'||S.stack[1].t==='set')?S.stack[1].t:'home',
   go:t=>{S.stack=t==='home'?[{t:'home'}]:[{t:'home'},{t}]},
   canBack:()=>S.stack.length>1, back:()=>{S.stack.pop(); render()},
