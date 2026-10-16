@@ -1405,7 +1405,7 @@ body.mod-stub .app>.filters,body.mod-stub main,body.mod-stub .tabbar,body.mod-st
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:121,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:122,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2378,6 +2378,16 @@ function sectionsHTML(w){const wts=[]; w.planS.segs.forEach(g=>{wts[g.op.s]=(wts
     +'<div class="pg-cap">'+esc(cap)+'</div>'}
 function custRow(c,ws){const t=totals(ws,'month');
   return `<button type="button" class="row" data-go="cust:${c.id}"><span class="av">${avHTML(c)}</span><span style="min-width:0"><div class="t">${esc(c.n)}</div><div class="s">${ws.length} скв. · ${ws.map(w=>w.no).join(', ')}</div></span><span class="r">${ws.some(w=>w.npv)?'<span class="pill" style="background:var(--st-npv)">НПВ</span>':''}<b class="${Math.round(t.pct*100)>=NORM.plan_good*100?'dgoodc':'dbadc'}">${Math.round(t.pct*100)} %</b>плана мес.<small class="cnpv">НПВ ${pct1(npvShare(ws,'month').opct)}</small>${sparkSVG(ws)}</span></button>`}
+
+/* сборка 122: вкладки скважины — подвести строку вкладок к верху панели */
+function wtScroller(){let e=document.querySelector('#pbody [data-wt]'); while(e&&e!==document.body){const o=getComputedStyle(e).overflowY; if(o==='auto'||o==='scroll') return e; e=e.parentElement} return panel}
+function wtSettle(st){const RMm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const go=()=>{const b=document.querySelector('#pbody [data-wt]'); if(!b) return; const row=b.parentElement, sc=wtScroller(); if(!sc) return;
+    sc.scrollTop=st; const old=sc.querySelector('.wt-pad'); if(old) old.remove();
+    const off=row.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-6, need=off+sc.clientHeight-sc.scrollHeight;
+    if(need>0){const p=document.createElement('div'); p.className='wt-pad'; p.style.height=Math.ceil(need)+'px'; p.setAttribute('aria-hidden','true'); panel.appendChild(p)}
+    sc.scrollTo({top:Math.max(0,off),behavior:RMm?'auto':'smooth'})};
+  if(typeof isPhoneSheet==='function'&&isPhoneSheet()&&sheet!=='max'){setSheet('max'); setTimeout(go,320)} else requestAnimationFrame(go)}
 function renderPanel(){
   if(stopWB){stopWB(); stopWB=null} charts=[]; const lev=state.level; let h='';
   const scope=scopeWells();
@@ -2463,7 +2473,7 @@ function renderPanel(){
         <div class="rig-tm">${months.map(m=>`<span style="left:${m.x}%">${m.l}</span>`).join('')}</div>
         <div class="rig-l">${rows.map(r=>`<div class="rl${r.cur?' cur':''}"><span class="pad">${esc(String(r.pad)).slice(0,4)}</span><span class="m"><b>${esc(r.no)}${r.cur?'<em>сейчас</em>':''}</b><small>${fmtR(r.d0)} – ${r.d1?fmtR(r.d1):'по н. в.'} · ${nf1(r.days)} сут</small></span><span class="v">${nf0(r.T)} м</span></div>`).join('')}</div></div>`}
     h+='</div>'; panel.innerHTML=h; bindGo(panel);
-    panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{state.wtab=b.dataset.wt; renderPanel()});
+    panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{const sc=wtScroller(), st=sc?sc.scrollTop:0; state.wtab=b.dataset.wt; renderPanel(); wtSettle(st)});
     document.getElementById('opSum').onclick=()=>nOpen('well',{w:w.id,d:0}); document.getElementById('npvW').onclick=()=>npvOpen([w],'month');
     if(tab==='drill'){const cv=document.getElementById('wbc'); cv._V={t:w.tNow}; const stop=wellbore(cv,w);
       const R=document.getElementById('rpR'), go=document.getElementById('rpGo'), ico=document.getElementById('rpIco'); let play=false, raf=0, last=0, spd=1;
