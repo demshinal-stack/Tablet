@@ -1658,7 +1658,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 30px))!imp
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:137,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:138,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2621,7 +2621,7 @@ function dynBind(id,ws,after,onPer){const draw=()=>{const bul=document.getElemen
     if(after) after()};
   charts.push(draw); draw()}
 /* мини-тренд: проходка за 30 суток против плана */
-function sparkSVG(ws){const r=d3.sum(ws,w=>w.planDay)||1, v=PER.month.bins.map(b=>d3.sum(ws,w=>metersW(w,b.a,b.b))/(r*(b.b-b.a)));
+function sparkSVG(ws){const r=d3.sum(ws,w=>w.planDay)||1, v=PER.month.bins.filter(b=>b.b-b.a>1e-6).map(b=>d3.sum(ws,w=>metersW(w,b.a,b.b))/(r*(b.b-b.a))).filter(Number.isFinite); if(v.length<2) return '';
   const mx=Math.max(1.4,d3.max(v)||1), X=i=>2+i*(88/(v.length-1)), Y=x=>26-Math.min(x,mx)/mx*23;
   return `<svg class="spk" viewBox="0 0 92 28" aria-hidden="true"><line x1="2" x2="90" y1="${Y(1)}" y2="${Y(1)}" stroke="var(--plan)" stroke-dasharray="3 3"/><polyline points="${v.map((x,i)=>X(i)+','+Y(x)).join(' ')}" fill="none" stroke="var(--fact)" stroke-width="1.6" stroke-linejoin="round"/><circle cx="${X(v.length-1)}" cy="${Y(v.at(-1))}" r="2.6" fill="var(--fact)"/></svg>`}
 function sectionsHTML(w){const wts=[]; w.planS.segs.forEach(g=>{wts[g.op.s]=(wts[g.op.s]||0)+(g.t1-g.t0)}); const n=wts.length;
@@ -4464,9 +4464,17 @@ shadow.addEventListener('pointermove',e=>{if(e.pointerType==='mouse') tipAt(e)})
 shadow.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){tipAt(e); const tip=shadow.querySelector('.r2tip'); clearTimeout(tipAt._t); tipAt._t=setTimeout(()=>tip&&tip.classList.remove('on'),2200)}});
 /* сортировка списков, раскрытие групп инцидентов — без перехода на другой экран */
 const toggleExp=a=>{const k=KEY+'.'+a; EXP=EXP===k?null:k; render(true)};
-shadow.addEventListener('click',e=>{const ex=e.target.closest('[data-exp]'); if(ex){e.stopPropagation(); e.preventDefault(); toggleExp(ex.dataset.exp); return}
+/* кнопки ↓↑ и ⇕: срабатывают по отрыву пальца (iOS может не прислать click после прокрутки или перерисовки), повторный click гасится;
+   при раскрытой соседней плитке нажатие на кнопку другой плитки сворачивает раскрытую и сразу выполняет действие (раньше — только сворачивало) */
+let btDown=null, btDone=0;
+const btAct=b=>{if(b.dataset.exp!=null){toggleExp(b.dataset.exp); return} if(EXP&&!b.closest('.r2t.expd')) EXP=null; SORT[b.dataset.srt]=!SORT[b.dataset.srt]; render(true)};
+shadow.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('[data-srt],[data-exp]'); btDown=b&&e.pointerType!=='mouse'?{b,x:e.clientX,y:e.clientY,t:performance.now()}:null},true);
+shadow.addEventListener('pointerup',e=>{if(!btDown) return; const d=btDown; btDown=null; if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>=12||performance.now()-d.t>=800) return;
+  const R=d.b.getBoundingClientRect(); if(e.clientX<R.left-10||e.clientX>R.right+10||e.clientY<R.top-10||e.clientY>R.bottom+10) return; e.stopPropagation(); btDone=performance.now(); btAct(d.b)},true);
+shadow.addEventListener('pointercancel',()=>{btDown=null},true);
+shadow.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ') return; const b=e.target.closest&&e.target.closest('[data-srt],[data-exp]'); if(!b) return; e.preventDefault(); btAct(b); const k=b.dataset.srt?'[data-srt="'+b.dataset.srt+'"]':'[data-exp="'+b.dataset.exp+'"]'; setTimeout(()=>{const n=shadow.querySelector(k); n&&n.focus()},0)});
+shadow.addEventListener('click',e=>{const bt=e.target.closest('[data-srt],[data-exp]'); if(bt){e.stopPropagation(); e.preventDefault(); if(performance.now()-btDone<800) return; btAct(bt); return}
   if(EXP&&!e.target.closest('.r2t.expd')){EXP=null; render(true); return}
-  const sr=e.target.closest('[data-srt]'); if(sr){e.stopPropagation(); e.preventDefault(); SORT[sr.dataset.srt]=!SORT[sr.dataset.srt]; render(true); return}
   const xg=e.target.closest('[data-xg]'); if(xg){e.stopPropagation(); const i=+xg.dataset.xg; NPVX=NPVX===i?null:i; render(true)}},true);
 /* отклонение над столбцами: % ↔ абсолют. Срабатывает по отрыву пальца (iOS может не прислать click после прокрутки или перерисовки),
    click по плашке гасится — плитка не открывается, подсказки нет */
@@ -5164,7 +5172,7 @@ function clock(t,e,me){const d=new Date(); let F=[];
 /* погода: Open-Meteo по координатам месторождений (округлены до 0,1°), без ключа; нет связи — честно говорим и даём обычный диапазон */
 const WXC={0:'ясно',1:'малооблачно',2:'переменная облачность',3:'пасмурно',45:'туман',48:'туман с изморозью',51:'морось',53:'морось',55:'сильная морось',56:'ледяная морось',57:'ледяная морось',61:'небольшой дождь',63:'дождь',65:'сильный дождь',66:'ледяной дождь',67:'ледяной дождь',71:'небольшой снег',73:'снег',75:'сильный снег',77:'снежная крупа',80:'ливень',81:'ливень',82:'сильный ливень',85:'снегопад',86:'сильный снегопад',95:'гроза',96:'гроза с градом',99:'гроза с градом'};
 const WXI=c=>c===0||c===1?'☀':c<=3?'☁':c<=48?'🌫':c<=67||(c>=80&&c<=82)?'🌧':c<=86?'❄':'⛈';
-const NORM=['от −35 до −18','от −32 до −15','от −25 до −8','от −15 до 0','от −5 до +8','от +3 до +15','от +8 до +20','от +5 до +16','от 0 до +10','от −10 до 0','от −25 до −10','от −30 до −15'];
+const WXNORM=['от −35 до −18','от −32 до −15','от −25 до −8','от −15 до 0','от −5 до +8','от +3 до +15','от +8 до +20','от +5 до +16','от 0 до +10','от −10 до 0','от −25 до −10','от −30 до −15'];
 const rng=(a,b)=>Math.round(a)===Math.round(b)?'около '+tC(a):'от '+tC(a)+' до '+tC(b);
 const tC=v=>(v>0?'+':v<0?'−':'')+Math.abs(Math.round(v))+' °C';
 let WXCACHE={at:0,key:'',data:null}, GEO=null;
@@ -5193,7 +5201,7 @@ function weather(t,e){if(PREFS.aiNet===false) return say([{t:'Погода и г
     else F=wxPlaces(e);
     const one=F.length===1, place=one?F[0].n:(e.cust?`месторождения ${e.cust.short||e.cust.n}`:'месторождения');
     let J; try{J=await wxGet(F)}catch(err){J=null}
-    if(!J) return [{t:`Не могу получить прогноз: нет связи с метеосервисом. Обычно в ${MGEN[new Date().getMonth()].replace(/я$/,'е').replace(/а$/,'е')} на Ямале ${NORM[new Date().getMonth()]} °C, часто ветер и снег.`},{h:src('Климатическая норма для севера Западной Сибири, ориентировочно')}];
+    if(!J) return [{t:`Не могу получить прогноз: нет связи с метеосервисом. Обычно в ${MGEN[new Date().getMonth()].replace(/я$/,'е').replace(/а$/,'е')} на Ямале ${WXNORM[new Date().getMonth()]} °C, часто ветер и снег.`},{h:src('Климатическая норма для севера Западной Сибири, ориентировочно')}];
     const R=F.map((f,i)=>{const w=J[i]||{}, c=w.current||{}, d=w.daily||{}; return day===0?{f,t:c.temperature_2m,fl:c.apparent_temperature,code:c.weather_code,wind:c.wind_speed_10m,g:c.wind_gusts_10m}
       :{f,t:(d.temperature_2m_max||[])[day],lo:(d.temperature_2m_min||[])[day],code:(d.weather_code||[])[day],g:(d.wind_gusts_10m_max||[])[day]}}).filter(r=>r.t!=null);
     if(!R.length) throw 0;
@@ -5394,8 +5402,6 @@ function listen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognit
   try{r.start(); setTimeout(()=>{try{r.stop()}catch(e){}},7000)}catch(e){fake()}}
 /* точка «есть новое» */
 try{const live=daySum(0).inc.some(i=>i.live); orb.querySelector('.dot').hidden=!live}catch(e){}
-})();
-
 /* настройки помощника: Профиль → Данные */
 const aiVis=()=>{try{const o=document.querySelector('.aiorb'); if(o) o.hidden=PREFS.aiOn===false; if(PREFS.aiOn===false&&open) toggle(false)}catch(e){}}; aiVis();
 const _aiRP=renderProfile; renderProfile=function(){_aiRP.apply(this,arguments); try{const sec=document.querySelector('#profwrap [data-p2s="data"]')||document.querySelector('#profwrap .prof'); if(!sec||sec.querySelector('.pbox.paiset')) return;
@@ -5403,6 +5409,8 @@ const _aiRP=renderProfile; renderProfile=function(){_aiRP.apply(this,arguments);
   const b=document.createElement('div'); b.className='pbox paiset'; b.innerHTML='<h3>Помощник «Пульс»</h3>'+row('aiOn','Значок помощника на экране','отвечает по файлу базы на устройстве, без нейросети')+row('aiNet','Погода и геопозиция','по вопросу; наружу — только округлённые координаты');
   const src=[...sec.querySelectorAll(':scope>.pbox')].find(x=>/Откуда данные/.test(x.textContent)); if(src) sec.insertBefore(b,src); else sec.appendChild(b);
   b.querySelectorAll('[data-ai]').forEach(x=>x.onclick=()=>{const k=x.dataset.ai; PREFS[k]=PREFS[k]===false; savePrefs(); x.setAttribute('aria-checked',PREFS[k]!==false); aiVis()})}catch(e){console.error(e)}};
+})();
+
 
 window.__app={go,state:()=>state,WELLS,setScreen,nOpen,PREFS:()=>PREFS};
 };
