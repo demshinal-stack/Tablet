@@ -1534,7 +1534,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 30px))!imp
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:133,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:136,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4117,8 +4117,10 @@ function treemap(types,w,h){ // плитки типов: площадь — мл
       s+=`<g class="pop tm" style="--d:${dd}s"><rect x="${x+g/2}" y="${y+g/2}" width="${W-g}" height="${H-g}" rx="6" fill="${t.c}" ${T((t.full||t.n)+': '+nf(t.v,1)+' млн ₽ · '+pc)}/>`;
       const nm=t.n, big=W>90&&H>70, pfs=big?Math.min(22,H*.28):12.5, pw=TW(pc,pfs,700), fn=[12.5,11.5].find(f=>Math.max(TW(nm,f,600),TW(vl,f-1,500))<=W-14);
       if(fn&&H>=34+pfs+6&&W>=pw+14){s+=at(x+7,y+17,fn,600,'',nm)+at(x+7,y+32,fn-1,500,'',vl,'tmv')+at(x+W-7,y+H-8,pfs,700,'end',pc)}           // название, сумма, доля
+      else {const two=[12.5,11.5].map(f=>{const sp=SPLIT2(nm,W-14,f,600); return sp&&TW(vl,f-1,500)<=W-14?{f,sp}:null}).find(Boolean); /* название в две строки */
+        if(two&&H>=46+pfs+6&&W>=pw+14){s+=at(x+7,y+17,two.f,600,'',two.sp[0])+at(x+7,y+31,two.f,600,'',two.sp[1])+at(x+7,y+46,two.f-1,500,'',vl,'tmv')+at(x+W-7,y+H-8,pfs,700,'end',pc)}
       else if(H>=22&&W>=TW(nm+' · '+vl,11,600)+TW(pc,11.5,700)+26){const yy=y+H/2+4; s+=at(x+7,yy,11,600,'',nm+' · '+vl)+at(x+W-7,yy,11.5,700,'end',pc)} // в одну строку
-      else {fitAll=0; if(W>=pw+10&&H>=pfs+8) s+=at(x+W/2,y+H/2+pfs*.35,Math.min(pfs,13),700,'middle',pc)}                                     // не влезает — только доля, остальное в легенде
+      else {fitAll=0; if(W>=pw+10&&H>=pfs+8) s+=at(x+W/2,y+H/2+pfs*.35,Math.min(pfs,13),700,'middle',pc)}}                                     // не влезает — только доля, остальное в легенде
       s+='</g>'; return}
     const S=sum(arr.map(z=>z.v)); let acc=0,i=0; while(i<arr.length-1&&acc+arr[i].v<S/2){acc+=arr[i].v;i++} if(i===0){acc=arr[0].v;i=1}
     const f=S?acc/S:.5; if(W>=H){lay(arr.slice(0,i),x,y,W*f,H);lay(arr.slice(i),x+W*f,y,W*(1-f),H)} else {lay(arr.slice(0,i),x,y,W,H*f);lay(arr.slice(i),x,y+H*f,W,H*(1-f))}};
@@ -4251,11 +4253,12 @@ const LLO=()=>[LI.line('var(--c3)','9+3'),LI.tick('var(--ink)','БП'),LI.dot('v
 const LWF=(up)=>[LI.sw('var(--c2)','БП'),LI.sw('var(--good)',up?'рост к БП':'экономия к БП'),LI.sw('var(--bad)',up?'снижение к БП':'перерасход к БП'),LI.sw('var(--c3)','9+3')];
 const LTY=(fc)=>D.load.types.map(x=>LI.sw(`var(${x[1]})`,x[0])).concat(fc?[LI.sw('var(--c3)','прогноз окт–дек',.45)]:[]);
 const LSP=()=>[LI.sw('var(--c3)','9+3 · '+nf(D.speed.v.f,2)),LI.tick('var(--ink)','БП · '+nf(D.speed.v.bp,2)),LI.tick('var(--c1)','2025 · '+nf(D.speed.v.f25,2))];
-const LNT=()=>{const tt=[...D.npv.types].sort((a,b)=>b.v-a.v), tot=sum(tt.map(x=>x.v))||1; return tt.map(t=>LI.sw(t.c,`${t.n} · ${nf(t.v,t.v<10?1:0)} · ${nf(t.v/tot*100,0)} %`))};
+const LTG=k=>{const tot=v0(k); return [...D[k].groups].sort((x,y)=>y[1]-x[1]).map(g=>LI.sw(`var(${g[2]})`,`${g[0]} · ${nf(g[1]/100*tot,0)} · ${nf(g[1],0)} %`))}, /* группы заказчиков: легенда — только если подпись не влезла в плитку */
+LNT=()=>{const tt=[...D.npv.types].sort((a,b)=>b.v-a.v), tot=sum(tt.map(x=>x.v))||1; return tt.map(t=>LI.sw(t.c,`${t.n} · ${nf(t.v,t.v<10?1:0)} · ${nf(t.v/tot*100,0)} %`))};
 const LG={
- 'ebitda.a':LP,'ebitda.b':()=>[LI.sw('var(--c3)','9+3 · '+nf(D.margin.f,1)+' %'),LI.tick('var(--ink)','БП · '+nf(D.margin.bp,1)+' %')],'ebitda.c':LPER,'ebitda.d':()=>LWF(1),'ebitda.g':()=>[`<span>цвет — группа, площадь — доля EBITDA 9+3</span>`],
+ 'ebitda.a':LP,'ebitda.b':()=>[LI.sw('var(--c3)','9+3 · '+nf(D.margin.f,1)+' %'),LI.tick('var(--ink)','БП · '+nf(D.margin.bp,1)+' %')],'ebitda.c':LPER,'ebitda.d':()=>LWF(1),'ebitda.g':()=>LTG('ebitda'),
  'rev.a':()=>LSPL('rev'),'rev.b':LPER,'rev.c':()=>LWF(1),
- 'drill.a':LP,'drill.b':LPER,'drill.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'drill.d':()=>LWF(1),'wells.c':()=>LWF(1),'rev.d':()=>[`<span>цвет — группа, площадь — доля выручки 9+3</span>`],
+ 'drill.a':LP,'drill.b':LPER,'drill.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'drill.d':()=>LWF(1),'wells.c':()=>LWF(1),'rev.d':()=>LTG('rev'),
  'wells.a':LP,'wells.b':LPER,
  'load.a':()=>LTY(0),'load.b':()=>[LI.sw('var(--c3)','сейчас'),LI.sw('var(--c2)','БП (демо)'),`<span>справа — разница</span>`],'load.m':()=>LTY(1),'load.c':()=>LTY(0).concat([`<span>шкала — дни года · ↕ — сортировка</span>`]),
  'speed.a':LP,'speed.b':()=>LLO().concat([`<span>↕ — сортировка</span>`]),'speed.c':()=>LLO().concat([`<span>↕ — сортировка</span>`]),
