@@ -1329,7 +1329,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:110,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:112,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -1341,7 +1341,7 @@ const DB_MODE='file', DB_API='/api/pulse2/v1';
    Выход — разделы, которые читают экраны (dict, svodka, wells…). Все итоги и разрезы считаются здесь,
    в хранилище лежат только исходные строки. Тот же код может работать на сервере (Node) для API. */
 const PulseRepo=(()=>{
-  const SCHEMA=4;
+  const SCHEMA=5, SCHEMA_MIN=4;  /* 4 — ещё принимается: инклинометрия без признака план/факт считается проектом */
   const R4=x=>Math.round(x*1e4)/1e4, R1=x=>Math.round(x*10)/10;
   const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-яa-z0-9]/g,'');
   /* строки таблицы как объекты, по порядку ord/seq, если он есть */
@@ -1381,7 +1381,8 @@ const PulseRepo=(()=>{
       statuses:get('well_status').sort(by('ord')).map(t=>t.name),
       cur:cur.map(r=>({no:r.well_no,pad:r.pad,field:r.field_id,cust:r.customer_id,rig:r.rig_code,type:r.well_type,contract:r.contract_type,st:r.status,brig:r.crew_no,master:r.master,
         proj:r.design_depth_m,depth:r.current_depth_m,f:[r.fact_day_m,r.fact_month_m,r.fact_year_m],p:[r.plan_day_m,r.plan_month_m,r.plan_year_m],
-        npv:[r.npv_h_day,r.npv_h_month],kv:[r.kv_h_day,r.kv_h_month],start:r.work_start_at,dur:r.plan_duration_days,scen:r.scenario,work:r.work_text,next:r.next_text}))};
+        npv:[r.npv_h_day,r.npv_h_month],kv:[r.kv_h_day,r.kv_h_month],
+        days:Object.fromEntries(DR.filter(x=>x.rig_code===r.rig_code).map(x=>[x.report_date,[x.fact_day_m,x.plan_day_m,x.npv_h_day,x.kv_h_day]])),start:r.work_start_at,dur:r.plan_duration_days,scen:r.scenario,work:r.work_text,next:r.next_text}))};
     out.res=Object.fromEntries(get('rig_condition').map(r=>[r.rig_code,[r.level,r.note]]));
     const GM=get('customer_group_member').sort(by('ord'));
     out.groups=get('customer_group').sort(by('ord')).map(g=>flag({n:g.name,cust:GM.filter(m=>m.group_id===g.id).map(m=>m.customer_id),c:g.color},'dark',g.dark));
@@ -1423,14 +1424,15 @@ const PulseRepo=(()=>{
     const g=(a,k)=>{const m=new Map(); a.forEach(x=>{const v=x[k]; m.has(v)?m.get(v).push(x):m.set(v,[x])}); return m};
     const COg=g(CO,'construction_id'), CPg=g(CP,'construction_id'), SVg=g(SV,'construction_id'), CSg=g(CS,'construction_id');
     const opsOf=(id,sch)=>(COg.get(id)||[]).filter(o=>o.schedule===sch).map(o=>[o.kind,o.section_ord,o.depth_end_md,R4((ms(o.end_at)-ms(o.start_at))/864e5),o.name]);
-    const cumPts=ops=>{let t=0; const p=[[0,0]]; ops.forEach(o=>{t+=o[3]; p.push([R4(t),o[2]])}); return p};
+    const cumPts=(ops,d0=0)=>{let t=0; const p=[[0,d0]]; ops.forEach(o=>{t+=o[3]; p.push([R4(t),o[2]])}); return p};
     const factOf=c=>{const s=ms(c.spud_at); return {ops:opsOf(c.id,'fact'),pts:(CPg.get(c.id)||[]).map(p=>[R4((ms(p.point_at)-s)/864e5),p.md])}};
+    const d0=c=>{const p=CPg.get(c.id); return p&&p.length?p[0].md:0};  /* скважина может начинаться не с нуля (второй ствол, ЗБС) */
     const hist=g(CN.filter(c=>!c.is_current).sort(by('ord')),'rig_code');
     out.wells=CN.filter(c=>c.is_current).sort(by('ord')).map(c=>{
       const secs=(CSg.get(c.id)||[]).sort(by('section_ord')), sv=SVg.get(c.id), plan=opsOf(c.id,'plan'), lks=opsOf(c.id,'lks');
       return {no:c.well_no,rig:c.rig_code,T:c.target_md,tp:secs.length?[secs[0].top_md,...secs.map(s=>s.bottom_md)]:[0,c.target_md],prof:c.profile,tNow:R4((SNAP-ms(c.spud_at))/864e5),
-        planDay:c.plan_rop_m_day,az:c.azimuth_deg,disp:c.displacement_km,kop:c.kop_md,survey:sv&&sv.length?sv.map(s=>[s.md,s.inc_deg]):null,
-        fact:factOf(c),plan:{ops:plan,pts:cumPts(plan)},lks:{ops:lks,pts:cumPts(lks)},
+        planDay:c.plan_rop_m_day,az:c.azimuth_deg,disp:c.displacement_km,kop:c.kop_md,survey:sv&&sv.length?{plan:sv.filter(s=>(s.kind||'plan')==='plan').map(s=>[s.md,s.inc_deg,s.azi_deg]),fact:sv.filter(s=>s.kind==='fact').map(s=>[s.md,s.inc_deg,s.azi_deg])}:null,tvd:c.target_tvd==null?null:c.target_tvd,
+        fact:factOf(c),plan:{ops:plan,pts:cumPts(plan,d0(c))},lks:{ops:lks,pts:cumPts(lks,d0(c))},
         hist:(hist.get(c.rig_code)||[]).map(h=>({no:h.well_no,T:h.target_md,t0:day(h.spud_at),t1:day(h.end_at),pad:h.pad,fact:factOf(h)})),
         inc1:c.inc1_deg,profName:c.profile_name,sections:secs.map(s=>({n:SEC[s.section_ord].name,top:s.top_md,bottom:s.bottom_md,bit:s.bit_mm,casing:s.casing_mm}))}});
     /* — Сводка: исходные строки сводки + производные разрезы из суточного рапорта */
@@ -1477,7 +1479,7 @@ const PulseRepo=(()=>{
     if(!db||db.format!=='pulse2-db') throw new Error('Это не файл базы «Пульс 2»');
     if(db.collections&&!db.tables) throw new Error('Файл базы старого формата (до сборки 78). Нужен файл с таблицами хранилища — Pulse2-DB-….json версии '+SCHEMA);
     if((db.schema_version|0)>SCHEMA) throw new Error('Файл базы новее приложения — обновите приложение');
-    if((db.schema_version|0)<SCHEMA||!db.tables) throw new Error('Файл базы предыдущей версии ('+(db.schema_version|0)+') — нужен новый файл Pulse2-DB-….json версии '+SCHEMA);
+    if((db.schema_version|0)<SCHEMA_MIN||!db.tables) throw new Error('Файл базы предыдущей версии ('+(db.schema_version|0)+') — нужен новый файл Pulse2-DB-….json версии '+SCHEMA);
     REQUIRED.forEach(k=>{const t=db.tables[k]; if(!t||!Array.isArray(t.columns)||!Array.isArray(t.rows)) throw new Error('В файле нет таблицы «'+k+'»')});
     return db}
   return {SCHEMA,REQUIRED,assemble,check,norm}})();
@@ -1576,7 +1578,7 @@ const WDB=DB.wells||[];
 function hydS(p){const ops=(p&&p.ops||[]).map(o=>({k:o[0],s:o[1],d:o[2],t:o[3],n:o[4]})), segs=[]; let t=0,d=0;
   ops.forEach((op,i)=>{segs.push({op,i,t0:t,t1:t+op.t,d0:d,d1:op.d}); t+=op.t; d=op.d});
   const pts=(p&&p.pts&&p.pts.length?p.pts:[[0,0]].concat(segs.map(g=>[g.t1,g.d1]))).map(q=>({t:q[0],d:q[1]})); return {pts,segs,end:t,endD:d}}
-function depthAt(S,t){const p=S.pts; if(t<=0) return 0; if(t>=p[p.length-1].t) return p[p.length-1].d;
+function depthAt(S,t){const p=S.pts; if(t<=0) return p.length?p[0].d:0; if(t>=p[p.length-1].t) return p[p.length-1].d;
   let lo=0,hi=p.length-1; while(hi-lo>1){const m=(lo+hi)>>1; if(p[m].t<t) lo=m; else hi=m}
   const a=p[lo],b=p[hi]; return a.d+(b.d-a.d)*(b.t===a.t?1:(t-a.t)/(b.t-a.t))}
 function timeAt(S,d){const p=S.pts; for(let k=1;k<p.length;k++) if(p[k].d>=d&&p[k].d>p[k-1].d){const a=p[k-1],b=p[k];return a.t+(b.t-a.t)*(d-a.d)/(b.d-a.d)} return p[p.length-1].t}
@@ -1588,7 +1590,7 @@ ROWS.forEach((r,i)=>{
   const status=npv?'npv':depth>=target?'finish':seg.op.k==='C'?'casing':'drill';
   const w={i,id:'w'+i,field:FIELDS.find(f=>f.id===fid),rig,no,pad,depth,target,T,tp,from,next,nextNote,npv:!!npv,res:{l:rl,t:rt},cust:CUSTOMERS.find(c=>c.id===cid),
     fact:S,planS:hydS(x.plan),lksS:hydS(x.lks),tNow,spud:-tNow,status,op:seg.op,bad:depth>target,cap:parseInt(rig)};
-  w.prof=x.prof||'v'; w.traj=x.survey&&x.survey.length?trajectory(w,x):null; w.dbAz=x.az||0; w.dbDisp=x.disp||0; w.dbHist=x.hist||[]; w.planDay=x.planDay||0;
+  w.traj=trajectory(w,x,(DICT.cur[i]||{}).type); w.prof=w.traj.key; w.dbAz=x.az!=null?x.az:([...String(w.no)].reduce((a,c)=>(a*31+c.charCodeAt(0))%360,7)); w.dbDisp=x.disp!=null?x.disp:w.traj.planAt(w.T).x/1000; w.dirCond=x.az==null; w.dbHist=x.hist||[]; w.planDay=x.planDay||0;
   WELLS.push(w);
 });
 WELLS.forEach((w,i)=>{const c=DICT.cur[i], rg=DICT.rigs.find(x=>x.code===c.rig)||{}; w.real=c; w.st=c.st; w.wtype=c.type||null; w.contract=c.contract; w.brig=c.brig; w.master=c.master; w.rigName=rg.name||''; w.rigNo=rg.no||'';
@@ -1604,7 +1606,7 @@ function syncState(){const now=new Date(), m=msk(now), lastSched=new Date(Date.U
   return {missed,fails,lvl:missed?'bad':fails.length?'warn':'ok',lastSched}}
 /* история станка (предыдущие скважины) — из базы */
 WELLS.forEach(w=>{w.hist=w.dbHist.map(h=>({T:h.T,t0:h.t0,t1:h.t1,pad:h.pad,no:h.no,fact:hydS(h.fact)}))});
-function wellDepthT(S,t0,t){if(t<=t0) return 0; return depthAt(S,t-t0)}
+function wellDepthT(S,t0,t){return depthAt(S,Math.max(0,t-t0))}
 function metersW(w,a,b){let m=0; b=Math.min(b,0);
   for(const h of w.hist){if(h.t1<=a||h.t0>=b) continue; m+=wellDepthT(h.fact,h.t0,Math.min(b,h.t1))-wellDepthT(h.fact,h.t0,Math.max(a,h.t0))}
   if(b>w.spud){const x=Math.max(a,w.spud); m+=Math.min(w.depth,depthAt(w.fact,b-w.spud))-Math.min(w.depth,depthAt(w.fact,x-w.spud))}
@@ -1868,7 +1870,7 @@ function drawDetail(){
   const g=gDetail.selectAll('g.pad').data(ws,d=>d.id).join(en=>{const g=en.append('g').attr('class','pad'); g.append('path').attr('class','tp'); g.append('path').attr('class','tf'); return g});
   g.select('.tp').attr('d',d=>tr(d,1)).attr('class','tp geo-ln').style('stroke','var(--plan)').style('stroke-width',2).style('stroke-dasharray','6 5');
   g.select('.tf').attr('d',d=>{const fr=Math.max(0,Math.min(1,(d.depth-d.T*.25)/(d.T*.75))); return fr>0?tr(d,fr):null}).attr('class','tf geo-ln').style('stroke','var(--fact)').style('stroke-width',3.5);
-  const labs=[]; if(state.level==='well') ws.forEach(w=>{const a=w.az*Math.PI/180, e=zt.apply([w.pos[0]+Math.sin(a)*w.disp,w.pos[1]-Math.cos(a)*w.disp]); const r=Math.sin(a)>=0; labs.push({x:e[0]+(r?10:-10),y:e[1]+4,a:r?'start':'end',t:'проектный забой '+nf0(w.target)+' м (траектория условная)'})});
+  const labs=[]; if(state.level==='well') ws.forEach(w=>{const a=w.az*Math.PI/180, e=zt.apply([w.pos[0]+Math.sin(a)*w.disp,w.pos[1]-Math.cos(a)*w.disp]); const r=Math.sin(a)>=0; labs.push({x:e[0]+(r?10:-10),y:e[1]+4,a:r?'start':'end',t:'проектный забой '+nf0(w.target)+' м'+(w.dirCond||(w.traj&&w.traj.cond)?' (траектория условная)':'')})});
   gDLab.selectAll('text').data(labs).join('text').attr('class','gratlab').style('font-size','11px').style('fill','var(--ink)').attr('x',d=>d.x).attr('y',d=>d.y).attr('text-anchor',d=>d.a).text(d=>d.t);
 }
 
@@ -1998,12 +2000,30 @@ function hbars(el,rows){ /* строки «факт к плану» в том ж
 
 /* ======================= анимация ствола ======================= */
 /* траектория ННС (демо): шаг 10 м по стволу; inc — зенитный угол, x — отход, z — глубина по вертикали */
-function trajectory(w,x){const T=w.T, hz=w.prof==='hz', sv=x.survey;
-  /* инклинометрия из базы: [MD, зенитный угол]; между станциями — линейно, профиль считается по шагу 10 м */
-  const incAt=md=>{if(md<=sv[0][0]) return sv[0][1]; for(let k=1;k<sv.length;k++) if(md<=sv[k][0]){const a=sv[k-1],b=sv[k]; return a[1]+(b[1]-a[1])*(md-a[0])/((b[0]-a[0])||1)} return sv[sv.length-1][1]};
-  const pts=[{md:0,x:0,z:0,inc:0}]; for(let md=10;md<=T+10;md+=10){const q=pts[pts.length-1], a=incAt(md-5)*Math.PI/180; pts.push({md,x:q.x+Math.sin(a)*10,z:q.z+Math.cos(a)*10,inc:incAt(md)})}
-  const at=md=>{md=Math.max(0,Math.min(T,md)); const k=Math.min(pts.length-2,Math.floor(md/10)), f=(md-pts[k].md)/10, a=pts[k], b=pts[k+1]; return {md,x:a.x+(b.x-a.x)*f,z:a.z+(b.z-a.z)*f,inc:a.inc+(b.inc-a.inc)*f}};
-  return {pts,at,kop:x.kop,hz,type:x.profName||(hz?'ННС с горизонтальным окончанием':'Наклонно-направленная (J-профиль)')}}
+function trajectory(w,x,wtype){const T=w.T, sv=x.survey||{}, plan=(sv.plan||[]).filter(s=>s[1]!=null), fact=(sv.fact||[]).filter(s=>s[1]!=null);
+  /* тип профиля: из базы (construction.profile) или по типу скважины из рапорта */
+  const t=(wtype||'').toLowerCase(), key=x.prof||(/субгориз/.test(t)?'shz':/гориз/.test(t)?'hz':/вертик/.test(t)?'v':/s-проф|s-образ/.test(t)?'s':'j');
+  const NAMES={v:'Вертикальная',j:'Наклонно-направленная (J-профиль)',s:'S-профиль',hz:'ННС с горизонтальным окончанием',shz:'Субгоризонтальная'};
+  /* условный профиль: набор угла 1°/10 м; точки и углы — из базы, если заданы */
+  const R=10, ramp=(md,a,b,i0,i1)=>md<=a?i0:md>=b?i1:i0+(i1-i0)*(md-a)/(b-a);
+  const cond=(()=>{if(key==='v') return ()=>0;
+    if(key==='j'){const th=x.inc1||35, k=x.kop!=null?x.kop:Math.round(T*.18), e=k+th*R; return md=>ramp(md,k,e,0,th)}
+    if(key==='s'){const th=x.inc1||30, k=x.kop!=null?x.kop:Math.round(T*.15), e=k+th*R, d0=Math.max(e,T*.6), d1=Math.max(d0+(th-5)*R,T*.8); return md=>md<d0?ramp(md,k,e,0,th):ramp(md,d0,d1,th,5)}
+    const end=x.inc1||(key==='hz'?88:80), hl=T*(key==='hz'?.3:.2), mid=55, L=T-hl, l0=L-(end-mid)*R, k0=x.kop!=null?x.kop:Math.max(150,Math.min(T*.25,l0-mid*R-100)), b1=k0+mid*R;
+    return md=>md<l0?ramp(md,k0,Math.min(b1,l0),0,mid):ramp(md,l0,L,mid,end)})();
+  const interp=S=>md=>{if(md<=S[0][0]) return S[0][1]*(S[0][0]>0?md/S[0][0]:1); for(let k=1;k<S.length;k++) if(md<=S[k][0]){const a=S[k-1],b=S[k]; return a[1]+(b[1]-a[1])*(md-a[0])/((b[0]-a[0])||1)} return S[S.length-1][1]};
+  const planReal=plan.length>=2, factReal=fact.length>=2, pInc=planReal?interp(plan):cond;
+  /* фактические замеры до последней станции, дальше — проект (плавный переход 300 м) */
+  const fLast=factReal?fact[fact.length-1][0]:-1, fInc=factReal?interp(fact):null, dI=factReal?fact[fact.length-1][1]-pInc(fLast):0;
+  const cInc=md=>!factReal?pInc(md):md<=fLast?fInc(md):pInc(md)+dI*Math.max(0,1-(md-fLast)/300);
+  const integ=inc=>{const p=[{md:0,x:0,z:0,inc:0}]; for(let md=10;md<=T+10;md+=10){const q=p[p.length-1], a=inc(md-5)*Math.PI/180; p.push({md,x:q.x+Math.sin(a)*10,z:q.z+Math.cos(a)*10,inc:inc(md)})} return p};
+  const mkAt=p=>md=>{md=Math.max(0,Math.min(T,md)); const k=Math.min(p.length-2,Math.floor(md/10)), f=(md-p[k].md)/10, a=p[k], b=p[k+1]; return {md,x:a.x+(b.x-a.x)*f,z:a.z+(b.z-a.z)*f,inc:a.inc+(b.inc-a.inc)*f}};
+  const pts=integ(cInc), ppts=integ(pInc), at=mkAt(pts), planAt=mkAt(ppts);
+  let kop=x.kop; if(kop==null){const q=ppts.find(p=>p.inc>1); kop=q?q.md:null}
+  const vertical=!factReal&&ppts.every(p=>p.inc<.5);
+  const typeName=x.profName||NAMES[key]||NAMES.j, tl=typeName.toLowerCase();
+  const note=!factReal&&!planReal?'Траектория условная: инклинометрии нет, изгиб — по типу скважины: '+typeName+'. Глубины — по рапорту.':!factReal?'Фактических замеров нет — ствол показан по проекту.':!planReal?'Проектная часть траектории условная — нет проектной инклинометрии.':'';
+  return {pts,at,planAt,kop,hz:key==='hz'||key==='shz',key,type:typeName,factReal,planReal,cond:!factReal&&!planReal,vertical,note,tvd:x.tvd}}
 /* состояние скважины на момент t (для просмотра бурения с начала) */
 function viewAt(w,t){if(t>=w.tNow-1e-6) return {t:w.tNow,dep:w.depth,st:w.status,op:w.op};
   const g=w.fact.segs.find(g=>t>=g.t0&&t<g.t1)||w.fact.segs[0], st=g.op.k==='N'?'npv':g.op.k==='D'?'drill':'casing';
@@ -2034,7 +2054,7 @@ function stageLabels(ctx,o){const {ns,tp,ys,stg,dep,yD,bx,W,H,top,cs}=o, lx=bx+1
   ctx.fillStyle=o.npv?cs['st-npv']:cs.fact; ctx.beginPath(); ctx.roundRect?ctx.roundRect(px,pill.y-10,lw,20,10):ctx.rect(px,pill.y-10,lw,20); ctx.fill(); ctx.fillStyle=cs.surface; ctx.fillText(label,px+7,pill.y+4)}
 function wellbore(canvas,w){
   canvas._V=canvas._V||{t:w.tNow};
-  if(w.traj) return wellboreDir(canvas,w);
+  if(w.traj&&!w.traj.vertical) return wellboreDir(canvas,w);
   const ctx=canvas.getContext('2d'); let phase=0,last=0,raf=0; const parts=d3.range(70).map(i=>({lane:i%3,u:Math.random(),j:Math.random()}));
   const RM=matchMedia('(prefers-reduced-motion: reduce)');
   const C=n=>getComputedStyle(document.documentElement).getPropertyValue('--'+n).trim();
@@ -2093,7 +2113,7 @@ function wellboreDir(canvas,w){
   const LT=(()=>{const m=(cs.surface||'').match(/#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i); return m?(parseInt(m[1],16)*.3+parseInt(m[2],16)*.59+parseInt(m[3],16)*.11)>150:false})();
   /* светлая тема: тёмная сталь, синий раствор, тёплый цемент — чтобы не сливалось с бежево-серым фоном пластов */
   const steelHi=LT?'#B4C0CF':'#E8EDF2', steelLo=LT?'#2F3E52':'#6B7A90', mud=LT?'#6A8DB3':'#24384F', cement=LT?'#B8986A':'#AFC0D6', cut=LT?'#7A4E22':'#C9A46A', flow=LT?'#008F80':'#00DCC8';
-  const end=Tj.at(w.T), xMax=Math.max(1,end.x), zMax=end.z;
+  const end=Tj.at(w.T), pend=Tj.planAt(w.T), xMax=Math.max(1,end.x,pend.x), zMax=Math.max(end.z,pend.z);
   function frame(now){
     const W=canvas.clientWidth, H=canvas.clientHeight, dpr=Math.min(2,devicePixelRatio||1);
     if(!W){raf=requestAnimationFrame(frame); return}
@@ -2115,7 +2135,9 @@ function wellboreDir(canvas,w){
     const path=(a,b)=>{ctx.beginPath(); for(let md=a;md<=b;md+=10){const [x,y]=P(Math.min(md,b)); md===a?ctx.moveTo(x,y):ctx.lineTo(x,y)} const [x,y]=P(b); ctx.lineTo(x,y)};
     ctx.lineCap='butt'; ctx.lineJoin='round';
     // проектный ствол
-    ctx.setLineDash([6,5]); ctx.strokeStyle=cs.plan; ctx.globalAlpha=.7; ctx.lineWidth=1.6; path(dep,w.T); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    ctx.setLineDash([6,5]); ctx.strokeStyle=cs.plan; ctx.globalAlpha=.7; ctx.lineWidth=1.6; path(dep,w.T); ctx.stroke();
+    if(Tj.factReal){ctx.globalAlpha=.4; ctx.lineWidth=1.2; ctx.beginPath(); for(let md=0;md<=w.T;md+=10){const q=Tj.planAt(md); md?ctx.lineTo(X(q.x),Y(q.z)):ctx.moveTo(X(q.x),Y(q.z))} ctx.stroke()}
+    ctx.setLineDash([]); ctx.globalAlpha=1;
     { const [ex,ey]=P(w.T); ctx.fillStyle=cs.accent; ctx.beginPath(); ctx.moveTo(ex,ey-6); ctx.lineTo(ex+6,ey); ctx.lineTo(ex,ey+6); ctx.lineTo(ex-6,ey); ctx.closePath(); ctx.fill(); }
     // пробуренный ствол по секциям: цемент → обсадка → раствор
     const doneC=new Set(w.fact.segs.filter(g=>g.op.k==='C'&&g.t1<=v.t).map(g=>g.op.s)); const curC=w.fact.segs.find(g=>g.op.k==='C'&&g.t0<=v.t&&g.t1>v.t);
@@ -2131,7 +2153,7 @@ function wellboreDir(canvas,w){
       const tw=ctx.measureText(t).width, low=a>1.05; let tx=low?x-tw+4:x+nx*off, ty=low?y+off+8:y+ny*off+4; tx=Math.max(4,Math.min(W-tw-4,tx));
       let n=0; while(hit(tx,ty,tw)&&n++<6) ty+=low?14:-14; placed.push([tx,ty-11,tw,13]); ctx.fillText(t,tx,ty)})};
     // точка начала набора угла
-    { const [x,y]=P(Tj.kop); ctx.fillStyle=cs.accent; ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill(); ctx.fillStyle=cs.muted; ctx.font='10px Golos Text, system-ui'; ctx.textAlign='right'; ctx.fillText('КОП · '+nf0(Tj.kop)+' м',x-maxR-6,y+3); ctx.textAlign='left'; }
+    if(Tj.kop!=null){ const [x,y]=P(Tj.kop); ctx.fillStyle=cs.accent; ctx.beginPath(); ctx.arc(x,y,3.5,0,7); ctx.fill(); ctx.fillStyle=cs.muted; ctx.font='10px Golos Text, system-ui'; ctx.textAlign='right'; ctx.fillText('КОП · '+nf0(Tj.kop)+' м',x-maxR-6,y+3); ctx.textAlign='left'; }
     // колонна и долото
     const stringOn=v.st==='drill'||v.st==='npv', drilling=v.st==='drill'; const [bx,by,ba]=P(dep);
     if(stringOn&&dep>0){const s=v.op.s, rp=Math.max(2,r(127)*.7), rb=r(BIT[s])*.95;
@@ -2314,7 +2336,7 @@ function renderPanel(){
     if(tab==='drill') h+=`<div class="rp nogest"><button type="button" class="rp-b" id="rpGo" aria-label="Показать бурение с начала"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="rpIco" d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></button>
       <div class="rp-m"><div class="rp-t"><b id="rpD"></b><span id="rpS"></span></div><input type="range" id="rpR" min="0" max="${w.tNow.toFixed(3)}" step="0.01" value="${w.tNow.toFixed(3)}" aria-label="Момент бурения"></div>
       <div class="rp-sp seg" id="rpSp">${[1,2,4].map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===1}">${k}×</button>`).join('')}</div></div>
-      <div class="wb"><canvas id="wbc" style="height:420px" aria-label="Схема скважины"></canvas></div><div class="facts"><div style="grid-column:1/-1"><span>Профиль</span><b>${w.traj?w.traj.type:'Вертикальная'}</b></div>${w.traj?(()=>{const q=w.traj.at(Math.min(w.depth,w.T)), e=w.traj.at(w.T); return `<div><span>Зенитный угол</span><b>${Math.round(q.inc)}°</b></div><div><span>Отход сейчас</span><b>${nf0(q.x)} м</b></div><div><span>По вертикали</span><b>${nf0(q.z)} м</b></div><div><span>Отход по проекту</span><b>${nf0(e.x)} м</b></div>`})():''}<div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><div><span>Переедет на</span><b>${w.next?esc(w.next)+(w.nextNote?' · '+esc(w.nextNote):''):'—'}</b></div><div style="grid-column:1/-1"><span>Ресурс оборуд.</span><b>${resHTML(w)}</b></div></div>`;
+      <div class="wb"><canvas id="wbc" style="height:420px" aria-label="Схема скважины"></canvas></div><div class="facts"><div style="grid-column:1/-1"><span>Профиль</span><b>${w.traj?w.traj.type:'Вертикальная'}</b></div>${w.traj&&!w.traj.vertical?(()=>{const Tj=w.traj, q=Tj.at(Math.min(w.depth,w.T)), e=Tj.planAt(w.T), af=Tj.factReal?'':'≈ ', ap=Tj.planReal?'':'≈ '; return `<div><span>Зенитный угол</span><b>${af}${Math.round(q.inc)}°</b></div><div><span>Отход сейчас</span><b>${af}${nf0(q.x)} м</b></div><div><span>По вертикали</span><b>${af}${nf0(q.z)} м</b></div><div><span>Отход по проекту</span><b>${ap}${nf0(e.x)} м</b></div>`+(Tj.tvd?`<div><span>Проект по вертикали</span><b>${nf0(Tj.tvd)} м</b></div>`:'')})():''}${w.traj&&w.traj.note?`<p class="note trajnote" style="grid-column:1/-1;margin:2px 0 0">${esc(w.traj.note)}</p>`:''}<div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><div><span>Переедет на</span><b>${w.next?esc(w.next)+(w.nextNote?' · '+esc(w.nextNote):''):'—'}</b></div><div style="grid-column:1/-1"><span>Ресурс оборуд.</span><b>${resHTML(w)}</b></div></div>`;
     if(tab==='ggd') h+=`<div class="sec"><div class="sec-h"><h3>Глубина — день</h3><div class="legend"><span><i style="background:var(--fact)"></i>факт</span><span><i style="background:var(--plan)"></i>ГТН</span><span><i style="background:var(--lks)"></i>ЛКС</span><span><i style="background:var(--st-npv);opacity:.5;height:9px"></i>НПВ</span></div></div><div class="chart" id="ggd"></div></div>
       <div class="facts"><div><span>Забуривание</span><b>${fmtDY(dateAt(w.spud))}</b></div><div><span>Сутки на скважине</span><b>${nf1(w.tNow)} из ${nf1(w.planS.end)}</b></div><div><span>К графику ГТН</span><b style="color:${lag>NORM.lag_card?'var(--bad)':lag<-NORM.lag_card?'var(--good)':'var(--ink)'}">${signed1(lag)} сут</b></div><div><span>ЛКС на скважину</span><b>${nf1(w.lksS.end)} сут</b></div><div><span>Прогноз окончания</span><b>${fmtDY(dateAt(rem))}</b></div><div><span>НПВ на скважине</span><b>${nf1(d3.sum(w.fact.segs.filter(g=>g.op.k==='N'&&g.t0<w.tNow),g=>Math.min(g.t1,w.tNow)-g.t0)*24)} ч</b></div></div><p class="note">ГГД и ГТН — демонстрационные, построены от фактического забоя на ${ASOF_S}.</p>`;
     if(tab==='dyn') h+=dynHTML('wd');
@@ -2857,7 +2879,7 @@ let NST={r:{},p:{}}, NFIRST=false; try{const o=localStorage.getItem(NKEY); if(o)
 const nSave=()=>{try{localStorage.setItem(NKEY,JSON.stringify(NST))}catch(e){}};
 const dayAt=d=>new Date(LOAD.at.getTime()-d*864e5), dKey=d=>dayAt(d).toISOString().slice(0,10), dLbl=d=>fmtMsk(dayAt(d)).slice(0,5);
 const nf1r=v=>v.toLocaleString('ru-RU',{minimumFractionDigits:1,maximumFractionDigits:1});
-function daySum(d,ws=WELLS){const a=-1-d,b=-d, fact=d3.sum(ws,w=>metersW(w,a,b)), plan=d3.sum(ws,w=>w.planDay), nh=d3.sum(ws,w=>npvTime(w,a,b))*24, cal=ws.length*24, inc=[];
+function daySum(d,ws=WELLS){const a=-1-d,b=-d, rd=(()=>{const x=new Date(SNAP); x.setDate(x.getDate()-1-d); return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')})(), rr=w=>w.real&&w.real.days&&w.real.days[rd], byRep=ws.length&&ws.every(rr), fact=d3.sum(ws,w=>metersW(w,a,b)), plan=byRep?d3.sum(ws,w=>rr(w)[1]||0):d3.sum(ws,w=>w.planDay), nh=d3.sum(ws,w=>npvTime(w,a,b))*24, cal=byRep?d3.sum(ws,w=>rr(w)[3]!=null?rr(w)[3]:24):ws.length*24, inc=[];
   ws.forEach(w=>{const add=(S,t0,cur)=>S.segs.forEach(g=>{if(g.op.k!=='N') return; const x=Math.max(a,t0+g.t0),y=Math.min(b,t0+g.t1); if(y<=x) return;
       const live=cur&&d===0&&w.status==='npv'&&t0+g.t1>=w.spud+w.tNow-1e-6; inc.push({w,op:g.op,h:(y-x)*24,tot:(g.t1-g.t0)*24,live,closed:!live&&t0+g.t1<=b+1e-6,start:t0+g.t0})});
     w.hist.forEach(h=>add(h.fact,h.t0,false)); add(w.fact,w.spud,true)});
