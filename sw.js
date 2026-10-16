@@ -1,6 +1,6 @@
 /* Пульс 2 © Demshin_lab. Офлайн-кеш и обновления.
    Версию поднимайте вместе с APP в index.html и version.json. */
-const VERSION = "pulse2-2.0.0-136";
+const VERSION = "pulse2-2.0.0-137";
 const SHELL = [
   "./",
   "./index.html",
@@ -50,6 +50,9 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = new URL(req.url);
+
+  // внешние сервисы помощника (погода, название места) — всегда из сети, мимо кеша
+  if (/(^|\.)(open-meteo\.com|bigdatacloud\.net)$/.test(url.hostname)) return;
 
   // страница и version.json: сначала сеть, без сети — кеш
   if (req.mode === "navigate" || url.pathname.endsWith("/version.json")) {

@@ -1452,6 +1452,130 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 30px))!imp
   .phead .phbtn{padding:8px;border-radius:50%} .phead .phbtn .t{display:none} .phead .phbtn .q{width:24px;height:24px;font-size:14px}
   .phead .eyebrow{display:none}
 }
+
+/* ===== сборка 137: помощник «Пульс» ===== */
+/* ===== МАКЕТ: ИИ-помощник «Пульс» ===== */
+.aiorb{position:fixed;right:10px;z-index:60;width:48px;height:48px;border-radius:50%;border:0;padding:0;cursor:pointer;background:none;-webkit-tap-highlight-color:transparent;touch-action:none;transition:transform .35s cubic-bezier(.3,1.4,.5,1),right .3s,opacity .3s;filter:drop-shadow(0 6px 16px rgba(0,20,40,.35))}
+.aiorb::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from var(--ang,0deg),#00DCC8,#7FA8FF,#B48CFF,#FFC46B,#00DCC8);animation:aispin 6s linear infinite}
+.aiorb::after{content:"";position:absolute;inset:-6px;border-radius:50%;background:radial-gradient(closest-side,rgba(0,220,200,.35),transparent);animation:aibreath 3.2s ease-in-out infinite;z-index:-1}
+.aiorb .core{position:absolute;inset:3px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,#1d3a5c,#071425 70%);color:#E9FFFB}
+:root[data-theme="light"] .aiorb .core{background:radial-gradient(circle at 35% 30%,#ffffff,#e6eef6 75%);color:#0a5f58}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .aiorb .core{background:radial-gradient(circle at 35% 30%,#ffffff,#e6eef6 75%);color:#0a5f58}}
+.aiorb svg{width:22px;height:22px;fill:currentColor}
+.aiorb .dot{position:absolute;top:1px;right:1px;width:11px;height:11px;border-radius:50%;background:#FF6B5E;border:2px solid var(--bg,#0A1626);z-index:2}
+.aiorb.tuck{right:-34px;opacity:.75}
+.aiorb.on{transform:scale(.0);opacity:0;pointer-events:none}
+.aiorb:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@property --ang{syntax:"<angle>";inherits:false;initial-value:0deg}
+@keyframes aispin{to{--ang:360deg}}
+@keyframes aibreath{50%{transform:scale(1.18);opacity:.55}}
+/* окно */
+.aipan{position:fixed;z-index:61;right:12px;width:400px;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;
+  background:color-mix(in srgb,var(--surface) 84%,transparent);-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);
+  border:1px solid color-mix(in srgb,var(--accent) 28%,var(--line));box-shadow:0 24px 60px rgba(0,18,40,.38),0 0 0 1px rgba(255,255,255,.04) inset;color:var(--body);font-family:var(--f-body)}
+.aipan[hidden]{display:none}
+.aipan.in{animation:aimorph .42s cubic-bezier(.2,.9,.25,1.05)}
+@keyframes aimorph{from{clip-path:circle(24px at calc(100% - 30px) calc(100% - 30px));opacity:.4}to{clip-path:circle(150% at calc(100% - 30px) calc(100% - 30px));opacity:1}}
+.aipan.max{width:min(720px,calc(100vw - 120px))}
+.aigrab{display:none}
+.aih{display:flex;align-items:center;gap:10px;padding:12px 12px 10px 14px;border-bottom:1px solid var(--line)}
+.aiava{width:34px;height:34px;border-radius:50%;flex:none;display:grid;place-items:center;background:conic-gradient(from 200deg,#00DCC8,#7FA8FF,#B48CFF,#FFC46B,#00DCC8);color:#06202a}
+.aiava svg{width:18px;height:18px;fill:currentColor} .aiava.sm{width:26px;height:26px} .aiava.sm svg{width:14px;height:14px}
+.ait{display:flex;flex-direction:column;min-width:0;flex:1} .ait b{font-family:var(--f-display);font-weight:500;font-size:15px;color:var(--ink)} .ait small{font-size:11.5px;color:var(--accent);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aib{all:unset;cursor:pointer;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;color:var(--muted)} .aib:hover{background:var(--band);color:var(--ink)}
+.aib svg,.aimic svg,.aisend svg,.src svg,.wr svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.aibody{flex:1;overflow:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.m{max-width:94%;font-size:14px;line-height:1.45}
+.m.u{align-self:flex-end;background:var(--accent);color:#00234B;padding:8px 12px;border-radius:16px 16px 4px 16px;font-weight:500}
+.m.b{align-self:flex-start;display:flex;flex-direction:column;gap:8px;color:var(--ink)} .m.b p{margin:0}
+.typing{display:flex;gap:4px;padding:6px 2px} .typing i{width:7px;height:7px;border-radius:50%;background:var(--accent);opacity:.4;animation:aitp 1s infinite} .typing i:nth-child(2){animation-delay:.15s} .typing i:nth-child(3){animation-delay:.3s}
+@keyframes aitp{50%{opacity:1;transform:translateY(-3px)}}
+.rich.pop{animation:aipop .35s ease-out}
+@keyframes aipop{from{opacity:0;transform:translateY(6px)}}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:8px}
+.kp{background:var(--band);border:1px solid var(--line);border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:1px}
+.kp small{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)} .kp b{font-family:var(--f-display);font-weight:500;font-size:18px;color:var(--ink)} .kp b.ok{color:var(--good)} .kp b.lo{color:var(--bad)} .kp b.wn{color:var(--warn)} .kp span{font-size:11.5px;color:var(--muted)}
+.src{display:flex;align-items:center;gap:6px;margin-top:8px;font-size:11.5px;color:var(--muted)} .src svg{width:13px;height:13px}
+.list{display:flex;flex-direction:column;gap:6px}
+.wr{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:12px;background:var(--band);border:1px solid var(--line)} .wr:hover{border-color:var(--accent)}
+.wr>i{width:10px;height:10px;border-radius:3px;flex:none} .wr span{display:flex;flex-direction:column;min-width:0;flex:1} .wr b{font-size:13.5px;color:var(--ink)} .wr small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr em{font-style:normal;font-size:12.5px;color:var(--ink);display:flex;align-items:center;gap:6px;white-space:nowrap} .wr svg{color:var(--muted);width:15px;height:15px}
+.tag{font-size:11px;padding:1px 7px;border-radius:999px;background:var(--band);border:1px solid var(--line);color:var(--muted)} .tag.lo{color:var(--bad);border-color:color-mix(in srgb,var(--bad) 45%,transparent)}
+.sub{margin:6px 0 0;font-size:12.5px;color:var(--muted)}
+.bars{display:flex;flex-direction:column;gap:6px} .br{display:grid;grid-template-columns:120px 1fr 28px;align-items:center;gap:8px;font-size:12.5px} .br i{height:10px;border-radius:5px;width:var(--w)} .br b{text-align:right;color:var(--ink)}
+.wcard .prog{height:8px;border-radius:4px;background:var(--band);overflow:hidden;margin-bottom:8px} .wcard .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7FA8FF);border-radius:4px}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.act{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;padding:7px 12px;border-radius:999px;background:var(--accent);color:#00234B} .act.ghost{background:none;color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 50%,transparent)}
+.aisug{display:flex;gap:6px;overflow-x:auto;padding:8px 14px 2px;scrollbar-width:none} .aisug::-webkit-scrollbar{display:none}
+.aisug .chip{all:unset;cursor:pointer;white-space:nowrap;font-size:12.5px;padding:6px 11px;border-radius:999px;border:1px solid var(--line);background:var(--band);color:var(--ink)} .aisug .chip:hover{border-color:var(--accent)}
+.aiin{display:flex;align-items:center;gap:6px;margin:8px 12px 6px;padding:5px 5px 5px 14px;border-radius:999px;background:var(--band);border:1px solid var(--line)}
+.aiin:focus-within{border-color:var(--accent)}
+.aiin input{flex:1;min-width:0;border:0;background:none;outline:none;font:inherit;font-size:16px;color:var(--ink)} /* 16 px: иначе Safari на iPhone приближает страницу при вводе */
+.aimic,.aisend{all:unset;cursor:pointer;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;color:var(--muted)} .aisend{background:var(--accent);color:#00234B}
+.ainote{font-size:10.5px;color:var(--muted);text-align:center;padding:0 14px 10px}
+.aimini[hidden]{display:none!important}
+.aimini{display:flex;align-items:center;gap:10px;padding:10px 14px;font-size:13.5px;color:var(--ink)} .aimini span:nth-child(2){flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aiback{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;color:var(--accent)}
+.aipan.mini .aih,.aipan.mini .aibody,.aipan.mini .aisug,.aipan.mini .aiin,.aipan.mini .ainote{display:none}
+/* голос */
+.aivoice{position:fixed;inset:auto 0 0 0;z-index:70;display:flex;flex-direction:column;align-items:center;gap:6px;padding:28px 16px 120px;background:linear-gradient(transparent,color-mix(in srgb,var(--bg,#0A1626) 92%,transparent) 35%);color:var(--ink);pointer-events:none}
+.aivoice[hidden]{display:none} .aivoice b{font-family:var(--f-display);font-weight:500;font-size:17px} .aivoice small{font-size:14px;color:var(--accent)}
+.aivoice .wave{display:flex;gap:5px;align-items:center;height:40px} .aivoice .wave i{width:6px;border-radius:3px;background:linear-gradient(#00DCC8,#B48CFF);animation:aiwave .9s ease-in-out infinite} .aivoice .wave i:nth-child(2){animation-delay:.12s} .aivoice .wave i:nth-child(3){animation-delay:.24s} .aivoice .wave i:nth-child(4){animation-delay:.36s} .aivoice .wave i:nth-child(5){animation-delay:.48s}
+@keyframes aiwave{0%,100%{height:8px}50%{height:38px}}
+/* телефон: шторка снизу */
+@media (max-width:759px){
+  .aipan{left:0;right:0;width:auto;height:62vh;border-radius:22px 22px 0 0;border-bottom:0}
+  .aipan.max{width:auto;height:calc(100vh - 70px)}
+  .aipan.mini{height:auto}
+  .aipan.in{animation:aisheet .38s cubic-bezier(.2,.9,.25,1.05)} @keyframes aisheet{from{transform:translateY(100%)}}
+  .aigrab{display:flex;justify-content:center;padding:8px 0 0;cursor:pointer} .aigrab span{width:40px;height:5px;border-radius:3px;background:var(--line)}
+  .aih{padding-top:6px}
+  #aiMax{display:none}
+}
+@media (prefers-reduced-motion: reduce){.aiorb::before,.aiorb::after{animation:none}.aipan.in{animation:none}}
+.aipan.mini{top:auto!important}
+
+/* клавиатура на телефоне: шторка встаёт прямо над клавиатурой и занимает видимую часть экрана */
+@media (max-width:759px){.aipan.kb{height:auto!important;border-radius:18px 18px 0 0}.aipan.kb .ainote,.aipan.kb .aigrab{display:none}}
+.aipan,.aipan *{max-width:100%;box-sizing:border-box} .aibody{overflow-x:hidden}
+
+/* значок «пульс с искрой» */
+.aiorb svg,.aiava svg{overflow:visible}
+.aiorb .ecg,.aiava .ecg{fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.aiorb .ecg.ghost,.aiava .ecg.ghost{opacity:.6}
+.aiorb .ecg.run{stroke-dasharray:16 38;animation:airun 1.9s linear infinite;filter:drop-shadow(0 0 2px currentColor)}
+.aiava .ecg{stroke-width:2.4} .aiava .ecg.ghost{opacity:1}
+.aiorb .spk,.aiava .spk{fill:currentColor;transform-origin:19.5px 4.5px}
+.aiorb .spk{animation:aitw 1.9s ease-in-out infinite}
+@keyframes airun{from{stroke-dashoffset:54}to{stroke-dashoffset:0}}
+@keyframes aitw{0%,40%,100%{transform:scale(.85);opacity:.8}50%{transform:scale(1.25);opacity:1}}
+.aiava svg{width:20px;height:20px} .aiava.sm svg{width:15px;height:15px}
+.aiorb .core svg{width:26px;height:26px}
+@media (prefers-reduced-motion: reduce){.aiorb .ecg.run,.aiorb .spk{animation:none}}
+/* значок в шапке окна — тот же, что на кнопке: тёмный круг, цветное кольцо, бегущий пульс и искра */
+.aiava{position:relative;background:none;color:#E9FFFB}
+.aiava::before{content:"";position:absolute;inset:0;border-radius:50%;background:conic-gradient(from var(--ang,0deg),#00DCC8,#7FA8FF,#B48CFF,#FFC46B,#00DCC8);animation:aispin 6s linear infinite}
+.aiava::after{content:"";position:absolute;inset:2.5px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#1d3a5c,#071425 70%)}
+:root[data-theme="light"] .aiava{color:#0a5f58} :root[data-theme="light"] .aiava::after{background:radial-gradient(circle at 35% 30%,#ffffff,#e6eef6 75%)}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .aiava{color:#0a5f58} :root:not([data-theme="dark"]) .aiava::after{background:radial-gradient(circle at 35% 30%,#ffffff,#e6eef6 75%)}}
+.aiava svg{position:relative;z-index:1}
+.aiava .ecg{stroke-width:2.6} .aiava .ecg.ghost{opacity:.6}
+.aiava .ecg.run{stroke-dasharray:16 38;animation:airun 1.9s linear infinite;filter:drop-shadow(0 0 2px currentColor)}
+.aiava .spk{animation:aitw 1.9s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.aiava::before,.aiava .ecg.run,.aiava .spk{animation:none}}
+/* ===== «мозг» макета: подсказки при наборе, графики, рейтинги, «откуда цифра», демо ===== */
+.aita{display:flex;flex-direction:column;gap:2px;margin:6px 12px 0;padding:4px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 10px 24px rgba(0,20,40,.18)}
+.aita[hidden]{display:none}
+.aita button{all:unset;cursor:pointer;padding:8px 10px;border-radius:10px;font-size:14px;color:var(--muted)} .aita button b{color:var(--ink);font-weight:600} .aita button:hover,.aita button:focus-visible{background:var(--band)}
+.aidemo{all:unset;cursor:pointer;font-size:12.5px;font-weight:600;padding:5px 11px;border-radius:999px;border:1px solid color-mix(in srgb,var(--accent) 55%,transparent);color:var(--accent)} .aidemo.on{background:var(--accent);color:#00234B}
+.spark{margin-top:8px;padding:8px 8px 4px;border-radius:12px;background:var(--band);border:1px solid var(--line)} .spark svg{display:block;width:100%;height:74px;overflow:visible} .spark text{font-size:9.5px;fill:var(--muted)}
+.spark .lg{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:4px} .spark .lg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px} .spark .lg i.g{background:var(--good)} .spark .lg i.r{background:var(--bad)} .spark .lg i.l{height:0;border-top:1.5px dashed var(--ink);width:12px;border-radius:0;vertical-align:3px}
+.hb{display:flex;flex-direction:column;gap:5px;margin-top:2px}
+.hr{all:unset;box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) auto;align-items:center;gap:8px;padding:5px 8px;border-radius:10px;font-size:12.5px;color:var(--ink)} button.hr{cursor:pointer} button.hr:hover{background:var(--band)}
+.hr span{min-width:0;display:flex;flex-direction:column} .hr span small{font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hr i{display:block;height:10px;border-radius:5px;width:var(--w);min-width:3px} .hr b{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.xpl{font-size:13px;line-height:1.5;padding:10px 12px;border-radius:12px;background:var(--band);border-left:3px solid var(--accent);color:var(--ink)}
+.acts .act[data-ask]{font-weight:500}
 </style>
 </head>
 <body>
@@ -1534,7 +1658,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 30px))!imp
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:136,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:137,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4644,6 +4768,642 @@ function profSections(){const el=document.getElementById('profwrap'), root=el&&e
   wrap.querySelectorAll('[data-p2back]').forEach(b=>b.onclick=()=>go(null))}
 const _p2RP=renderProfile; renderProfile=function(){_p2RP.apply(this,arguments); try{profSections()}catch(e){console.error(e)}};
 addEventListener('resize',()=>{const r=document.querySelector('#profwrap .prof.p2w'); if(!r) return; if(matchMedia('(min-width:760px)').matches&&!P2S){P2S='user'; renderProfile()}});
+/* ===== Помощник «Пульс» (сборка 137; без нейросети — ответы считаются на устройстве из файла базы) =====
+   Вход: значок «пульс с искрой» у правого края — всегда на месте, не перекрывает данные: при прокрутке/движении карты прячется в тонкий язычок.
+   Касание — окно помощника; удержание — голосом (в макете — пример). Точка на искре — есть новое (НПВ продолжается).
+   Окно: планшет — стеклянная панель справа поверх экрана, экран под ней остаётся живым; телефон — шторка снизу (половина / весь экран).
+   Помощник видит, какой экран открыт («Смотрю: …»), отвечает карточками с цифрами и ссылкой на источник,
+   кнопки в ответе ведут по приложению (окно на это время сворачивается в полоску).
+   Ответы в макете считаются на устройстве из файла базы — без нейросети и без отправки данных. */
+(()=>{
+const $=s=>document.querySelector(s), esc2=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const STN=k=>(ST[k]&&ST[k].n)||k, STC=k=>ST[k]?`var(${ST[k].v})`:'var(--muted)';
+const wide=()=>matchMedia('(min-width:760px)').matches;
+let open=false, mini=false, busy=false, msgs=[], greeted=false;
+/* ---------- разметка ---------- */
+const orb=document.createElement('button'); orb.type='button'; orb.className='aiorb'; orb.setAttribute('aria-label','ИИ-помощник');
+orb.innerHTML='<span class="core"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ecg ghost" d="M2 15h5l2-4 3 7 3.2-11"/><path class="ecg run" d="M2 15h5l2-4 3 7 3.2-11"/><path class="spk" d="M19.5 1.2l.95 2.35 2.35.95-2.35.95-.95 2.35-.95-2.35-2.35-.95 2.35-.95z"/></svg></span><i class="dot" hidden></i>';
+const pan=document.createElement('section'); pan.className='aipan'; pan.setAttribute('role','dialog'); pan.setAttribute('aria-label','ИИ-помощник'); pan.hidden=true;
+pan.innerHTML=`<div class="aigrab" aria-hidden="true"><span></span></div>
+ <header class="aih"><span class="aiava"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ecg ghost" d="M2 15h5l2-4 3 7 3.2-11"/><path class="ecg run" d="M2 15h5l2-4 3 7 3.2-11"/><path class="spk" d="M19.5 1.2l.95 2.35 2.35.95-2.35.95-.95 2.35-.95-2.35-2.35-.95 2.35-.95z"/></svg></span>
+   <div class="ait"><b>Пульс</b><small id="aiCtx">Смотрю: …</small></div>
+   <button type="button" class="aidemo" id="aiDemo" title="Показать возможности по шагам">Демо</button>
+   <button type="button" class="aib" id="aiNew" aria-label="Новый разговор" title="Новый разговор"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+   <button type="button" class="aib" id="aiMax" aria-label="Развернуть" title="Развернуть"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 15v5h-5M4 4l6 6M20 20l-6-6"/></svg></button>
+   <button type="button" class="aib" id="aiX" aria-label="Закрыть" title="Закрыть"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+ <div class="aimini" id="aiMini" hidden><span class="aiava sm"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="ecg ghost" d="M2 15h5l2-4 3 7 3.2-11"/><path class="ecg run" d="M2 15h5l2-4 3 7 3.2-11"/><path class="spk" d="M19.5 1.2l.95 2.35 2.35.95-2.35.95-.95 2.35-.95-2.35-2.35-.95 2.35-.95z"/></svg></span><span id="aiMiniT">Открыл</span><button type="button" class="aiback">Вернуться к ответу</button></div>
+ <div class="aibody" id="aiBody" aria-live="polite"></div>
+ <div class="aisug" id="aiSug"></div>
+ <div class="aita" id="aiTA" hidden></div>
+ <form class="aiin" id="aiForm" autocomplete="off"><input id="aiQ" type="text" placeholder="Спросите о бурении, НПВ, скважине…" aria-label="Вопрос помощнику">
+   <button type="button" class="aimic" id="aiMic" aria-label="Сказать голосом"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+   <button type="submit" class="aisend" aria-label="Отправить"><svg viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6"/></svg></button></form>
+ <div class="ainote">Ответы считаются на этом устройстве из файла базы, без нейросети. Данные рапортов никуда не уходят; для погоды — только округлённые координаты.</div>`;
+const voice=document.createElement('div'); voice.className='aivoice'; voice.hidden=true; voice.innerHTML='<div class="wave"><i></i><i></i><i></i><i></i><i></i></div><b>Слушаю…</b><small id="aiVoiceT"></small>';
+document.body.append(orb,pan,voice);
+/* ---------- положение искры: правый край, над нижним меню; можно передвинуть по краю ---------- */
+let orbY=null; try{orbY=+localStorage.getItem('ai-orb-y')||null}catch(e){}
+function place(){const tb=$('.tabbar'), r=tb?tb.getBoundingClientRect():null, bot=r&&r.height>0&&r.width>r.height?r.top:innerHeight, top=($('.app>.top')||{getBoundingClientRect:()=>({bottom:60})}).getBoundingClientRect().bottom;
+  const def=wide()?bot-150:bot-140, y=Math.max(top+70,Math.min(bot-64,orbY==null?def:orbY)); orb.style.top=y+'px';
+  if(wide()){pan.style.top=(top+10)+'px'; pan.style.bottom=(innerHeight-bot+10)+'px'} else {pan.style.top=''; pan.style.bottom=(innerHeight-bot)+'px'}}
+addEventListener('resize',()=>setTimeout(place,60)); setTimeout(place,300); setInterval(place,1500);
+/* клавиатура (iPhone/iPad): видимая часть экрана — visualViewport; шторку ставим над клавиатурой, во весь видимый экран */
+const vv=window.visualViewport;
+function kbFit(){if(!vv||wide()||!open){pan.classList.remove('kb'); return}
+  const kbH=innerHeight-(vv.offsetTop+vv.height); if(kbH>80){pan.classList.add('kb'); pan.style.bottom=Math.max(0,kbH)+'px'; pan.style.top=(vv.offsetTop+8)+'px'; window.scrollTo(0,0); setTimeout(()=>{const b=body(); b.scrollTop=b.scrollHeight},50)}
+  else {pan.classList.remove('kb'); pan.style.top=''; place()}}
+if(vv){vv.addEventListener('resize',kbFit); vv.addEventListener('scroll',kbFit)}
+document.addEventListener('focusin',e=>{if(e.target.id==='aiQ') setTimeout(kbFit,250)}); document.addEventListener('focusout',e=>{if(e.target.id==='aiQ') setTimeout(kbFit,250)});
+/* прячется в язычок, пока двигают карту или листают */
+let hideT=0; const tuck=()=>{if(open) return; orb.classList.add('tuck'); clearTimeout(hideT); hideT=setTimeout(()=>orb.classList.remove('tuck'),1100)};
+document.addEventListener('scroll',tuck,true); document.addEventListener('wheel',tuck,{passive:true,capture:true});
+document.addEventListener('pointermove',e=>{if(e.buttons&&!e.target.closest('.aiorb,.aipan')) tuck()},true);
+/* касание — открыть; удержание — голос; перетаскивание по вертикали — сдвинуть */
+let pd=null, lp=0;
+orb.addEventListener('pointerdown',e=>{pd={y:e.clientY,t:Date.now(),oy:parseFloat(orb.style.top),moved:false}; orb.setPointerCapture(e.pointerId); lp=setTimeout(()=>{if(pd&&!pd.moved){pd.voice=true; listen()}},480)});
+orb.addEventListener('pointermove',e=>{if(!pd) return; const dy=e.clientY-pd.y; if(Math.abs(dy)>6){pd.moved=true; clearTimeout(lp); orbY=pd.oy+dy; place()}});
+orb.addEventListener('pointerup',()=>{clearTimeout(lp); if(!pd) return; const p=pd; pd=null; if(p.moved){try{localStorage.setItem('ai-orb-y',orbY)}catch(e){} return} if(p.voice) return; toggle(true)});
+/* ---------- окно ---------- */
+function ctxText(){const s=state; if(s.mode==='rep') return 'Отчёты'; if(s.screen==='stats') return 'Утренняя сводка'; if(s.screen==='profile') return 'Профиль';
+  if(s.level==='well'){const w=WELLS.find(x=>x.id===s.well); return w?`Скв. ${w.no} · ${({drill:'бурение',ggd:'ГГД',dyn:'динамика',rig:'станок'})[s.wtab]||'карточка'}`:'скважина'}
+  if(s.level==='field'){const f=FIELDS.find(x=>x.id===s.field); return f?f.n+' месторождение':'месторождение'}
+  if(s.level==='cust'){const c=CUSTOMERS.find(x=>x.id===s.cust); return c?'заказчик '+c.n:'заказчик'}
+  return 'Все месторождения · карта'}
+function sugs(){const s=state; if(s.level==='well'){const w=WELLS.find(x=>x.id===s.well); return ['Что по этой скважине?','Когда закончим бурение?','Был ли НПВ?']}
+  if(s.level==='field') return ['Что на месторождении?','Где здесь НПВ?','Кто отстаёт от графика?'];
+  return ['Сводка за сутки','Где сейчас НПВ?','Кто отстаёт от графика?','Сколько буровых в работе?']}
+function renderSug(){$('#aiSug').innerHTML=sugs().map(t=>`<button type="button" class="chip" data-q="${esc2(t)}">${esc2(t)}</button>`).join('')}
+function toggle(v){open=v; pan.hidden=!v; orb.classList.toggle('on',v); document.body.classList.toggle('aiopen',v);
+  if(v){setMini(false); pan.classList.remove('max'); $('#aiCtx').textContent='Смотрю: '+ctxText(); renderSug(); place();
+    pan.classList.remove('in'); void pan.offsetWidth; pan.classList.add('in'); if(!greeted){greeted=true; brief()} if(wide()) setTimeout(()=>$('#aiQ').focus(),250)}}
+function setMini(v,t){mini=v; pan.classList.toggle('mini',v); $('#aiMini').hidden=!v; if(t) $('#aiMiniT').textContent=t}
+$('#aiX').onclick=()=>toggle(false); $('#aiMax').onclick=()=>pan.classList.toggle('max');
+$('#aiNew').onclick=()=>{$('#aiBody').innerHTML=''; greeted=false; brief(); greeted=true};
+pan.querySelector('.aiback').onclick=()=>setMini(false);
+pan.querySelector('.aigrab').onclick=()=>{if(mini) setMini(false); else pan.classList.toggle('max')};
+$('#aiSug').onclick=e=>{const b=e.target.closest('[data-q]'); if(b) ask(b.dataset.q)};
+$('#aiForm').onsubmit=e=>{e.preventDefault(); const q=$('#aiQ').value.trim(); if(q){$('#aiQ').value=''; ask(q)}};
+$('#aiMic').onclick=()=>listen();
+$('#aiDemo').onclick=()=>{if(!open) toggle(true); demo()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&open) toggle(false); if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault(); toggle(!open)}});
+/* смена экрана — помощник видит контекст */
+const _r=refresh; refresh=function(){const r=_r.apply(this,arguments); try{$('#aiCtx').textContent='Смотрю: '+ctxText(); if(open&&!busy) renderSug()}catch(e){} return r};
+/* ---------- сообщения ---------- */
+const body=()=>$('#aiBody');
+function addUser(t){const d=document.createElement('div'); d.className='m u'; d.textContent=t; body().appendChild(d); scr()}
+function scr(){const b=body(); b.scrollTo({top:b.scrollHeight,behavior:'smooth'})}
+function addBot(parts){const d=document.createElement('div'); d.className='m b'; body().appendChild(d);
+  const typing=document.createElement('div'); typing.className='typing'; typing.innerHTML='<i></i><i></i><i></i>'; d.appendChild(typing); scr(); busy=true;
+  return new Promise(res=>setTimeout(async()=>{if(typeof parts==='function'){try{parts=await parts()}catch(err){parts=[{t:'Не получилось получить ответ — попробуйте ещё раз чуть позже.'}]}} typing.remove();
+    for(const p of parts){ if(p.t){const el=document.createElement('p'); d.appendChild(el); await type(el,p.t)} else if(p.h){const el=document.createElement('div'); el.className='rich'; el.innerHTML=p.h; d.appendChild(el); el.classList.add('pop'); wire(el)} scr(); await wait(90)}
+    busy=false; renderSug(); res()},520))}
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function type(el,t){if(matchMedia('(prefers-reduced-motion: reduce)').matches){el.innerHTML=t; return} const words=t.split(/(\s+)/); let s=''; for(let i=0;i<words.length;i++){s+=words[i]; el.innerHTML=s; if(i%3===0){scr(); await wait(18)}}}
+function wire(el){el.querySelectorAll('[data-well]').forEach(b=>b.onclick=()=>{const w=WELLS.find(x=>x.id===b.dataset.well); go({level:'well',well:w.id,cust:null}); setMini(true,`Открыл скв. ${w.no}`)});
+  el.querySelectorAll('[data-field]').forEach(b=>b.onclick=()=>{const f=FIELDS.find(x=>x.id===b.dataset.field); go({level:'field',field:f.id,cust:null,well:null}); setMini(true,`Открыл ${f.n}`)});
+  el.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{const g=b.dataset.go; if(g==='stats'){setScreen('stats'); setMini(true,'Открыл утреннюю сводку')} if(g==='map'){setScreen('map'); go({level:'fields',field:null,cust:null,well:null})}})}
+const src=t=>`<div class="src"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M9 10h6M9 14h6"/></svg>${t}</div>`;
+const kpi=(a)=>`<div class="kpis">${a.map(k=>`<div class="kp"><small>${k.l}</small><b class="${k.c||''}">${k.v}</b>${k.s?`<span>${k.s}</span>`:''}</div>`).join('')}</div>`;
+const wrow=(w,extra)=>`<button type="button" class="wr" data-well="${w.id}"><i style="background:${STC(w.status)}"></i><span><b>Скв. ${esc2(w.no)}</b><small>${esc2(w.field.n)} · ${esc2(w.cust.short||w.cust.n)} · ${esc2(w.rig)}</small></span><em>${extra||''}</em><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`;
+const asof=()=>{try{return fmtMsk(LOAD.at,1)}catch(e){return ''}};
+/* ---------- «мозг» макета: понимание фраз без языковой модели ----------
+   Нормализация и основы слов → понятия (НПВ, проходка, EBITDA…), названия (скважина, месторождение, заказчик, буровая),
+   период (сутки, вчера, неделя, месяц, год), память о прошлом вопросе («а вчера?»). Все цифры — из файла базы на устройстве. */
+let SV=null, RP=null; try{PulseDB.get('svodka').then(x=>{SV=x; buildCatalog()}); PulseDB.get('reports').then(x=>{RP=x; buildCatalog()})}catch(e){}
+const N=s=>String(s==null?'':s).toLowerCase().replace(/ё/g,'е');
+const LAT={'а':'a','в':'v','е':'e','к':'k','м':'m','н':'n','о':'o','р':'r','с':'c','т':'t','у':'u','х':'h','д':'d','б':'b','г':'g','з':'z','л':'l','п':'p','ф':'f','и':'i','ж':'zh','й':'y','ш':'sh','щ':'sh','ц':'c','ч':'ch','ы':'y','э':'e','ю':'yu','я':'ya','ь':'','ъ':''};
+const lat=s=>N(s).split('').map(c=>LAT[c]!=null?LAT[c]:c).join('').replace(/[^a-z0-9]/g,'');
+const pc=v=>Math.round(v*100)+' %', sgn=v=>(v>0?'+':v<0?'−':'')+nf0(Math.abs(v));
+const CMI=()=>{try{return new Date(SV.date).getMonth()}catch(e){return new Date().getMonth()}};
+const MSH=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MGEN=['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const C={
+  npv:/нпв|непроизвод|простой|простои|простоя|инцидент|авари|осложн|(^|[^а-я])брак/,
+  lag:/отста|опазд|график|гтн|не успева|задерж|срыв/,
+  drill:/проходк|пробур|метр|темп бурен/,
+  done:/законч[а-я]*\s+скваж|скважин[а-я]*\s+законч|сдал|сдан|закончено|законченн/,
+  rigs:/буров|станк|(^|[^а-я])бу([^а-я]|$)|установк/,
+  ebitda:/ebitda|эбитда|ебитда|прибыл/, rev:/выручк|доход/, cost:/затрат|расход|издерж|себестоим/,
+  speed:/коммерческ[а-я]*\s*скорост|скорост[ьи]/, load:/загрузк|загружен/,
+  why:/почему|из-за|причин|за сч[её]т|что повлиял|отчего|объясни/,
+  top:/топ|лучш|худш|рейтинг|сравни|больше всего|меньше всего|лидер|отстающ|самы[ейх]/,
+  brief:/сводк|брифинг|итог|как дела|что нового|что случилось|обстановк|ситуаци|доброе утро|привет/,
+  when:/когда|прогноз|успее|срок оконч|законч[а-я]* бурен/,
+  src:/откуда|как посчит|как считал|источник|формул|из чего/,
+  help:/что умеешь|что ты умеешь|помощь|что можешь|что ты можешь|умеешь/,
+  plan:/план|(^|[^а-я])бп([^а-я]|$)|бизнес-план|бизнес план/
+};
+function period(s){if(/позавчера/.test(s)) return {k:'d',d:2,l:'позавчера'}; if(/вчера/.test(s)) return {k:'d',d:1,l:'вчера'};
+  if(/недел|7 дней|семь дней/.test(s)) return {k:'w',l:'за неделю'}; if(/с начала года|за год|в году|(^|[^а-я])год([ау]|ов)?([^а-я]|$)|2026/.test(s)) return {k:'y',l:'с начала года'};
+  if(/месяц|октябр|с начала месяца/.test(s)) return {k:'m',l:'с начала месяца'}; if(/сегодня|за сутки|сутки|за день|сейчас/.test(s)) return {k:'d',d:0,l:'за сутки'}; return null}
+/* названия */
+function findWell(s){const t=s.split(/[^a-zа-я0-9\-]+/i).filter(x=>/\d/.test(x)); for(const x of t){const L=lat(x); const w=WELLS.find(w=>lat(w.no)===L); if(w) return w} return null}
+function findField(s){let best=null,bl=0; FIELDS.forEach(f=>{const ws=N(f.n).split(/[-\s]+/).filter(Boolean).map(w=>w.slice(0,Math.max(4,w.length-3))); if(ws.every(w=>s.includes(w))){const l=ws.join('').length; if(l>bl){bl=l; best=f}}}); return best}
+/* общие слова в названиях заказчиков (встречаются у двух и больше) — слабый признак; считаются по справочнику */
+const GEN={test:w=>{if(/^(ооо|ао|пао|зао|оао)$/.test(w)) return true; let n=0; CUSTOMERS.forEach(c=>{if(N(c.n+' '+(c.short||'')).split(/[-\s]+/).includes(w)) n++}); return n>=2}};
+function findCust(s){let best=null,bs=0; CUSTOMERS.forEach(c=>{const ws=[...new Set(N(c.n+' '+(c.short||'')).split(/[-\s]+/).filter(w=>w.length>=3))]; let sc=0;
+    ws.forEach(w=>{const st=w.slice(0,Math.max(3,Math.min(6,w.length-1))); const gen=GEN.test(w); if(s.includes(st)) sc+=gen?1:st.length; else if(!gen) sc-=1});
+    const ab=N(c.short||'').split(/[-\s]+/).pop(); if(ab&&ab.length>=3&&new RegExp('(^|[^а-яa-z])'+ab+'([^а-яa-z]|$)').test(s)) sc+=4;
+    if(sc>bs){bs=sc; best=c}}); return bs>=3?best:null}
+function findRig(s){const m=s.match(/(?:^|[^a-zа-я0-9])([эмcсe])\s*-?\s*(\d{1,2})(?![0-9])/i); if(!m) return null; const L=({'э':'э','е':'э','e':'э','м':'м','c':'с','с':'с'})[m[1]], num=m[2].padStart(2,'0');
+  const pre=(s.match(/\b(225|315|320|400|450)\b/)||[])[1]; const rigs=[...new Set(WELLS.map(w=>w.rig))].filter(r=>{const q=N(r).replace(/c/g,'с'); return new RegExp(L+'-'+num+'$').test(q)&&(!pre||q.startsWith(pre))}); return rigs[0]||null}
+/* память разговора */
+let CTX={}, LASTX='';
+const ENT=(s)=>{const st=state, e={}; const w=findWell(s), r=findRig(s), c=findCust(s), f=findField(s);
+  if(w) e.well=w; else if(r) e.rig=r; if(c) e.cust=c; if(f&&!w) e.field=f;
+  if(/(эт\w+|этой|здесь|тут|по ней|по нему|текущ)/.test(s)){if(st.level==='well') e.well=WELLS.find(x=>x.id===st.well); else if(st.field) e.field=FIELDS.find(x=>x.id===st.field); else if(st.cust) e.cust=CUSTOMERS.find(x=>x.id===st.cust)}
+  return e};
+/* мини-графики и разметка */
+function spark(F,P,labs){const n=F.length; if(!n) return ''; const W=300,H=74,B=14,mx=Math.max(1,...F,...P)*1.08, bw=W/n; let s='';
+  F.forEach((f,i)=>{const h=(f||0)/mx*(H-B-4), ok=f>=P[i]*.999; s+=`<rect x="${(i*bw+bw*.18).toFixed(1)}" y="${(H-B-h).toFixed(1)}" width="${(bw*.64).toFixed(1)}" height="${Math.max(1.5,h).toFixed(1)}" rx="2" fill="${ok?'var(--good)':'var(--bad)'}" opacity="${i===n-1?1:.75}"/>`});
+  const pl=P.map((p,i)=>`${(i*bw+bw/2).toFixed(1)},${(H-B-(p||0)/mx*(H-B-4)).toFixed(1)}`).join(' ');
+  s+=`<polyline points="${pl}" fill="none" stroke="var(--ink)" stroke-width="1.3" stroke-dasharray="3 3" opacity=".7"/>`;
+  (labs||[]).forEach((l,i)=>{if(n<=12||i%2===0||i===n-1) s+=`<text x="${(i*bw+bw/2).toFixed(1)}" y="${H-2}" text-anchor="middle">${l}</text>`});
+  return `<div class="spark"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="факт по дням против плана">${s}</svg><div class="lg"><span><i class="g"></i>факт ≥ плана</span><span><i class="r"></i>ниже плана</span><span><i class="l"></i>план</span></div></div>`}
+function hbars(rows,fmt){const mx=Math.max(1,...rows.map(r=>Math.abs(r.v))); return `<div class="hb">${rows.map(r=>`<${r.well?`button type="button" data-well="${r.well}"`:r.cust?`button type="button" data-cust="${r.cust}"`:'div'} class="hr"><span>${esc2(r.n)}${r.s?`<small>${esc2(r.s)}</small>`:''}</span><i style="--w:${Math.abs(r.v)/mx*100}%;background:${r.c||'var(--accent)'}"></i><b>${fmt(r.v)}</b></${r.well||r.cust?'button':'div'}>`).join('')}</div>`}
+const pcls=q=>q>=NORM.plan_good-1e-3?'ok':q>=NORM.plan_bad?'wn':'lo';
+/* ответ: части + «откуда цифра» */
+function say(parts,x,ctx){LASTX=x||''; if(ctx) CTX={...ctx,t:Date.now()}; return addBot(parts)}
+/* ===== вопросы ===== */
+function ask(q){addUser(q); hideTA(); const s=N(q); const e=ENT(s), per=period(s); let I=Object.keys(C).filter(k=>C[k].test(s));
+  const tk=talk(q,s,e,I); if(tk) return tk;
+  {const s2=s.replace(/[?!.,…«»]+/g,' ').replace(/\s+/g,' ').trim(), kbe=kbFind(s2); if(kbe&&!(kbe.co&&(e.cust||e.field||e.well))){const bizI=I.filter(k=>!['why','plan','help','top','brief','when'].includes(k)), mL=(s2.match(kbe.k)||[''])[0].length; if((kbe.co&&!e.cust)||KB_DEF.test(s2)||(!bizI.length&&!Object.keys(e).length)||mL>=s2.length*.6) return kbAnswer(kbe)}}
+  const noI=!I.filter(k=>!['plan','why','top'].includes(k)).length, hasE=Object.keys(e).length, aStart=/^(а|и|ну а)\s/.test(s);
+  if(noI&&CTX.intent&&!['talk','wx'].includes(CTX.intent)&&((per&&!hasE)||aStart)){const card=['well','when','cust','field'].includes(CTX.intent);
+    if(hasE&&card) return e.well?route('well',e,per,s):e.cust?route('cust',e,per,s):e.field?route('field',e,per,s):route('drill',e,per,s);
+    const c={...CTX, per:per||CTX.per, ent:hasE?e:CTX.ent}; return route(c.intent,c.ent,c.per,s,c.sub)}
+  const has=k=>I.includes(k);
+  if(has('help')) return help();
+  if(has('src')) return explain();
+  if(has('top')&&(has('rigs')||/заказчик|месторожд|скваж/.test(s))) return route('top',e,per,s);
+  for(const k of ['ebitda','rev','cost','speed','load']) if(has(k)) return route('kpi',e,per,s,k);
+  if(has('npv')) return route(per&&per.k==='y'&&!Object.keys(e).length?'kpi':'npv',e,per,s,'npv');
+  if(has('lag')) return route('lag',e,per,s);
+  if(has('done')) return route('done',e,per,s);
+  if(has('when')&&(e.well||state.level==='well')) return route('when',e.well?e:{well:WELLS.find(x=>x.id===state.well)},per,s);
+  if(has('drill')) return route('drill',e,per,s);
+  if(has('rigs')&&!e.rig) return route('rigs',e,per,s);
+  if(has('brief')&&!Object.keys(e).length) return route('brief',e,per,s);
+  if(e.well) return route('well',e,per,s); if(e.rig) return route('drill',e,per,s); if(e.cust) return route('cust',e,per,s); if(e.field) return route('field',e,per,s);
+  if(has('brief')) return route('brief',e,per,s);
+  if(state.level==='well'&&/скваж|что по|как она|как там/.test(s)) return route('well',{well:WELLS.find(x=>x.id===state.well)},per,s);
+  return dunno(q)}
+function route(intent,e,per,s,sub){e=e||{}; const c={intent,ent:e,per,sub};
+  try{switch(intent){case 'brief': return briefFull(per,c); case 'drill': return drill(e,per,c); case 'npv': return npv(e,per,c); case 'lag': return lag(e,c); case 'done': return done(e,per,c);
+    case 'rigs': return rigs(c); case 'kpi': return kpi2(sub,e,s||'',c); case 'top': return top(e,per,s||'',c); case 'well': return well(e.well,c); case 'when': return finish(e.well,c);
+    case 'cust': return cust(e.cust,per,c); case 'field': return field(e.field,per,c)}}catch(err){console.error(err); return dunno(s)}}
+/* сводка: сутки / вчера / неделя / месяц / год */
+function briefFull(per,c){per=per||{k:'d',d:0,l:'за сутки'};
+  if(per.k==='d'){const S=daySum(per.d), P=daySum(per.d+1), q=S.pct, dd=S.fact-P.fact, day=dLbl(per.d);
+    const DS=SV?SV.DAYS.filter(d=>d.f!=null):[]; const k=DS.length-1-per.d, ds=DS.slice(Math.max(0,k-11),k+1);
+    return say([{t:`${per.d?`${per.l[0].toUpperCase()+per.l.slice(1)} (${day})`:`За сутки (${day})`} пробурено ${nf0(S.fact)} м — ${pc(q)} плана, ${dd>=0?'на '+nf0(dd)+' м больше':'на '+nf0(-dd)+' м меньше'}, чем днём раньше. НПВ — ${nf1r(S.npct*100)} %, инцидентов ${S.inc.length}.`},
+      {h:kpi([{l:'Факт',v:nf0(S.fact)+' м'},{l:'План',v:nf0(S.plan)+' м'},{l:'Выполнение',v:pc(q),c:pcls(q)}])+(ds.length?spark(ds.map(d=>d.f),ds.map(d=>d.p),ds.map(d=>d.d)):'')+`<div class="acts"><button type="button" class="act" data-go="stats">Открыть утреннюю сводку</button></div>`+src('Суточный рапорт за '+day)}],
+      `Проходка за сутки — сумма графы «факт, м» суточного рапорта по всем скважинам за ${day}; план — графа «план, м». Выполнение = ${nf0(S.fact)} / ${nf0(S.plan)} = ${pc(q)}. НПВ % = часы НПВ (${nf1r(S.nh)} ч) / календарное время всех буровых за сутки.`,c)}
+  if(per.k==='w'){let f=0,p=0; const ds=[]; for(let d=6;d>=0;d--){const S=daySum(d); f+=S.fact; p+=S.plan; ds.push({f:S.fact,p:S.plan,l:dLbl(d).slice(0,2)})}
+    return say([{t:`За неделю пробурено ${nf0(f)} м — ${pc(f/p)} плана (${nf0(p)} м).`},{h:spark(ds.map(d=>d.f),ds.map(d=>d.p),ds.map(d=>d.l))+src('Суточные рапорты за 7 суток')}],
+      `Сумма суточных рапортов за 7 суток: факт ${nf0(f)} м, план ${nf0(p)} м.`,c)}
+  const T=SV.tot, m=per.k==='m', f=m?T.mF:T.yF, p=m?T.mP:T.yP, wf=m?T.wmF:T.wyF, wp=m?T.wmP:T.wyP;
+  return say([{t:`${m?'С начала месяца':'С начала года'} пробурено ${nf0(f)} м — ${pc(f/p)} плана; закончено ${wf} из ${wp} скважин по плану.`},
+    {h:kpi([{l:'Проходка',v:nf0(f)+' м',s:pc(f/p)+' плана',c:pcls(f/p)},{l:'Скважины',v:`${wf} из ${wp}`,c:pcls(wf/(wp||1))},{l:'Отклонение',v:sgn(f-p)+' м',c:f>=p?'ok':'lo'}])+(m?spark(SV.DAYS.filter(d=>d.f!=null).map(d=>d.f),SV.DAYS.filter(d=>d.f!=null).map(d=>d.p),SV.DAYS.filter(d=>d.f!=null).map(d=>d.d)):spark(SV.MON.slice(0,CMI()+1).map(x=>x.f),SV.MON.slice(0,CMI()+1).map(x=>x.p),SV.MON.slice(0,CMI()+1).map((x,i)=>MSH[i])))+src('Утренняя сводка диспетчера')}],
+    `Цифры ${m?'месяца':'года'} — из утренней сводки диспетчера (итоговая строка): факт ${nf0(f)} м, план ${nf0(p)} м${m?'':' нарастающим итогом с 1 января'}. Скважины — графы «закончено, план / факт».`,c)}
+/* проходка по объекту */
+function drill(e,per,c){per=per||{k:'m',l:'с начала месяца'}; if(!e.cust&&!e.well&&!e.rig&&!e.field) return briefFull(per,{...c,intent:'drill'}); const ix={d:0,m:1,y:2,w:1}[per.k], lbl=per.k==='d'?(per.d?per.l:'за сутки'):per.k==='y'?'с начала года':'с начала месяца';
+  if(e.cust){const P=SV&&SV.PER[e.cust.id]; if(!P) return say([{t:`По ${e.cust.short||e.cust.n} в сводке нет строки проходки.`}]);
+    const f=[P.dF,P.mF,P.yF][ix], p=[P.dP,P.mP,P.yP][ix]; const ds=SV.DAYS.filter(d=>d.f!=null&&d.c[e.cust.id]);
+    return say([{t:`${e.cust.short||e.cust.n}: ${lbl} пробурено ${nf0(f)} м — ${pc(f/(p||1))} плана (${nf0(p)} м).`},{h:kpi([{l:'Сутки',v:pc(P.dF/(P.dP||1)),s:nf0(P.dF)+' м',c:pcls(P.dF/(P.dP||1))},{l:'Месяц',v:pc(P.mF/(P.mP||1)),s:nf0(P.mF)+' м',c:pcls(P.mF/(P.mP||1))},{l:'Год',v:pc(P.yF/(P.yP||1)),s:nf0(P.yF)+' м',c:pcls(P.yF/(P.yP||1))}])+(ds.length?spark(ds.map(d=>d.c[e.cust.id][0]||0),ds.map(d=>d.c[e.cust.id][1]||0),ds.map(d=>d.d)):'')+`<div class="acts"><button type="button" class="act ghost" data-cust="${e.cust.id}">${esc2(e.cust.short||e.cust.n)} на карте</button></div>`+src('Утренняя сводка · строка заказчика')}],
+      `Строка заказчика «${e.cust.n}» в утренней сводке: факт и план за сутки, месяц и год. Процент = факт / план.`,c)}
+  let ws=WELLS, name='Все скважины'; if(e.well){ws=[e.well]; name='Скв. '+e.well.no} else if(e.rig){ws=WELLS.filter(w=>w.rig===e.rig); name='Буровая '+e.rig} else if(e.field){ws=WELLS.filter(w=>w.field.id===e.field.id); name=e.field.n}
+  const f=ws.reduce((a,w)=>a+((w.real&&w.real.f[ix])||0),0), p=ws.reduce((a,w)=>a+((w.real&&w.real.p[ix])||0),0);
+  const dk=[...new Set(ws.flatMap(w=>Object.keys((w.real&&w.real.days)||{})))].sort().slice(-12); const F=dk.map(k=>ws.reduce((a,w)=>a+(((w.real.days||{})[k]||[0])[0]||0),0)), P=dk.map(k=>ws.reduce((a,w)=>a+(((w.real.days||{})[k]||[0,0])[1]||0),0));
+  return say([{t:`${name}: ${lbl} ${nf0(f)} м — ${pc(f/(p||1))} плана (${nf0(p)} м).`},{h:kpi([{l:'Факт',v:nf0(f)+' м'},{l:'План',v:nf0(p)+' м'},{l:'Выполнение',v:pc(f/(p||1)),c:pcls(f/(p||1))}])+spark(F,P,dk.map(k=>+k.slice(8)))+(e.field?`<div class="acts"><button type="button" class="act ghost" data-field="${e.field.id}">${esc2(e.field.n)} на карте</button></div>`:e.well?`<div class="acts"><button type="button" class="act" data-well="${e.well.id}">Открыть скважину</button></div>`:'')+src('Суточный рапорт · строки скважин')}],
+    `Сумма граф «факт, м» и «план, м» суточного рапорта (${lbl}) по ${ws.length} ${plural(ws.length,'скважине','скважинам','скважинам')}${e.rig?' буровой '+e.rig:e.field?' месторождения '+e.field.n:''}.`,c)}
+/* НПВ */
+function npvRows(e,per){const cm=CMI(); let R=(SV?SV.NPVR:[]).filter(r=>r.m===cm); const last=Math.max(...R.map(r=>r.d)); if(per&&per.k==='w') R=R.filter(r=>r.d>last-7);
+  const wOf=r=>WELLS.find(w=>w.rig===r.rig&&lat(w.no)===lat(r.well))||WELLS.find(w=>w.rig===r.rig);
+  if(e.well) R=R.filter(r=>lat(r.well)===lat(e.well.no)); if(e.rig) R=R.filter(r=>r.rig===e.rig); if(e.cust) R=R.filter(r=>r.cust===e.cust.id); if(e.field) R=R.filter(r=>{const w=wOf(r); return w&&w.field.id===e.field.id});
+  return {R,wOf}}
+function npv(e,per,c){const nm=e.well?'скв. '+e.well.no:e.rig?'буровой '+e.rig:e.cust?(e.cust.short||e.cust.n):e.field?e.field.n:'';
+  if(!per||per.k==='d'){const d=per?per.d:0, S=daySum(d); let inc=S.inc; if(e.well) inc=inc.filter(i=>i.w===e.well); if(e.rig) inc=inc.filter(i=>i.w.rig===e.rig); if(e.field) inc=inc.filter(i=>i.w.field.id===e.field.id); if(e.cust) inc=inc.filter(i=>i.w.cust.id===e.cust.id);
+    const when=d?per.l:'за сутки';
+    if(!inc.length) return say([{t:`${nm?'У '+nm+' ':''}${when} НПВ не было.`}],`Проверены строки НПВ суточного рапорта ${dLbl(d)}${nm?' по '+nm:''}.`,c);
+    const live=inc.filter(i=>i.live).length;
+    return say([{t:`${live&&!d?`Сейчас НПВ продолжается на ${live} ${plural(live,'скважине','скважинах','скважинах')}. `:''}${nm?nm[0].toUpperCase()+nm.slice(1)+': '+when:when[0].toUpperCase()+when.slice(1)} — ${inc.length} ${plural(inc.length,'событие','события','событий')}, ${nf1r(inc.reduce((a,i)=>a+i.h,0))} ч.`},
+      {h:`<div class="list">${inc.slice(0,6).map(i=>wrow(i.w,`<span class="tag ${i.live?'lo':''}">${i.live?'идёт':'закрыто'}</span>${i.h?nf1r(i.h)+' ч':''}`)).join('')}</div><p class="sub">Самая долгая причина — ${esc2(inc[0].op.n)}.</p>`+src('Суточный рапорт · текст операций')}],
+      `НПВ за сутки ${dLbl(d)} — операции с отметкой НПВ в суточном рапорте; часы — графа «НПВ, ч», причина — из текста операции. Общая доля: ${nf1r(S.nh)} ч из календарного времени всех буровых = ${nf1r(S.npct*100)} %.`,c)}
+  const {R,wOf}=npvRows(e,per); const h=R.reduce((a,r)=>a+r.npv,0), kv=R.reduce((a,r)=>a+r.kv,0);
+  const byW={}; R.forEach(r=>{if(r.npv>0){const k=r.rig+'|'+r.well; (byW[k]=byW[k]||{r,h:0,why:{}}).h+=r.npv; (r.why||[]).forEach(([w,x])=>byW[k].why[w||'не указана']=(byW[k].why[w||'не указана']||0)+x)}});
+  const L=Object.values(byW).sort((a,b)=>b.h-a.h); const why={}; L.forEach(o=>Object.entries(o.why).forEach(([k,v])=>why[k]=(why[k]||0)+v)); const top=Object.entries(why).sort((a,b)=>b[1]-a[1])[0];
+  return say([{t:`${nm?nm[0].toUpperCase()+nm.slice(1)+': ':''}НПВ ${per.l} — ${nf1r(h)} ч, ${nf1r(kv?h/kv*100:0)} % календарного времени. ${L.length?`Больше всего — скв. ${L[0].r.well} (${nf1r(L[0].h)} ч).`:''}`},
+    {h:(L.length?hbars(L.slice(0,6).map(o=>{const w=wOf(o.r); return {n:'Скв. '+o.r.well,s:o.r.rig,v:o.h,c:'var(--bad)',well:w&&w.id}}),v=>nf1r(v)+' ч'):'<p class="sub">НПВ не было.</p>')+npvWhyLine(why)+src('Суточные рапорты месяца · НПВ и причины')}],
+    `НПВ ${per.l}: сумма графы «НПВ, ч» суточных рапортов (${R.length} строк БУ·сутки) / календарное время тех же строк (${nf0(kv)} ч). Причины — из текста операций «причина: …».`,c)}
+const npvWhyLine=why=>{const L=Object.entries(why).sort((a,b)=>b[1]-a[1]), named=L.filter(([k])=>k!=='не указана'), un=why['не указана']||0; if(!L.length) return '';
+  return `<p class="sub">${named.length?`Главная названная причина — ${esc2(named[0][0])}: ${nf1r(named[0][1])} ч.`:''}${un?` Без причины в тексте рапорта — ${nf1r(un)} ч.`:''}</p>`};
+/* отставание */
+function lag(e,c){let L=WELLS.map(w=>({w,lag:w.tNow-timeAt(w.planS,w.depth)})).filter(o=>o.lag>2); if(e.field) L=L.filter(o=>o.w.field.id===e.field.id); if(e.cust) L=L.filter(o=>o.w.cust.id===e.cust.id); L.sort((a,b)=>b.lag-a.lag); const nm=e.field?' на '+e.field.n:e.cust?' у '+(e.cust.short||e.cust.n):'';
+  if(!L.length) return say([{t:`Все скважины${nm} идут в графике ГТН — отставание меньше 2 суток.`}],`Сравнение фактического забоя с плановым графиком ГТН на сегодня по каждой скважине.`,c);
+  return say([{t:`От графика ГТН больше чем на 2 суток отстают ${L.length} ${plural(L.length,'скважина','скважины','скважин')}${nm}. Больше всех — скв. ${L[0].w.no}: ${nf1r(L[0].lag)} сут.`},
+    {h:`<div class="list">${L.slice(0,6).map(o=>wrow(o.w,`<span class="tag lo">−${nf1r(o.lag)} сут</span>`)).join('')}</div>`+src('ГГД: факт против плана ГТН')}],
+    `Отставание = сколько суток назад плановый график ГТН прошёл текущий забой скважины. Порог — 2 суток.`,c)}
+function done(e,per,c){per=per&&per.k==='y'?per:{k:'m',l:'в этом месяце'}; const y=per.k==='y'; let f,p,nm='';
+  if(e.cust&&SV.PER[e.cust.id]){const P=SV.PER[e.cust.id]; f=y?P.wyF:P.wmF; p=y?P.wyP:P.wmP; nm=(e.cust.short||e.cust.n)+': '} else {f=y?SV.tot.wyF:SV.tot.wmF; p=y?SV.tot.wyP:SV.tot.wmP}
+  return say([{t:`${nm}${y?'С начала года':'В этом месяце'} закончено ${f} ${plural(f,'скважина','скважины','скважин')} из ${p} по плану — ${pc(f/(p||1))}.`},{h:kpi([{l:'Факт',v:String(f)},{l:'План',v:String(p)},{l:'Выполнение',v:pc(f/(p||1)),c:pcls(f/(p||1))}])+src('Утренняя сводка · законченные скважины')}],
+    `Графы «закончено скважин, план / факт» утренней сводки${nm?' по строке заказчика':''}.`,c)}
+function rigs(c){const on=new Set(WELLS.filter(w=>w.status==='drill').map(w=>w.rig)), all=new Set(WELLS.map(w=>w.rig)), by={}; WELLS.forEach(w=>{by[w.status]=(by[w.status]||0)+1});
+  return say([{t:`В бурении ${on.size} из ${all.size} буровых в рапорте.`},{h:`<div class="bars">${Object.entries(by).sort((a,b)=>b[1]-a[1]).map(([k,n])=>`<div class="br"><span>${esc2(STN(k))}</span><i style="--w:${n/WELLS.length*100}%;background:${STC(k)}"></i><b>${n}</b></div>`).join('')}</div>`+src('Суточный рапорт · статусы скважин')}],
+    `Статус каждой скважины — из суточного рапорта; «в бурении» = статус «бурение».`,c)}
+/* отчётность: EBITDA, выручка, затраты, скорость, загрузка, НПВ год */
+function kpi2(id,e,s,c){if(!RP) return say([{t:'Отчётность ещё загружается — спросите через секунду.'}]); const K=RP.IND.find(k=>k.id===id); if(!K) return dunno(s);
+  const v=K.v, f=v.f, bp=v.bp, f25=v.f25, d=f-bp, up=!!K.up, good=(d>=0)===up, u=K.u, dd=K.d==null?0:K.d, fmt=x=>x==null?'—':x.toLocaleString('ru-RU',{minimumFractionDigits:dd,maximumFractionDigits:dd});
+  const br=(K.br.find(b=>/Заказчики$/.test(b.n))||K.br[0]); const rows=br&&br.rows&&br.rows[0]&&br.rows[0].length>=3?br.rows.map(r=>({n:r[0],bp:r[1],f:r[2],d:r[2]-r[1]})):null;
+  const why=C.why.test(s)||/ниже|выше|хуже|лучше|отклон/.test(s);
+  let t=`${K.n} по прогнозу 9+3 — ${fmt(f)} ${u}: ${d===0?'ровно по БП':`${good?'лучше':'хуже'} БП на ${fmt(Math.abs(d))} ${u} (${sgn(d/bp*100).replace(/ /g,'')} %)`}${f25!=null?`, к 2025 году ${sgn((f-f25)/f25*100)} %`:''}.`;
+  let h=kpi([{l:'Прогноз 9+3',v:fmt(f),s:u},{l:'БП 2026',v:fmt(bp),s:u},{l:'К БП',v:sgn(d/bp*100)+' %',c:good?'ok':'lo'}]);
+  if(rows&&(why||e.cust)){
+    if(e.cust){const r=rows.find(r=>{const a=N(r.n); return N(e.cust.n).split(/[-\s]/).filter(w=>w.length>3&&!GEN.test(w)).some(w=>a.includes(w.slice(0,5)))||a.includes(N(e.cust.short||'').split(/[-\s]/).pop())});
+      if(r){t=`${K.n} — ${r.n}: ${fmt(r.f)} ${u} против ${fmt(r.bp)} по БП (${sgn(r.d)} ${u}).`; h=kpi([{l:'Прогноз 9+3',v:fmt(r.f)},{l:'БП',v:fmt(r.bp)},{l:'Разница',v:sgn(r.d),c:(r.d>=0)===up?'ok':'lo'}])}}
+    else {const neg=rows.filter(r=>(r.d<0)===up).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,3), pos=rows.filter(r=>(r.d>=0)===up&&r.d!==0).sort((a,b)=>Math.abs(b.d)-Math.abs(a.d)).slice(0,2);
+      t+=` ${good?'Больше всего добавили':'Главные причины'} — ${(good?pos:neg).map(r=>`${r.n} (${sgn(r.d)})`).join(', ')}.`;
+      h+=hbars([...neg,...pos].map(r=>({n:r.n,v:r.d,c:(r.d>=0)===up?'var(--good)':'var(--bad)'})),x=>sgn(x))}}
+  return say([{t},{h:h+src(`Отчётность: прогноз 9+3 против БП 2026${rows&&why?' · разрез по заказчикам':''}`)+`<div class="acts"><button type="button" class="act ghost" data-rep="${id}">Открыть в «Отчётах»</button></div>`}],
+    `«${K.n}»: прогноз 9+3 (утверждён 14.10.2026) против бизнес-плана 2026 (утверждён 20.12.2025)${f25!=null?' и факта 2025':''}. Разница к БП = ${fmt(f)} − ${fmt(bp)} = ${fmt(d)} ${u}.${rows&&why?' Вклад заказчиков — из разреза «Заказчики» той же отчётности.':''}${K.d===undefined?'':''}`,c)}
+/* рейтинги и сравнения */
+function top(e,per,s,c){per=per||{k:'m',l:'с начала месяца'}; const n=+(s.match(/(?:топ|первы\w*)\s*-?\s*(\d+)/)||[])[1]||5, worst=/худш|меньше|отстающ|слаб/.test(s), ix={d:0,m:1,y:2,w:1}[per.k];
+  if(/заказчик/.test(s)){const rows=Object.entries(SV.PER).map(([id,P])=>{const cu=CUSTOMERS.find(x=>x.id===id); const f=[P.dF,P.mF,P.yF][ix], p=[P.dP,P.mP,P.yP][ix]; return {n:cu?(cu.short||cu.n):id,v:p?f/p:0,cust:id,s:nf0(f)+' из '+nf0(p)+' м',c:p&&f/p>=1?'var(--good)':'var(--bad)'}}).filter(r=>r.s!=='0 из 0 м').sort((a,b)=>worst?a.v-b.v:b.v-a.v);
+    return say([{t:`Заказчики по выполнению плана проходки ${per.l}: ${worst?'ниже всех':'лучше всех'} — ${rows[0].n} (${pc(rows[0].v)}).`},{h:hbars(rows.slice(0,Math.max(n,rows.length>8?8:rows.length)),v=>pc(v))+src('Утренняя сводка · строки заказчиков')}],
+      `Для каждого заказчика: факт проходки / план ${per.l} из его строки утренней сводки.`,c)}
+  if(C.npv.test(s)){const {R,wOf}=npvRows({},per.k==='d'?{k:'w'}:per); const by={}; R.forEach(r=>{const k=r.rig+'|'+r.well; (by[k]=by[k]||{r,h:0,kv:0}); by[k].h+=r.npv; by[k].kv+=r.kv});
+    const L=Object.values(by).filter(o=>o.h>0).sort((a,b)=>b.h-a.h).slice(0,n);
+    return say([{t:`Больше всего НПВ ${per.l} — скв. ${L[0].r.well}: ${nf1r(L[0].h)} ч (${nf1r(L[0].h/L[0].kv*100)} % времени).`},{h:hbars(L.map(o=>{const w=wOf(o.r); return {n:'Скв. '+o.r.well,s:o.r.rig,v:o.h,c:'var(--bad)',well:w&&w.id}}),v=>nf1r(v)+' ч')+src('Суточные рапорты · НПВ, ч')}],
+      `Сумма графы «НПВ, ч» суточных рапортов ${per.l} по каждой скважине.`,c)}
+  const grp=/месторожд/.test(s)?'field':/скваж/.test(s)?'well':'rig'; const by={};
+  WELLS.forEach(w=>{const k=grp==='field'?w.field.id:grp==='well'?w.id:w.rig; const o=by[k]=by[k]||{n:grp==='field'?w.field.n:grp==='well'?'Скв. '+w.no:w.rig,s:grp==='well'?w.rig:grp==='rig'?'скв. '+w.no+' · '+(w.cust.short||w.cust.n):'',v:0,p:0,well:grp==='well'?w.id:null}; o.v+=(w.real&&w.real.f[ix])||0; o.p+=(w.real&&w.real.p[ix])||0});
+  const L=Object.values(by).sort((a,b)=>worst?a.v-b.v:b.v-a.v).slice(0,n).map(o=>({...o,c:o.p&&o.v>=o.p?'var(--good)':'var(--bad)'}));
+  const gn={field:'месторождения',well:'скважины',rig:'буровые'}[grp];
+  return say([{t:`${worst?'Меньше всех':'Больше всех'} пробурили ${per.l} ${gn}: ${L.map(o=>`${o.n} — ${nf0(o.v)} м`).slice(0,3).join(', ')}.`},{h:hbars(L,v=>nf0(v)+' м')+'<p class="sub">Зелёный — план выполнен, красный — нет.</p>'+src('Суточный рапорт · факт проходки')}],
+    `Сумма графы «факт, м» суточного рапорта ${per.l} по каждой ${grp==='rig'?'буровой':grp==='field'?'группе месторождения':'скважине'}; цвет — сравнение с графой «план, м».`,c)}
+/* карточки */
+function well(w,c){if(!w) return dunno(''); const pcn=Math.round(w.depth/w.target*100), r=w.real||{f:[0,0,0],p:[0,0,0]};
+  return say([{t:`Скв. ${w.no} (${w.field.n}, ${w.cust.short||w.cust.n}): ${STN(w.status).toLowerCase()}, забой ${nf0(w.depth)} из ${nf0(w.target)} м. За сутки ${nf0(r.f[0])} м при плане ${nf0(r.p[0])} м.`},
+    {h:`<div class="wcard"><div class="prog"><i style="width:${Math.min(100,pcn)}%"></i></div>${kpi([{l:'Пройдено',v:pcn+' %'},{l:'Месяц',v:pc(r.f[1]/(r.p[1]||1)),s:nf0(r.f[1])+' м',c:pcls(r.f[1]/(r.p[1]||1))},{l:'Буровая',v:esc2(w.rig.split('-').slice(-2).join('-')),s:esc2(w.rig)}])}${w.op&&w.op.n?`<p class="sub">Сейчас: ${esc2(w.op.n)}</p>`:''}</div><div class="acts">${state.well===w.id?'':`<button type="button" class="act" data-well="${w.id}">Открыть скважину</button>`}<button type="button" class="act ghost" data-field="${w.field.id}">${esc2(w.field.n)} на карте</button></div>`+src('Суточный рапорт · ГГД')}],
+    `Забой и проектная глубина — из суточного рапорта (${nf0(w.depth)} / ${nf0(w.target)} м); проходка за сутки и месяц — графы «факт / план, м» строки скважины.`,{intent:'well',ent:{well:w}})}
+function finish(w,c){if(!w) return dunno(''); const left=Math.max(0,w.target-w.depth); const days=Object.values((w.real&&w.real.days)||{}).slice(-5), fact=days.reduce((a,d)=>a+(d[0]||0),0)/(days.length||1);
+  const dP=w.planDay?left/w.planDay:null, dF=fact>1?left/fact:null, D=x=>new Date(LOAD.at.getTime()+x*864e5).toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+  return say([{t:dP==null?`По скв. ${w.no} нет планового темпа.`:`До проектного забоя скв. ${w.no} — ${nf0(left)} м. По плановому темпу (${nf0(w.planDay)} м/сут) закончим ${D(dP)}${dF?`, по факту последних 5 суток (${nf0(fact)} м/сут) — ${D(dF)}`:''}.`},
+    {h:kpi([{l:'Осталось',v:nf0(left)+' м'},{l:'По плану',v:dP?D(dP):'—'},{l:'По факту',v:dF?D(dF):'—',c:dF&&dP&&dF>dP+1?'lo':'ok'}])+src('ГГД · плановый темп и факт 5 суток')}],
+    `Осталось = проектная глубина − текущий забой = ${nf0(w.target)} − ${nf0(w.depth)}. Дата = осталось / темп; плановый темп — из ГТН, фактический — средняя проходка последних 5 суток рапорта (${nf0(fact)} м/сут). НПВ впереди не учитывается.`,{intent:'when',ent:{well:w}})}
+function cust(cu,per,c){const P=SV&&SV.PER[cu.id]; const ws=WELLS.filter(w=>w.cust.id===cu.id), dr=ws.filter(w=>w.status==='drill').length, live=daySum(0).inc.filter(i=>i.live&&i.w.cust.id===cu.id).length;
+  if(per&&per.k!=='d') return drill({cust:cu},per,c);
+  const q=P?P.mF/(P.mP||1):null;
+  return say([{t:`${cu.short||cu.n}: ${ws.length} ${plural(ws.length,'скважина','скважины','скважин')} в рапорте, ${dr} бурится${live?`, НПВ продолжается на ${live}`:''}. ${P?`Проходка с начала месяца — ${pc(q)} плана, за сутки — ${pc(P.dF/(P.dP||1))}.`:''}`},
+    {h:(P?kpi([{l:'Сутки',v:pc(P.dF/(P.dP||1)),s:nf0(P.dF)+' м',c:pcls(P.dF/(P.dP||1))},{l:'Месяц',v:pc(q),s:nf0(P.mF)+' м',c:pcls(q)},{l:'Год',v:pc(P.yF/(P.yP||1)),s:nf0(P.yF)+' м',c:pcls(P.yF/(P.yP||1))}]):'')+`<div class="list">${ws.slice(0,4).map(w=>wrow(w,'')).join('')}</div><div class="acts"><button type="button" class="act ghost" data-cust="${cu.id}">${esc2(cu.short||cu.n)} на карте</button></div>`+src('Утренняя сводка · строка заказчика')}],
+    `Строка заказчика «${cu.n}» утренней сводки (сутки, месяц, год) и его скважины из суточного рапорта.`,{intent:'cust',ent:{cust:cu},per})}
+function field(f,per,c){if(per&&per.k!=='d') return drill({field:f},per,c); const ws=WELLS.filter(w=>w.field.id===f.id), by={}; ws.forEach(w=>by[w.status]=(by[w.status]||0)+1); const fd=ws.reduce((a,w)=>a+((w.real&&w.real.f[0])||0),0), pd=ws.reduce((a,w)=>a+((w.real&&w.real.p[0])||0),0);
+  return say([{t:`${f.n}: ${ws.length} ${plural(ws.length,'скважина','скважины','скважин')}, ${Object.entries(by).map(([k,n])=>STN(k).toLowerCase()+' — '+n).join(', ')}. За сутки ${nf0(fd)} м — ${pc(fd/(pd||1))} плана.`},
+    {h:`<div class="list">${ws.slice(0,5).map(w=>wrow(w,'')).join('')}</div><div class="acts"><button type="button" class="act ghost" data-field="${f.id}">${esc2(f.n)} на карте</button></div>`+src('Суточный рапорт · скважины месторождения')}],
+    `Скважины месторождения «${f.n}» из суточного рапорта; проходка за сутки — сумма граф «факт / план, м».`,{intent:'field',ent:{field:f},per})}
+function explain(){if(!LASTX) return addBot([{t:'Сначала спросите что-нибудь — потом расскажу, откуда взялась цифра.'}]); return addBot([{t:'Откуда цифра:'},{h:`<div class="xpl">${esc2(LASTX)}</div>`+src('Файл базы на этом устройстве · расчёт в приложении')}])}
+function help(){return addBot([{t:'Я отвечаю по данным приложения — суточному рапорту, утренней сводке и отчётности, подскажу погоду и время на месторождениях, расскажу о компании и об основах бурения — и могу просто поболтать. Например:'},{h:`<div class="acts">${['Сводка за сутки','А вчера?','Где сейчас НПВ?','НПВ за месяц','Кто отстаёт от графика?','Топ-5 буровых по проходке за месяц','Сравни заказчиков по выполнению плана','Почему EBITDA ниже плана?',...(EX().cu?[`Как дела у ${EX().cu}?`]:[]),...(EX().w?[`Когда закончим скв. ${EX().w}?`]:[]),'Откуда эта цифра?','Погода на месторождениях','Который час на месторождениях?','Расскажи о компании ЭНГС','Конструкция скважины','Что такое ГРП?','Расскажи анекдот'].map(q=>`<button type="button" class="act ghost" data-ask="${esc2(q)}">${esc2(q)}</button>`).join('')}</div>`}])}
+function dunno(q){const sug=suggest(q,3); return addBot([{t:'Не уверен, что понял. Возможно, вы имели в виду:'},{h:`<div class="acts">${(sug.length?sug:['Сводка за сутки','Где сейчас НПВ?','Что умеешь?']).map(x=>`<button type="button" class="act ghost" data-ask="${esc2(x)}">${esc2(x)}</button>`).join('')}</div>`}])}
+/* сигналы: что выбивается (без вопроса) */
+function signals(){const out=[]; try{const cm=CMI(), R=SV.NPVR.filter(r=>r.m===cm), last=Math.max(...R.map(r=>r.d)); const byRig={};
+  R.forEach(r=>{(byRig[r.rig]=byRig[r.rig]||{})[r.d]=(byRig[r.rig][r.d]||0)+r.npv});
+  Object.entries(byRig).forEach(([rig,d])=>{let k=0; for(let x=last;x>0&&(d[x]||0)>0;x--) k++; if(k>=2){const w=WELLS.find(w=>w.rig===rig); if(w) out.push({w,t:`НПВ ${k} ${plural(k,'сутки','суток','суток')} подряд`,c:'lo'})}});
+  WELLS.filter(w=>w.status==='drill'&&w.real&&w.real.days).forEach(w=>{const d=Object.values(w.real.days).slice(-3), f=d.reduce((a,x)=>a+(x[0]||0),0), p=d.reduce((a,x)=>a+(x[1]||0),0); if(p>50&&f<p*.5&&!out.some(o=>o.w===w)) out.push({w,t:`темп ${pc(f/p)} плана 3 суток`,c:'wn'})});
+  const L=WELLS.map(w=>({w,lag:w.tNow-timeAt(w.planS,w.depth)})).filter(o=>o.lag>NORM.lag_bad).sort((a,b)=>b.lag-a.lag)[0]; if(L&&!out.some(o=>o.w===L.w)) out.push({w:L.w,t:`отстаёт от ГТН на ${nf1r(L.lag)} сут`,c:'lo'})}catch(e){}
+  return out.slice(0,3)}
+function brief(){const S=daySum(0), live=S.inc.filter(i=>i.live), q=S.pct, sig=signals();
+  say([{t:`${HELLO[dayPart()]}${nm()}! Коротко на ${asof()}:`},{h:kpi([{l:'Проходка за сутки',v:nf0(S.fact)+' м',s:`${pc(q)} плана`,c:pcls(q)},{l:'НПВ за сутки',v:nf1r(S.npct*100)+' %',s:nf1r(S.nh)+' ч',c:S.npct>=NORM.npv_bad?'lo':S.npct>=NORM.npv_warn?'wn':'ok'},{l:'Инциденты',v:String(S.inc.length),s:live.length?`${live.length} продолжается`:'все закрыты',c:live.length?'lo':''}])+src('Суточный рапорт · файл базы на устройстве')},
+    ...(sig.length?[{t:'Что выбивается — нашёл сам:'},{h:`<div class="list">${sig.map(o=>wrow(o.w,`<span class="tag ${o.c}">${o.t}</span>`)).join('')}</div>`}]:[])],
+    `Проходка за сутки — сумма графы «факт, м» суточного рапорта, план — графа «план, м»: ${nf0(S.fact)} / ${nf0(S.plan)}. Сигналы ищутся сами: НПВ 2+ суток подряд по буровой, темп ниже половины плана 3 суток, отставание от ГТН больше 5 суток.`,{intent:'brief',ent:{},per:{k:'d',d:0,l:'за сутки'}})}
+/* ===== простые темы: знакомство, как дела, пожелания, погода ===== */
+let UNAME=''; const myName=()=>{if(UNAME) return UNAME; try{const n=String((PREFS&&PREFS.name)||'').trim(); return n?n.split(/\s+/)[0]:''}catch(e){return ''}};
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const hourNow=()=>new Date().getHours();
+const dayPart=()=>{const h=hourNow(); return h<5?'night':h<12?'morning':h<18?'day':'evening'};
+const HELLO={morning:'Доброе утро',day:'Добрый день',evening:'Добрый вечер',night:'Доброй ночи'};
+const nm=(pre)=>{const n=myName(); return n?(pre||', ')+n:''};
+const chips=a=>({h:`<div class="acts">${a.map(q=>`<button type="button" class="act ghost" data-ask="${esc2(q)}">${esc2(q)}</button>`).join('')}</div>`});
+const TK={
+  hello:/^(привет[а-яa-z]*|здравствуй[а-яa-z]*|здрасьте|добр[а-яa-z]+ (утр|ден|дн|вечер|ночи)[а-яa-z]*|доброго (утра|дня|вечера)|хай|салют|приветик|хелло|hello|hi|доброе утро)([^а-яa-z]|$)/,
+  howru:/^(ну\s+)?(как (дела|ты|жизнь|поживаешь|настроение|сам|твои дела|у тебя дела)|как оно|что как|чем занят[а-яa-z]*|как работа[а-яa-z]*)([^а-я]|$)/,
+  whoami:/(как тебя зовут|кто ты|ты кто|представься|познакомимся|давай знакомиться|твое имя|как тебя называть|что ты такое)/,
+  myname:/(меня зовут|зови меня|называй меня|мое имя)\s*[—-]?\s*[а-яa-z-]{2,}/,
+  maker:/(кто тебя (создал|сделал|придумал|написал)|кто твой (создатель|автор|разработчик))/,
+  human:/(ты (человек|робот|бот|живой|нейросеть|ии|искусственный интеллект|chatgpt|гпт)|ты настоящий)/,
+  thanks:/(^|[^а-я])(спасибо|спс|благодар[а-яa-z]*|мерси|thanks?)([^а-я]|$)/,
+  praise:/^(молодец|умница|круто|класс|супер|отлично|здорово|красава|хорошо|ты лучший|ты молодец|огонь)[!. ]*$/,
+  ok:/^(ок|окей|ok|понятно|ясно|принято|хорошо|ладно|угу|ага|понял|поняла)[!. ]*$/,
+  bye:/(^|[^а-я])(пока|до свидания|до встречи|до завтра|увидимся|всего доброго|всего хорошего|бывай)([^а-я]|$)/,
+  wish:/(хорош[а-я]*|удачн[а-я]*|отличн[а-я]*|прекрасн[а-я]*|добр[а-я]*|спокойн[а-я]*|приятн[а-я]*|легк[а-я]*)\s+(дня|вечера|утра|ночи|выходных|отдыха|аппетита|недели|смены)|(^|[^а-я])удачи([^а-я]|$)|с праздник/,
+  joke:/(анекдот|шутк|пошути|рассмеши|развесели)/,
+  time:/(который (сейчас )?час|сколько (сейчас )?времени|какое (сегодня )?число|какой (сегодня )?день( недели)?$|какой сегодня день|какая (сегодня )?дата|день недели|местн[а-яa-z]* врем|точн[а-яa-z]* врем|час[а-яa-z]* пояс|(^|[^а-я])время (на|в|у|там)([^а-я]|$)|разниц[а-яa-z]* (во|в) времен)/,
+  mood:/(устал|надоело|тяжел[а-яa-z]* день|грустно|плохое настроение|не выспал|запарка|аврал)/,
+  rude:/(дурак|тупой|идиот|бестолков|бесполезн)/,
+  me:/(у меня|где я|за окном|на улице|в (моем|моём|нашем) город|рядом со мной|где (я )?нахожусь|по gps|по джипиэс|по геолокац|по геопозиц|мое местополож|моё местополож|в моем месте|у нас в город|где мы)/,
+  wx:/погод|температур|градус|мороз|холодн|тепл[оа]|ветер|ветр|снег|дожд|метел|пург|осадк|прогноз погод|солнечн|оденьс|одеват/
+};
+function talk(q,s,e,I){const t=s.replace(/[?!.,…]+/g,' ').replace(/\s+/g,' ').trim(); const biz=I.filter(k=>!['brief','plan','why','top','when','help'].includes(k)).length||Object.keys(e).length;
+  const aStart=/^(а|и|ну а)\s/.test(t);
+  const me=TK.me.test(t)||(/(^|[^а-я])(здесь|тут)([^а-я]|$)/.test(t)&&!state.field&&state.level!=='well');
+  if(TK.time.test(t)) return clock(t,e,me);
+  if(TK.wx.test(t)) return weather(t,me?{me:true}:e); if(me&&CTX.intent==='wx') return weather(t,{me:true}); if(CTX.intent==='wx'&&(aStart||/завтра|послезавтра/.test(t))&&!I.filter(k=>k!=='when').length) return weather(t,Object.keys(e).length?e:(CTX.ent||{}));
+  if(TK.myname.test(t)){const m=q.match(/(?:меня зовут|зови меня|называй меня|моё имя|мое имя)\s*[—-]?\s*([А-ЯЁа-яёA-Za-z-]{2,})/i); if(m){UNAME=m[1][0].toUpperCase()+m[1].slice(1).toLowerCase();
+    return say([{t:pick([`Очень приятно, ${UNAME}! А я — Пульс, помощник по бурению. Спрашивайте про проходку, НПВ, скважины — или просто поболтаем.`,`Приятно познакомиться, ${UNAME}! Я Пульс. Буду звать вас по имени.`])},chips(['Сводка за сутки','Что умеешь?'])],'',{intent:'talk'})}}
+  if(TK.whoami.test(t)) return say([{t:`Я — Пульс, помощник в этом приложении. Слежу за бурением: проходка, НПВ, отставание от графика, скважины и буровые, отчётность. Могу подсказать погоду на месторождениях и просто поговорить.`},
+      ...(myName()?[]:[{t:'А как вас зовут? Напишите, например: «Меня зовут Алексей».'}]),chips(['Что умеешь?','Сводка за сутки'])],'',{intent:'talk'});
+  if(TK.maker.test(t)) return say([{t:'Меня сделали в Demshin_lab для приложения «Пульс 2». Отвечаю только по данным, которые лежат в файле базы на этом устройстве, — никуда их не отправляю.'}],'',{intent:'talk'});
+  if(TK.human.test(t)) return say([{t:'Нет, я не человек и даже не нейросеть. Я разбираю вопрос по смыслу: тема, период, скважина или заказчик — и считаю ответ прямо на устройстве. Поэтому цифры у меня всегда те же, что в приложении.'}],'',{intent:'talk'});
+  if(biz) return null;
+  if(TK.hello.test(t)){const g=HELLO[dayPart()], rest=t.replace(TK.hello,'').trim();
+    if(TK.howru.test(rest)) return howru(g);
+    if(dayPart()==='morning') return brief();
+    return say([{t:pick([`${g}${nm()}! Чем помочь?`,`${g}${nm()}! Рад вас видеть. Что посмотрим?`,`${g}${nm()}! Я на связи.`])},chips(['Сводка за сутки','Где сейчас НПВ?','Какая погода у меня?'])],'',{intent:'talk'})}
+  if(TK.howru.test(t)) return howru();
+  if(TK.praise.test(t)) return say([{t:pick(['Спасибо, приятно!','Стараюсь! Спрашивайте ещё.','Спасибо! Это всё хорошие данные из рапортов.'])}],'',{intent:'talk'});
+  if(TK.ok.test(t)) return say([{t:pick(['Хорошо. Если понадоблюсь — я здесь.','Принято. Что-нибудь ещё посмотреть?','Отлично. Я рядом.'])}],'',{intent:'talk'});
+  if(TK.wish.test(t)){const w=t.match(TK.wish); const word=(w&&w[2])||'';
+    const back=/аппетит/.test(word)?'Спасибо! А вам — приятного аппетита.':/выходн|отдых/.test(word)?'Спасибо! И вам хорошо отдохнуть — буровые я покараулю.':/ноч/.test(word)?'Спасибо, и вам спокойной ночи! Утром подготовлю сводку.':/удач/.test(t)?'Спасибо! И вам удачи — пусть всё идёт по графику.':/праздник/.test(t)?'Спасибо, и вас с праздником!':`Спасибо! И вам ${(w&&w[1])||'хорошего'} ${word||'дня'}!`;
+    return say([{t:(TK.thanks.test(t)&&!/^Спасибо/.test(back)?'Спасибо! ':'')+back}],'',{intent:'talk'})}
+  if(TK.thanks.test(t)) return say([{t:pick(['Пожалуйста! Обращайтесь.','Всегда рад помочь.','Не за что! Если что — я рядом, значок справа.','Пожалуйста. Хорошего дня!'].map(x=>dayPart()==='evening'&&/дня/.test(x)?x.replace('дня','вечера'):x))}],'',{intent:'talk'});
+  if(TK.bye.test(t)){const p=dayPart(); return say([{t:p==='evening'||p==='night'?`До свидания${nm()}! Хорошего вечера — утром будет свежая сводка.`:`До встречи${nm()}! Хорошего дня.`}],'',{intent:'talk'})}
+  if(TK.joke.test(t)) return say([{t:pick(JOKES)}],'',{intent:'talk'});
+  if(TK.mood.test(t)) return say([{t:pick(['Понимаю. Давайте я возьму на себя цифры — спросите коротко, отвечу коротко.','Бывает. Могу собрать всё главное в одну сводку, чтобы не листать экраны.'])},chips(['Сводка за сутки','Кто отстаёт от графика?'])],'',{intent:'talk'});
+  if(TK.rude.test(t)) return say([{t:'Похоже, я не понял вопрос — извините. Попробуйте сформулировать иначе или выберите подсказку ниже.'},chips(['Что умеешь?','Сводка за сутки'])],'',{intent:'talk'});
+  return null}
+function howru(g){let line=''; try{const S=daySum(0); line=S.pct>=1?`Буровые за сутки дали ${pc(S.pct)} плана по проходке — настроение рабочее.`:`Проходка за сутки — ${pc(S.pct)} плана, так что слежу внимательно.`}catch(e){}
+  return say([{t:`${g?g+nm()+'! ':''}${pick(['Спасибо, хорошо!','Всё отлично, спасибо!','Работаю, всё в порядке.'])} ${line} А у вас как?`},chips(['Сводка за сутки','Погода на месторождениях'])],'',{intent:'talk'})}
+const JOKES=[
+  'Буровик — единственный человек, который радуется, когда дела идут вниз.',
+  '— Почему буровики не спорят с геологами? — Бесполезно: у геолога всегда найдётся ещё один пласт аргументов.',
+  'Мой любимый план — тот, который уже выполнен. Остальные я просто сопровождаю.',
+  'Говорят, НПВ — это непроизводительное время. А совещание про НПВ — это что?',
+  'Скважина сказала долоту: «Ты меня насквозь видишь». Долото промолчало — оно было занято.'
+];
+/* время: часовой пояс по координатам (грубые границы субъектов РФ; для Ямала и ХМАО — UTC+5) */
+function tzFor(lat,lon){if(lon<55) return 'Europe/Moscow'; if(lon<60) return lat>=61?'Europe/Moscow':'Asia/Yekaterinburg';
+  if(lat>=59.5) return lon<=86?'Asia/Yekaterinburg':lon<=106?'Asia/Krasnoyarsk':'Asia/Yakutsk';
+  if(lon<70) return 'Asia/Yekaterinburg'; if(lon<76) return 'Asia/Omsk'; if(lon<106) return 'Asia/Novosibirsk'; return 'Asia/Irkutsk'}
+const TZN={'Europe/Moscow':'московское','Asia/Yekaterinburg':'екатеринбургское','Asia/Omsk':'омское','Asia/Novosibirsk':'новосибирское','Asia/Krasnoyarsk':'красноярское','Asia/Irkutsk':'иркутское','Asia/Yakutsk':'якутское'};
+function tzOff(tz,d){const p=new Intl.DateTimeFormat('en-US',{timeZone:tz,timeZoneName:'shortOffset'}).formatToParts(d).find(x=>x.type==='timeZoneName'); const m=(p&&p.value||'GMT').match(/GMT([+-]\d+)?(?::(\d+))?/); return (+(m[1]||0))+(m[2]?Math.sign(+m[1])*m[2]/60:0)}
+const hm=(tz,d)=>new Intl.DateTimeFormat('ru-RU',{timeZone:tz,hour:'2-digit',minute:'2-digit'}).format(d);
+const dmy=(tz,d)=>new Intl.DateTimeFormat('ru-RU',{timeZone:tz,weekday:'long',day:'numeric',month:'long'}).format(d);
+const offL=(tz,d)=>{const u=tzOff(tz,d), m=u-tzOff('Europe/Moscow',d); return `UTC${u>=0?'+':'−'}${Math.abs(u)}${m?`, МСК${m>0?'+':'−'}${Math.abs(m)}`:', как в Москве'}`};
+function clock(t,e,me){const d=new Date(); let F=[];
+  if(e.field) F=[e.field]; else if(e.well) F=[e.well.field]; else if(e.cust) F=[...new Set(WELLS.filter(w=>w.cust===e.cust).map(w=>w.field))];
+  else if(/месторожд|скваж|буров|объект|на севере|на ямале|на промысл/.test(t)) F=wxPlaces({});
+  const here=Intl.DateTimeFormat().resolvedOptions().timeZone||'Europe/Moscow';
+  const mine=`Сейчас ${hm(here,d)}, ${dmy(here,d)}`;
+  if(!F.length){const fz=[...new Set(wxPlaces({}).map(f=>tzFor(f.lat,f.lon)))];
+    return say([{t:`${mine}.${fz.length===1&&fz[0]!==here?` На месторождениях — ${hm(fz[0],d)} (${offL(fz[0],d)}).`:''} Данные в приложении — на ${asof()}.`}],'',{intent:'talk'})}
+  const G={}; F.forEach(f=>{const z=tzFor(f.lat,f.lon); (G[z]=G[z]||[]).push(f)}); const Z=Object.keys(G);
+  const lead=e.well?`На скв. ${e.well.no} (${e.well.field.n})`:F.length===1?`На ${F[0].n.replace(/ое$/,'ом').replace(/ий$/,'ом')}`:e.cust?`На месторождениях ${e.cust.short||e.cust.n}`:'На месторождениях';
+  const txt=Z.length===1?`${lead} сейчас ${hm(Z[0],d)}, ${dmy(Z[0],d)} — ${TZN[Z[0]]||''} время, ${offL(Z[0],d)}.`
+    :`${lead} несколько часовых поясов: `+Z.map(z=>`${hm(z,d)} (${offL(z,d)}) — ${G[z].map(f=>f.n).join(', ')}`).join('; ')+'.';
+  const diff=Z.length===1?tzOff(Z[0],d)-tzOff(here,d):0;
+  return say([{t:txt+(diff?` У вас ${hm(here,d)} — разница ${Math.abs(diff)} ${plural(Math.abs(diff),'час','часа','часов')}.`:'')},{h:src('Часы вашего устройства + часовой пояс по координатам месторождения')}],'',{intent:'talk'})}
+/* погода: Open-Meteo по координатам месторождений (округлены до 0,1°), без ключа; нет связи — честно говорим и даём обычный диапазон */
+const WXC={0:'ясно',1:'малооблачно',2:'переменная облачность',3:'пасмурно',45:'туман',48:'туман с изморозью',51:'морось',53:'морось',55:'сильная морось',56:'ледяная морось',57:'ледяная морось',61:'небольшой дождь',63:'дождь',65:'сильный дождь',66:'ледяной дождь',67:'ледяной дождь',71:'небольшой снег',73:'снег',75:'сильный снег',77:'снежная крупа',80:'ливень',81:'ливень',82:'сильный ливень',85:'снегопад',86:'сильный снегопад',95:'гроза',96:'гроза с градом',99:'гроза с градом'};
+const WXI=c=>c===0||c===1?'☀':c<=3?'☁':c<=48?'🌫':c<=67||(c>=80&&c<=82)?'🌧':c<=86?'❄':'⛈';
+const NORM=['от −35 до −18','от −32 до −15','от −25 до −8','от −15 до 0','от −5 до +8','от +3 до +15','от +8 до +20','от +5 до +16','от 0 до +10','от −10 до 0','от −25 до −10','от −30 до −15'];
+const rng=(a,b)=>Math.round(a)===Math.round(b)?'около '+tC(a):'от '+tC(a)+' до '+tC(b);
+const tC=v=>(v>0?'+':v<0?'−':'')+Math.abs(Math.round(v))+' °C';
+let WXCACHE={at:0,key:'',data:null}, GEO=null;
+const geoPos=()=>new Promise((res,rej)=>{if(!navigator.geolocation) return rej('none'); navigator.geolocation.getCurrentPosition(p=>res(p.coords),er=>rej(er&&er.code===1?'denied':'fail'),{enableHighAccuracy:false,timeout:12000,maximumAge:10*60e3})});
+const kmTo=(a,b,c,d)=>{const R=6371,r=Math.PI/180,x=Math.sin((c-a)*r/2)**2+Math.cos(a*r)*Math.cos(c*r)*Math.sin((d-b)*r/2)**2; return 2*R*Math.asin(Math.sqrt(x))};
+async function cityName(lat,lon){const ac=new AbortController(), to=setTimeout(()=>ac.abort(),5000); try{const r=await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+lat+'&longitude='+lon+'&localityLanguage=ru',{signal:ac.signal}); const j=await r.json(); return j.city||j.locality||j.principalSubdivision||''}catch(e){return ''}finally{clearTimeout(to)}}
+async function mePlace(){if(GEO&&Date.now()-GEO.at<10*60e3) return GEO.p; const c=await geoPos(), lat=Math.round(c.latitude*10)/10, lon=Math.round(c.longitude*10)/10;
+  const nm2=await cityName(lat,lon); let near=null; FIELDS.forEach(f=>{if(isFinite(f.lat)&&isFinite(f.lon)){const km=kmTo(lat,lon,f.lat,f.lon); if(!near||km<near.km) near={f,km}}});
+  const p={id:'me:'+lat+','+lon,n:nm2||'Там, где вы',lat,lon,me:true,near:near&&near.km<1500?near:null}; GEO={at:Date.now(),p}; return p}
+async function wxGet(F){const key=F.map(f=>f.id).join(','); if(WXCACHE.key===key&&Date.now()-WXCACHE.at<15*60e3) return WXCACHE.data;
+  const r1=x=>Math.round(x*10)/10, u='https://api.open-meteo.com/v1/forecast?latitude='+F.map(f=>r1(f.lat)).join(',')+'&longitude='+F.map(f=>r1(f.lon)).join(',')+
+    '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,wind_gusts_10m&daily=temperature_2m_min,temperature_2m_max,weather_code,wind_gusts_10m_max&wind_speed_unit=ms&timezone=auto&forecast_days=3';
+  const ac=new AbortController(), to=setTimeout(()=>ac.abort(),6000);
+  try{const r=await fetch(u,{signal:ac.signal}); if(!r.ok) throw 0; let j=await r.json(); if(!Array.isArray(j)) j=[j]; WXCACHE={at:Date.now(),key,data:j}; return j}finally{clearTimeout(to)}}
+function wxPlaces(e){let F=[]; const st=state;
+  if(e.field) F=[e.field]; else if(e.well) F=[e.well.field]; else if(e.cust) F=[...new Set(WELLS.filter(w=>w.cust===e.cust).map(w=>w.field))];
+  else if(st.level==='well'){const w=WELLS.find(x=>x.id===st.well); if(w) F=[w.field]} else if(st.field) F=[FIELDS.find(x=>x.id===st.field)];
+  if(!F.length){const act=new Set(WELLS.map(w=>w.field)); F=FIELDS.filter(f=>act.has(f))} if(!F.length) F=FIELDS.slice();
+  return F.filter(f=>f&&isFinite(f.lat)&&isFinite(f.lon))}
+function weather(t,e){if(PREFS.aiNet===false) return say([{t:'Погода и геопозиция выключены в настройках: Профиль → Данные → «Помощник». Данные рапортов при этом никуда не уходят.'}],'',{intent:'talk'});
+  const day=/послезавтра/.test(t)?2:/завтра/.test(t)?1:0, dl=['сейчас','завтра','послезавтра'][day];
+  const ctx={intent:'wx',ent:e};
+  return say(async()=>{let F, near='';
+    if(e.me){let P; try{P=await mePlace()}catch(err){return [{t:err==='denied'?'Не могу определить, где вы: доступ к геопозиции не разрешён. Разрешите его для этой страницы в настройках браузера — или спросите про месторождение.':'Не получилось определить, где вы: геопозиция сейчас недоступна. Могу показать погоду на месторождениях.'},chips(['Погода на месторождениях'])]}
+      F=[P]; if(P.near) near=` Ближайшее месторождение — ${P.near.f.n}, около ${nf0(P.near.km)} км.`}
+    else F=wxPlaces(e);
+    const one=F.length===1, place=one?F[0].n:(e.cust?`месторождения ${e.cust.short||e.cust.n}`:'месторождения');
+    let J; try{J=await wxGet(F)}catch(err){J=null}
+    if(!J) return [{t:`Не могу получить прогноз: нет связи с метеосервисом. Обычно в ${MGEN[new Date().getMonth()].replace(/я$/,'е').replace(/а$/,'е')} на Ямале ${NORM[new Date().getMonth()]} °C, часто ветер и снег.`},{h:src('Климатическая норма для севера Западной Сибири, ориентировочно')}];
+    const R=F.map((f,i)=>{const w=J[i]||{}, c=w.current||{}, d=w.daily||{}; return day===0?{f,t:c.temperature_2m,fl:c.apparent_temperature,code:c.weather_code,wind:c.wind_speed_10m,g:c.wind_gusts_10m}
+      :{f,t:(d.temperature_2m_max||[])[day],lo:(d.temperature_2m_min||[])[day],code:(d.weather_code||[])[day],g:(d.wind_gusts_10m_max||[])[day]}}).filter(r=>r.t!=null);
+    if(!R.length) throw 0;
+    R.sort((a,b)=>a.t-b.t); const cold=R[0], warm=R[R.length-1], gust=R.slice().sort((a,b)=>(b.g||0)-(a.g||0))[0];
+    let txt; if(one){const r=R[0]; txt=day===0?`${r.f.n}: сейчас ${tC(r.t)}, ощущается как ${tC(r.fl)}, ${WXC[r.code]||'—'}; ветер ${Math.round(r.wind)} м/с, порывы до ${Math.round(r.g)} м/с.`
+        :`${r.f.n}, ${dl}: ${tC(r.lo)}…${tC(r.t)}, ${WXC[r.code]||'—'}, порывы до ${Math.round(r.g)} м/с.`}
+      else txt=day===0?`Сейчас на ${place==='месторождения'?'месторождениях':place} ${rng(cold.t,warm.t)}. Холоднее всего — ${cold.f.n} (${tC(cold.t)}, ощущается ${tC(cold.fl)}).`
+        :`${dl[0].toUpperCase()+dl.slice(1)} на месторождениях днём ${rng(cold.t,warm.t)}; ночью до ${tC(Math.min(...R.map(r=>r.lo)))}.`;
+    const warn=(gust.g||0)>=15?` Сильный ветер — ${gust.f.n}, порывы до ${Math.round(gust.g)} м/с.`:(cold.fl!=null&&cold.fl<=-30)?` Очень холодно — ${cold.f.n}, ощущается ${tC(cold.fl)}.`:'';
+    const rows=one?kpi(day===0?[{l:'Температура',v:tC(R[0].t),s:'ощущается '+tC(R[0].fl)},{l:'Ветер',v:Math.round(R[0].wind)+' м/с',s:'порывы '+Math.round(R[0].g)+' м/с',c:R[0].g>=15?'lo':''},{l:'Небо',v:WXI(R[0].code),s:WXC[R[0].code]||''}]
+        :[{l:'Днём',v:tC(R[0].t)},{l:'Ночью',v:tC(R[0].lo)},{l:'Порывы',v:Math.round(R[0].g)+' м/с',s:WXC[R[0].code]||'',c:R[0].g>=15?'lo':''}])
+      :`<div class="list">${R.slice(0,8).map(r=>`<button type="button" class="wr" data-field="${r.f.id}"><i style="background:var(--accent)"></i><span><b>${esc2(r.f.n)}</b><small>${WXI(r.code)} ${WXC[r.code]||''} · ${day===0?'ветер '+Math.round(r.wind)+', ':''}порывы ${Math.round(r.g)} м/с</small></span><em><b>${day===0?tC(r.t):tC(r.lo)+'…'+tC(r.t)}</b></em><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`).join('')}</div>${R.length>8?`<p class="sub">Ещё ${R.length-8} ${plural(R.length-8,'месторождение','месторождения','месторождений')} — теплее, до ${tC(warm.t)}. Спросите про конкретное: «погода на …».</p>`:''}`;
+    return [{t:txt+warn+near},{h:rows+src(e.me?'Open-Meteo · ваша геопозиция, округлённая до ~10 км; нигде не сохраняется':'Open-Meteo · прогноз по координатам месторождений, округлённым до ~10 км')},chips([day===0?'А завтра?':'А послезавтра?',e.me?'Погода на месторождениях':'Какая погода у меня?'])]},'',ctx)}
+
+/* ===== справочник: основы бурения и нефтесервиса (общие сведения, без данных компании) ===== */
+const KB=[
+{id:'engs',co:1,t:'ЭНГС',k:/(^|[^а-яa-z])энгс([^а-яa-z]|$)|энерги[а-я]* нефтегазов[а-я]* сервис|engs|о компании|про компанию|наш[а-я]* компани/,
+ a:'ООО «Энергия нефтегазового сервиса» (ЭНГС) — независимая буровая компания, основана в 2008 году, зарегистрирована в Москве, производственная база и два филиала — в Новом Уренгое. Основной вид деятельности — бурение для добычи нефти и газа (ОКВЭД 09.10.1). Строит эксплуатационные и разведочные скважины — вертикальные, наклонно-направленные, горизонтальные и многоствольные — в Арктике и ЯНАО (Ямал, Гыдан), а также в Западной Сибири, Коми и Печоре. По данным компании: более 3 000 скважин и более 13 млн м проходки с начала работы, около 5 000 сотрудников, 38 буровых установок, 10-е место по объёму бурения в России по рейтингу RPI за 2025 год.',
+ see:['engs_fleet','engs_serv','engs_hist','engs_fin','engs_req'],src:'Открытые источники: сайт engsdrilling.ru, ЕГРЮЛ (через saby.ru), hh.ru · проверено 16.10.2026'},
+{id:'engs_fleet',co:1,t:'Буровой парк ЭНГС',k:/(парк|флот|сколько|какие|модел)[а-я]*.{0,25}(буров|установ|станк).{0,25}(энгс|компани)|(энгс|компани)[а-я]*.{0,25}(буров[а-я]* парк|парк буров|установ|спецтехник)|буров[а-я]* парк/,
+ a:'По данным компании — 38 буровых установок девяти моделей: Уралмаш 5000/320 ЭК-БМЧ — 15, Уралмаш 6000/400 ЭК-БМЧ — 5 и ещё 2 в арктическом исполнении «Арктика Лайт», ZJ70DBS — 9 и 2 «Аврора», ZJ50DBS — 1, ZJ40DBS — 2, ZJ40 — 1, ZJ15 — 1. Собственные разработки — арктическая установка Уралмаш 6000/400 «Арктика» и, совместно с китайским производителем, «Аврора». Плюс более 700 единиц спецтехники. Числа 320 и 400 в названиях — грузоподъёмность в тоннах.',
+ see:['rigclass','engs','rig'],src:'engsdrilling.ru, раздел «Работа» · 2026'},
+{id:'engs_serv',co:1,t:'Услуги ЭНГС',k:/(услуг|чем занима|что делает|направлени[а-я]* деятельн|виды работ)[а-я]*.{0,20}(энгс|компани)|(энгс|компани)[а-я]*.{0,20}(услуг|чем занима|делает)/,
+ a:'По данным сайта компании: эксплуатационное и разведочное бурение всех типов скважин, управление проектами строительства, текущий и капитальный ремонт скважин, зарезка боковых стволов, освоение, интенсификация притока и ГРП, цементирование (свой флот и лаборатория), буровые растворы, отбор керна, геофизика, геологическое и геомеханическое моделирование. Заказчики — крупнейшие нефтегазовые компании, в том числе арктические СПГ-проекты; компания подчёркивает, что не зависит от одного заказчика.',
+ see:['oilservice','engs','engs_rec'],src:'engsdrilling.ru, раздел «Что делаем» · 2026'},
+{id:'engs_rec',co:1,t:'Рекорды ЭНГС',k:/рекорд|достижени/,
+ a:'Рекорды, которые называет компания: скважина глубиной 7 137 м, отход от вертикали 5 891 м, горизонтальный участок 2 005 м, коммерческая скорость 7 630 м на станко-месяц.',
+ see:['commspeed','horizontal','engs_hist'],src:'engsdrilling.ru · 2026'},
+{id:'engs_hist',co:1,t:'История и награды ЭНГС',k:/истори[яи].{0,20}(энгс|компани)|(энгс|компани).{0,20}истори|наград|рейтинг[а-я]* (подрядчик|буров)|когда (основан|создан)/,
+ a:'2008 — основание компании. С 2019 по 2025 год, семь лет подряд, — первое место в рейтинге буровых подрядчиков одного из крупнейших заказчиков по эксплуатационному и разведочному бурению. 2019 — лучшая компания по охране труда, промбезопасности и экологии в рейтинге заказчика. 2021, 2023 и 2025 — первое место в рейтинге подрядчиков ещё одного крупного заказчика, в 2025 году — его премия «Признание лучших». 2022–2025 — награды «ТЭК-Рейтинг». 2023–2026 — в числе лучших работодателей среди буровых компаний. В 2026 году компания выступила на форуме «Нефтегаз» с опытом бурения юрских отложений. Своя учебная база в Новом Уренгое: тренажёры бурения и VR, около 3 400 человек обучаются в год.',
+ see:['engs','engs_rec'],src:'engsdrilling.ru, разделы «О нас» и «Пресс-центр» · 2026'},
+{id:'engs_fin',co:1,t:'Финансы ЭНГС',k:/(выручк|прибыл|финанс|оборот|отчетност)[а-я]*.{0,25}(энгс|компани).{0,10}(по годам|за \d|в \d|истори|ифнс|фнс|$)|(энгс|компани)[а-я]*.{0,15}(выручк|финанс|оборот)/,
+ a:'По открытой бухгалтерской отчётности (агрегатор данных ФНС): выручка 2021 — 34,5 млрд ₽, 2022 — 40,9 млрд ₽, 2023 — 49,9 млрд ₽, 2024 — 73,5 млрд ₽ (максимум), 2025 — 61,0 млрд ₽. Чистая прибыль: 2021 — 3,6 млрд ₽, 2022 — 4,7, 2023 — 7,3, 2024 — 5,0, 2025 — убыток 1,5 млрд ₽ (первый с 2017 года). Это данные агрегатора, с первоисточником не сверены. Текущие показатели прогноза и бизнес-плана — в «Отчётах»: спросите, например, «выручка» или «EBITDA».',
+ see:['engs','engs_req'],src:'Бухгалтерская отчётность через saby.ru · проверено 16.10.2026'},
+{id:'engs_req',co:1,t:'Реквизиты ЭНГС',k:/реквизит|(^|[^а-я])инн([^а-я]|$)|огрн|(^|[^а-я])кпп([^а-я]|$)|юридическ[а-я]* адрес|оквэд/,
+ a:'ООО «Энергия нефтегазового сервиса» (ООО «ЭНГС»): ИНН 7727650928, КПП 772701001, ОГРН 1087746582714. Зарегистрировано 30.04.2008, Москва, муниципальный округ Академический. Два филиала — в Новом Уренгое (ЯНАО). ОКВЭД 09.10.1 — бурение, связанное с добычей нефти, газа и газового конденсата. Статус — действующее. Учредитель — юридическое лицо (с 2023 года). Сайт — engsdrilling.ru.',
+ see:['engs','cctek'],src:'ЕГРЮЛ через saby.ru · проверено 16.10.2026'},
+{id:'cctek',co:1,t:'ЦЦ ТЭК',k:/(^|[^а-я])цц ?тэк|центр цифровизации|cd-?tek|цифров[а-я]* центр тэк/,
+ a:'ООО «Центр цифровизации ТЭК» (ЦЦ ТЭК) — ИТ-компания для топливно-энергетического комплекса. Создана 3 февраля 2023 года на базе ИТ-подразделений нескольких производственных компаний ТЭК. Направления — ИТ-консалтинг, техническая поддержка и разработка программного обеспечения; в штате разработчики, аналитики, тестировщики и специалисты по информационной безопасности. Реквизиты: ИНН 9725113270, КПП 772501001, ОГРН 1237700086986; Москва, ул. Летниковская, 5. ОКВЭД — сопровождение компьютерных систем. Малое предприятие (в реестре МСП с 2023 года), около 22 сотрудников; доходы за 2023 год — 152 млн ₽. Связь с ЭНГС в открытых источниках не указана. Сайт — cd-tek.ru.',
+ see:['engs'],src:'СПАРК-Интерфакс, данные ФНС, Хабр Карьера · проверено 16.10.2026'},
+{id:'vzdrus',t:'ВЗД или РУС',k:/(взд|забойн[а-я]* двигател).{0,25}(рус|роторн[а-я]* управл)|(рус|роторн[а-я]* управл).{0,25}(взд|забойн[а-я]* двигател)/,
+ a:'Оба управляют направлением ствола, но по-разному. ВЗД с изогнутым корпусом поворачивает ствол только в режиме слайдирования, когда колонна не вращается: это проще и дешевле, но ствол получается «ступеньками», хуже выносится шлам, а на длинной горизонтали колонна начинает «зависать». РУС отклоняет долото на ходу, при вращающейся колонне: ствол ровнее, скорость в горизонтали выше, можно бурить длиннее, но аренда заметно дороже. Поэтому ВЗД — на простых интервалах, РУС — на длинных и сложных горизонтальных участках.',see:['motor','rss','horizontal']},
+{id:'speeds',t:'Механическая или коммерческая скорость',k:/(механическ[а-я]*).{0,30}(коммерческ)|(коммерческ[а-я]*).{0,30}(механическ)/,
+ a:'Механическая скорость показывает, как быстро долото бурит породу: метры за час чистого бурения. Коммерческая — как быстро компания строит скважины в целом: метры на станко-месяц по всему календарному времени, вместе с креплением, СПО и простоями. Можно бурить быстро и при этом иметь низкую коммерческую скорость из-за НПВ и медленных вспомогательных операций.',see:['rop','commspeed','npvdef']},
+{id:'condsurf',t:'Направление и кондуктор',k:/направлени[а-я]*.{0,25}кондуктор|кондуктор.{0,25}направлени/,
+ a:'Обе — верхние колонны. Направление короче (десятки метров) и шире, защищает устье от размыва и мерзлоту от растепления. Кондуктор глубже (сотни метров), перекрывает верхние неустойчивые и водоносные породы, и на нём ставят противовыбросовое оборудование.',see:['conductor','surface','design']},
+/* обзорные */
+{id:'drill',t:'Бурение скважины',k:/^(что такое |расскажи (про |о )?)?бурени[ея]( скважин)?$|как бурят|как (идет|проходит|устроено) бурение|основы бурения|буровое дело/,
+ a:'Бурение — это разрушение горной породы долотом и вынос обломков (шлама) на поверхность потоком бурового раствора. Долото вращается — ротором, верхним приводом или забойным двигателем — и прижимается к забою весом бурильной колонны. Раствор насосами подаётся внутрь колонны, выходит через насадки долота, охлаждает его и поднимает шлам по затрубному пространству. По мере углубления колонну наращивают трубами, а пробуренные интервалы закрепляют обсадными колоннами и цементом.',see:['build','rig','mud','bit']},
+{id:'build',t:'Строительство скважины',k:/строительств[а-яa-z]* скважин|этапы (строительства|бурения)|как строят скважин|цикл строительства|из каких этапов/,
+ a:'Строительство скважины идёт по этапам: 1) подготовка кустовой площадки и вышкомонтаж или передвижка буровой; 2) бурение под направление и кондуктор, их спуск и цементирование; 3) бурение под техническую колонну (если нужна) и эксплуатационную колонну; 4) бурение горизонтального участка и спуск хвостовика или фильтра; 5) геофизические исследования (ГИС) по ходу бурения и после; 6) испытание и освоение — вызов притока; 7) демонтаж или передвижка на следующую скважину куста. Весь путь от начала до конца — цикл строительства; основная его часть — бурение и крепление.',see:['design','casing','cement','completion','pad']},
+{id:'design',t:'Конструкция скважины',k:/конструкци[а-яa-z]* скважин|из чего состоит скважин|сколько колонн|какие колонны/,
+ a:'Конструкция скважины — это набор обсадных колонн «матрёшкой»: каждая следующая меньше диаметром и глубже предыдущей. Типовой порядок: направление (десятки метров, защищает устье от размыва и, на Севере, от растепления мерзлоты) → кондуктор (сотни метров, перекрывает верхние неустойчивые породы и водоносные горизонты, на нём ставят противовыбросовое оборудование) → техническая (промежуточная) колонна, если по разрезу нужны зоны изоляции → эксплуатационная колонна до продуктивного пласта → хвостовик или фильтр в горизонтальном участке. Каждую колонну цементируют. Для каждой колонны задают диаметр, глубину спуска, марку стали и высоту подъёма цемента.',see:['conductor','surface','prodcasing','liner','cement']},
+{id:'rig',t:'Буровая установка',k:/буров[а-яa-z]* установк[а-яa-z]*( состоит| устроен|$)|из чего состоит буров|устройство буров|оборудование буров|основное оборудование|какое оборудование/,
+ a:'Буровая установка — комплекс оборудования на кустовой площадке. Главное: вышка или мачта с талевой системой и буровой лебёдкой — поднимают и опускают колонну; верхний привод или ротор — вращают её; буровые насосы — качают раствор; циркуляционная система с ситами, гидроциклонами и центрифугами — очищает раствор от шлама; противовыбросовое оборудование (превенторы) — герметизирует устье при проявлении; энергоснабжение — дизель-генераторы или сеть; привышечные сооружения, склады труб и жилой городок. Для кустового бурения установку делают эшелонной: она переезжает по рельсам от скважины к скважине без разборки.',see:['tophead','drawworks','pumps','solids','bop','rigclass']},
+{id:'oilservice',t:'Нефтесервис',k:/нефтесервис|нефтяной сервис|сервисн[а-яa-z]* компан|что делает сервис|буровой подрядчик|подрядчик по бурению/,
+ a:'Нефтесервис — компании, которые выполняют работы для нефтегазовых добывающих компаний: бурение и строительство скважин, наклонно-направленное бурение и телеметрия, буровые растворы, цементирование, геофизика (ГИС), гидроразрыв пласта, текущий и капитальный ремонт скважин, сервис долот и забойных двигателей, супервайзинг. Добывающая компания — заказчик — владеет лицензией и месторождением и задаёт программу работ, а буровой подрядчик строит скважины своими установками и бригадами. Бывает раздельный сервис, когда заказчик нанимает подрядчиков по каждой услуге, и генподряд «под ключ», когда один подрядчик отвечает за всю скважину.',see:['tariff','engs','build','customer']},
+{id:'customer',t:'Заказчик и подрядчик',k:/кто такой заказчик|заказчик и подрядчик|недропользовател/,
+ a:'Заказчик — недропользователь: добывающая компания, у которой лицензия на месторождение. Она утверждает проект на строительство скважин, график и бизнес-план, принимает работы. Буровой подрядчик строит скважины по договору: даёт установку, бригаду и технологию, а заказчик контролирует работу через своих супервайзеров.',see:['oilservice','tariff','supervisor']},
+{id:'tariff',t:'Как оплачивают бурение',k:/тариф|ставк[а-яa-z]* (бурени|суточн|метров)|как оплачива|суточн[а-яa-z]* ставк|метров[а-яa-z]* ставк|под ключ|генподряд/,
+ a:'Основные модели оплаты: суточная ставка — за каждые сутки работы установки (простои по вине подрядчика обычно не оплачиваются, поэтому НПВ напрямую бьёт по выручке); метровая — за каждый пробуренный метр; «под ключ» — фиксированная цена за готовую скважину, где риск сроков и осложнений на подрядчике. Часто их комбинируют: например, бурение посуточно, а мобилизацию и передвижку — отдельными платежами.',see:['npvdef','oilservice','commspeed']},
+/* колонны и крепление */
+{id:'conductor',t:'Направление',k:/(^|[^а-я])направлени[ея]( скважин|$| это| что)|что такое направление/,
+ a:'Направление — первая, самая короткая и широкая обсадная колонна (десятки метров). Оно защищает устье от размыва раствором и обвала рыхлых пород. В районах вечной мерзлоты направление часто делают теплоизолированным, чтобы скважина не растепляла грунт вокруг устья.',see:['surface','design','permafrost']},
+{id:'surface',t:'Кондуктор',k:/кондуктор/,
+ a:'Кондуктор — вторая колонна, спускается на сотни метров. Перекрывает верхние неустойчивые и водоносные породы, защищает пресные воды и мерзлоту. На кондуктор устанавливают противовыбросовое оборудование, поэтому его обязательно цементируют до устья.',see:['conductor','tech','bop','design']},
+{id:'tech',t:'Техническая колонна',k:/техническ[а-яa-z]* колонн|промежуточн[а-яa-z]* колонн/,
+ a:'Техническая, или промежуточная, колонна нужна, когда в разрезе есть интервалы, несовместимые по условиям бурения: зоны поглощения, неустойчивые глины, пласты с разным давлением. Её спускают, чтобы изолировать эти интервалы и безопасно бурить глубже. В простых разрезах её может не быть.',see:['design','prodcasing','loss']},
+{id:'prodcasing',t:'Эксплуатационная колонна',k:/эксплуатационн[а-яa-z]* колонн/,
+ a:'Эксплуатационная колонна спускается до продуктивного пласта или до кровли горизонтального участка. По ней нефть или газ будут подниматься всю жизнь скважины — через спущенные внутрь насосно-компрессорные трубы. Её герметичность и качество цемента за ней проверяют особенно тщательно.',see:['liner','cement','completion']},
+{id:'liner',t:'Хвостовик',k:/хвостовик|фильтр[а-яa-z]* (в скважин|горизонт)|(^|[^а-я])фильтр([^а-я]|$)/,
+ a:'Хвостовик — колонна, которая не доходит до устья, а подвешивается на подвеске внутри предыдущей колонны. В горизонтальном участке это обычно хвостовик-фильтр со щелями или с муфтами для многостадийного ГРП. Так экономят трубы и могут вскрыть пласт по всей длине горизонтального ствола.',see:['horizontal','frac','prodcasing']},
+{id:'casing',t:'Обсадная колонна',k:/обсадн[а-яa-z]*( колонн| труб|$)|крепление скважин|(^|[^а-я])крепление([^а-я]|$)|спуск колонн/,
+ a:'Обсадная колонна — свинченные стальные трубы, которые спускают в пробуренный ствол и цементируют. Она удерживает стенки, разобщает пласты и создаёт прочный канал. Весь этот этап — спуск колонны, цементирование и ожидание затвердевания цемента — называют креплением. В суточном рапорте статус «крепление» значит, что бурение интервала закончено и идёт эта работа.',see:['cement','design','ozc']},
+{id:'cement',t:'Цементирование',k:/цементир|цементн[а-яa-z]* раствор|тампонаж/,
+ a:'Цементирование — закачка тампонажного раствора в пространство между обсадной колонной и стенкой скважины. Раствор продавливают через колонну специальной продавочной жидкостью с разделительными пробками. После затвердевания цемент держит колонну и изолирует пласты друг от друга. Качество крепи проверяют акустическими методами (АКЦ).',see:['ozc','casing','gis']},
+{id:'ozc',t:'ОЗЦ',k:/(^|[^а-я])озц([^а-я]|$)|ожидани[а-яa-z]* затвердевани/,
+ a:'ОЗЦ — ожидание затвердевания цемента после цементирования колонны, обычно от нескольких часов до суток. В это время бурение не ведут. ОЗЦ входит в технологически необходимое, производительное время, а не в НПВ.',see:['cement','pvdef']},
+/* инструмент */
+{id:'bit',t:'Долото',k:/долот|(^|[^а-я])pdc([^а-я]|$)|шарошечн/,
+ a:'Долото разрушает породу на забое. Два основных типа: шарошечные — с вращающимися конусами-шарошками, давят и скалывают породу; PDC — с поликристаллическими алмазными резцами, срезают породу и сейчас дают основную проходку в мягких и средних породах. Отработку долота оценивают по проходке на долото и механической скорости; износ описывают кодом IADC.',see:['bha','rop','motor']},
+{id:'bha',t:'КНБК',k:/кнбк|компоновк[а-яa-z]* низа/,
+ a:'КНБК — компоновка низа бурильной колонны: долото, забойный двигатель или роторная управляемая система, калибраторы, телеметрия MWD/LWD, утяжелённые бурильные трубы и ясс. От КНБК зависит, пойдёт ствол прямо, наберёт угол или будет держать горизонталь.',see:['bit','motor','rss','mwd','dp']},
+{id:'dp',t:'Бурильная колонна',k:/бурильн[а-яa-z]* (колонн|труб)|(^|[^а-я])убт([^а-я]|$)|утяжел[её]нн[а-яa-z]* труб|(^|[^а-я])сбт|(^|[^а-я])тбт/,
+ a:'Бурильная колонна соединяет поверхность с долотом: передаёт вращение и нагрузку и служит каналом для раствора. Внизу стоят утяжелённые бурильные трубы (УБТ) — они создают нагрузку на долото, выше — обычные бурильные трубы. Трубы свинчивают по одной или свечами по 2–3 трубы.',see:['bha','trip','tophead']},
+{id:'motor',t:'Забойный двигатель (ВЗД)',k:/(^|[^а-я])вз[дт]([^а-я]|$)|винтов[а-яa-z]* (забойн|двигат)|забойн[а-яa-z]* двигател|турбобур/,
+ a:'Винтовой забойный двигатель (ВЗД) стоит над долотом и вращает его за счёт потока бурового раствора через винтовую пару. С изогнутым корпусом ВЗД позволяет управлять направлением: без вращения колонны (режим слайдирования) ствол набирает угол в нужную сторону. Старший предшественник — турбобур.',see:['rss','nnb','bha']},
+{id:'rss',t:'Роторная управляемая система',k:/(^|[^а-я])рус([^а-я]|$)|роторн[а-яa-z]* управляем|rss|rotary steer/,
+ a:'Роторная управляемая система (РУС) меняет направление ствола, не останавливая вращение колонны. Ствол получается ровнее, лучше выносится шлам, выше скорость в горизонтальном участке. Минус — дороже ВЗД, поэтому её ставят на сложные и протяжённые горизонтальные участки.',see:['motor','nnb','horizontal']},
+{id:'mwd',t:'Телеметрия MWD/LWD',k:/телеметр|(^|[^а-я])(mwd|lwd)([^а-я]|$)|каротаж во время|геонавигац/,
+ a:'MWD — измерения во время бурения: зенитный угол, азимут, положение отклонителя. Данные передаются на поверхность импульсами давления в растворе или по электромагнитному каналу. LWD добавляет каротаж во время бурения: гамма-каротаж, сопротивление, плотность и так далее. По этим данным ведут геонавигацию — удерживают горизонтальный ствол в лучшей части пласта.',see:['nnb','gis','horizontal']},
+/* оборудование */
+{id:'tophead',t:'Верхний привод',k:/верхн[а-яa-z]* привод|(^|[^а-я])ротор([^а-я]|$)|роторн[а-яa-z]* стол/,
+ a:'Верхний привод — мощный двигатель, который висит на талевой системе и вращает колонну сверху. Позволяет бурить свечами, вращать и промывать колонну при подъёме, что снижает риск прихватов. Раньше колонну вращали ротором — столом в полу буровой. На современных установках ротор остался вспомогательным.',see:['rig','drawworks','dp']},
+{id:'drawworks',t:'Лебёдка и талевая система',k:/лебедк|талев|кронблок|крюкоблок|(^|[^а-я])вышк|мачт|грузоподъемност/,
+ a:'Буровая лебёдка наматывает талевый канат, который через кронблок наверху вышки и подвижный талевый блок поднимает и опускает колонну. Грузоподъёмность установки — допускаемая нагрузка на крюке, обычно сотни тонн. Она определяет, насколько тяжёлую колонну, а значит, насколько глубокую скважину может строить установка.',see:['rigclass','rig','trip']},
+{id:'rigclass',t:'Цифры в названии буровой',k:/цифр[а-яa-z]* в названи|что значит (225|320|400|450)|класс буров|(225|320|400|450).{0,4}(уралмаш|zj)|уралмаш|(^|[^а-я])zj([^а-я]|$)/,
+ a:'Число в названии установки, например 320 или 450, обычно означает её грузоподъёмность в тоннах — допускаемую нагрузку на крюке. «Уралмаш» — российские установки (Уралмашзавод), ZJ — серия китайских установок. Чем выше грузоподъёмность, тем глубже и длиннее скважины по стволу может строить установка.',see:['drawworks','rig']},
+{id:'pumps',t:'Буровые насосы',k:/буров[а-яa-z]* насос|насос[а-яa-z]* буров|(^|[^а-я])нбт?([^а-я]|$)/,
+ a:'Буровые насосы — обычно два-три трёхпоршневых насоса — качают раствор в колонну под давлением в сотни атмосфер. Расход и давление подбирают так, чтобы хватило на вынос шлама, работу забойного двигателя и телеметрии.',see:['mud','solids','motor']},
+{id:'solids',t:'Очистка раствора',k:/систем[а-яa-z]* очистк|вибросит|гидроциклон|илоотдел|пескоотдел|центрифуг|циркуляционн[а-яa-z]* систем/,
+ a:'Циркуляционная система возвращает раствор из скважины в ёмкости и чистит его от шлама в несколько ступеней: вибросита отсеивают крупное, песко- и илоотделители (гидроциклоны) — среднее, центрифуги — мелкое. Чистый раствор снова уходит в насосы, а шлам вывозят или утилизируют.',see:['mud','pumps']},
+{id:'bop',t:'Противовыбросовое оборудование',k:/превентор|противовыбросов|(^|[^а-я])пво([^а-я]|$)|манифольд/,
+ a:'Противовыбросовое оборудование (ПВО) ставят на устье, на кондуктор или следующую колонну. Превенторы могут за секунды закрыть устье — вокруг трубы, по любой трубе или полностью. Через манифольд управляют давлением при глушении. ПВО регулярно опрессовывают, а бригада проводит учебные тревоги.',see:['kick','surface']},
+/* раствор и процессы */
+{id:'mud',t:'Буровой раствор',k:/буров[а-яa-z]* раствор|промывочн[а-яa-z]* жидк|(^|[^а-я])рум([^а-я]|$)|раствор на углеводород|утяжелител|плотност[а-яa-z]* раствор/,
+ a:'Буровой раствор выносит шлам, охлаждает долото, своим давлением удерживает пластовые флюиды и стенки скважины, передаёт энергию забойному двигателю и сигнал телеметрии. Бывает на водной основе (глинистые, полимерные) и на углеводородной (РУО) — для сложных глин и горизонтальных участков. Главные параметры — плотность, вязкость, фильтрация и содержание твёрдой фазы.',see:['solids','kick','loss']},
+{id:'trip',t:'СПО',k:/(^|[^а-я])спо([^а-я]|$)|спуско-?подъ[её]м|подъем инструмент|рейс долота|(^|[^а-я])рейс([^а-я]|$)|наращивани/,
+ a:'СПО — спуско-подъёмные операции: подъём колонны, чтобы сменить долото или компоновку, и спуск обратно. Один спуск долота до подъёма называется рейсом. Наращивание — добавление очередной трубы или свечи по мере углубления. На глубоких скважинах один рейс занимает десятки часов, поэтому долговечность долота прямо влияет на скорость.',see:['rop','bit','dp']},
+{id:'nnb',t:'Наклонно-направленное бурение',k:/наклонно-?направлен|(^|[^а-я])ннб([^а-я]|$)|профил[а-яa-z]* скважин|зенитн|азимут|набор угла/,
+ a:'Наклонно-направленное бурение (ННБ) — проводка ствола по заданной траектории, а не вертикально. Так с одной кустовой площадки достают участки пласта за километры в стороны. Траекторию задают профилем: вертикальный участок → набор зенитного угла → стабилизация → горизонтальный участок. Ведут её забойным двигателем или РУС под контролем телеметрии.',see:['horizontal','motor','rss','mwd','pad']},
+{id:'horizontal',t:'Горизонтальная скважина',k:/горизонтальн[а-яa-z]* (скважин|участ|ствол)|(^|[^а-я])гс([^а-я]|$)|многозабойн|(^|[^а-я])мзс([^а-я]|$)|fishbone/,
+ a:'Горизонтальная скважина входит в пласт почти параллельно его кровле и идёт по нему сотни метров или километр и больше. Площадь контакта с пластом во много раз больше, чем у вертикальной, — растёт дебит. Многозабойная скважина имеет несколько стволов из одного основного. Горизонтальные участки обычно заканчивают хвостовиком с муфтами под многостадийный ГРП.',see:['nnb','liner','frac']},
+{id:'zbs',t:'ЗБС',k:/(^|[^а-я])збс([^а-я]|$)|зарезк[а-яa-z]* боков|боков[а-яa-z]* ствол/,
+ a:'ЗБС — зарезка бокового ствола: из существующей, обычно старой или малодебитной скважины через окно в колонне бурят новый ствол в другую часть пласта. Это дешевле новой скважины и оживляет старый фонд. В рапорте такие скважины помечены «ЗБС».',see:['nnb','workover']},
+{id:'pad',t:'Куст скважин',k:/(^|[^а-я])куст|кустов[а-яa-z]* площад|кустов[а-яa-z]* бурени|передвижк/,
+ a:'На Севере скважины бурят кустами: на одной отсыпанной площадке стоят от нескольких до десятков устьев на расстоянии метров друг от друга, а забои расходятся на километры за счёт наклонно-направленного бурения. Установка переезжает между устьями куста — это передвижка, быстрее и дешевле полного переезда на новый куст.',see:['nnb','rig','build']},
+{id:'completion',t:'Освоение скважины',k:/освоени|вызов приток|испытани[а-яa-z]* (скважин|пласт)|перфорац/,
+ a:'Освоение — перевод готовой скважины в работу: перфорацией (если колонна сплошная) вскрывают пласт, снижают давление в стволе — заменой раствора, свабированием, азотом — и вызывают приток нефти или газа. Затем скважину исследуют и передают в добычу. Часто освоение делает отдельная бригада, а не буровая.',see:['frac','build','workover']},
+{id:'frac',t:'ГРП',k:/(^|[^а-я])грп([^а-я]|$)|гидроразрыв|мгрп/,
+ a:'Гидроразрыв пласта (ГРП) — закачка жидкости под высоким давлением, чтобы раскрыть в пласте трещины, и заполнение их проппантом (керамическим «песком»), который держит их открытыми. В горизонтальных скважинах делают многостадийный ГРП (МГРП) — по муфтам хвостовика, порциями по длине ствола. ГРП обычно выполняет специализированный подрядчик.',see:['horizontal','liner','completion']},
+{id:'gis',t:'ГИС',k:/(^|[^а-я])гис([^а-я]|$)|геофизическ|каротаж|(^|[^а-я])акц([^а-я]|$)|керн/,
+ a:'ГИС — геофизические исследования скважин: приборы на кабеле или в компоновке (LWD) измеряют свойства пород — сопротивление, радиоактивность, плотность, пористость. По ним выделяют пласты-коллекторы и насыщение нефтью, газом или водой, а после цементирования проверяют качество крепи (АКЦ). Иногда отбирают керн — образцы породы для лаборатории.',see:['mwd','cement']},
+{id:'workover',t:'ТКРС',k:/(^|[^а-я])т?крс([^а-я]|$)|капитальн[а-яa-z]* ремонт скваж|текущ[а-яa-z]* ремонт скваж|(^|[^а-я])прс([^а-я]|$)/,
+ a:'ТКРС — текущий и капитальный ремонт скважин уже в эксплуатации. Текущий: смена насоса, подъём и спуск НКТ, промывки. Капитальный: ликвидация аварий, изоляция притока воды, ремонт колонны, ЗБС, повторный ГРП. Это отдельный большой сегмент нефтесервиса со своими бригадами и подъёмниками.',see:['zbs','oilservice']},
+/* показатели */
+{id:'rop',t:'Механическая и рейсовая скорость',k:/механическ[а-яa-z]* скорост|рейсов[а-яa-z]* скорост|(^|[^а-я])rop([^а-я]|$)|скорост[а-яa-z]* проходк/,
+ a:'Механическая скорость — метры проходки за час чистого бурения, то есть насколько быстро долото углубляет забой. Рейсовая скорость учитывает ещё и время спуска и подъёма: метры за рейс, делённые на время всего рейса. Высокая механическая скорость при частых рейсах может давать низкую рейсовую.',see:['commspeed','trip','bit']},
+{id:'commspeed',t:'Коммерческая скорость',k:/(что такое|что значит|как считают|как считается|объясни|определени)[а-яa-z]*.{0,20}коммерческ[а-яa-z]* скорост|коммерческ[а-яa-z]* скорост[а-яa-z]* (это|—)|станко-?месяц|м\/ст/,
+ a:'Коммерческая скорость — главный показатель эффективности бурения: метры проходки на один станко-месяц, то есть на 30 суток работы установки (м/ст-мес). Считается по всему календарному времени строительства, поэтому учитывает и бурение, и крепление, и СПО, и простои. Растёт, когда меньше НПВ и быстрее вспомогательные операции. Текущее значение по компании спросите: «коммерческая скорость».',see:['rop','npvdef','pvdef']},
+{id:'npvdef',t:'НПВ',k:/(что такое|что значит|что означает|расшифр|объясни|определени)[а-яa-z]*.{0,15}нпв|нпв\s+(это|—)|непроизводительн[а-яa-z]* врем/,
+ a:'НПВ — непроизводительное время: часы, когда установка не делает работу по программе из-за проблем. Это аварии, осложнения (поглощения, прихваты, обвалы), брак, ремонт оборудования, ожидания по вине сторон, погода. НПВ считают в часах и в процентах от календарного времени, разбивая по причинам и виновникам. При суточной ставке простои по вине подрядчика обычно не оплачиваются. Текущий НПВ по компании спросите: «где сейчас НПВ?».',see:['pvdef','complic','accident','tariff']},
+{id:'pvdef',t:'Производительное время',k:/производительн[а-яa-z]* врем|(^|[^а-я])пв([^а-я]|$)|баланс времени|календарн[а-яa-z]* врем/,
+ a:'Баланс календарного времени установки делят на производительное время (бурение, СПО, крепление, ГИС, ОЗЦ и другие операции по программе) и непроизводительное (НПВ). Цель — максимум производительного времени и, внутри него, быстрые вспомогательные операции.',see:['npvdef','commspeed']},
+{id:'gtn',t:'ГТН',k:/(^|[^а-я])гтн([^а-я]|$)|геолого-?техническ|график глубина|глубина-?день|(^|[^а-я])ггд([^а-я]|$)/,
+ a:'ГТН — геолого-технический наряд: основной документ на бурение скважины с конструкцией, интервалами, режимами, раствором и плановым временем по операциям. Из него строится график «глубина — день» (ГГД): какой глубины скважина должна достичь к каждому дню. Отставание от ГГД показывает, что скважина идёт медленнее плана.',see:['build','commspeed']},
+{id:'report',t:'Суточный рапорт',k:/суточн[а-яa-z]* рапорт|(^|[^а-я])рапорт[а-яa-z]*( это| что|$)|сводк[а-яa-z]* (это|что такое)/,
+ a:'Суточный рапорт — отчёт буровой за сутки: глубина на начало и конец, проходка, операции по часам, раствор, оборудование, НПВ и его причины. Из рапортов всех установок собирается утренняя сводка для руководства. Помощник берёт цифры именно оттуда.',see:['gtn','npvdef']},
+{id:'supervisor',t:'Буровая бригада и супервайзер',k:/супервайзер|буров[а-яa-z]* мастер|бурильщик|буров[а-яa-z]* бригад|вахт|помбур|верховой/,
+ a:'Буровая бригада работает вахтами, обычно по 12 часов в смену и неделями подряд. В смене — бурильщик (управляет процессом), его помощники (помбуры), верховой (работает на площадке вышки при СПО), машинист и электрик. Руководит буровой мастер. Со стороны заказчика работу контролирует супервайзер — следит за выполнением программы и безопасностью и подписывает рапорт.',see:['report','rig']},
+/* осложнения */
+{id:'complic',t:'Осложнения при бурении',k:/осложнени[а-яa-z]*( при бурени|$| это| какие| бывают)|какие бывают осложнени/,
+ a:'Осложнения — ситуации, которые нарушают нормальное бурение, но ещё не авария. Основные: поглощение раствора, газонефтеводопроявление (ГНВП), прихват колонны, обвалы и осыпи стенок, сальники на КНБК, желобообразование. Каждое ведёт к НПВ и при плохой ликвидации может перейти в аварию.',see:['loss','kick','stuck','accident']},
+{id:'loss',t:'Поглощение',k:/поглощени/,
+ a:'Поглощение — уход бурового раствора в пласт через трещины или высокопроницаемые породы, когда давление раствора выше, чем может выдержать порода. Лечат снижением плотности, закачкой кольматантов (наполнителей), цементными мостами или перекрывают колонной.',see:['mud','kick','complic']},
+{id:'kick',t:'ГНВП',k:/(^|[^а-я])гнвп([^а-я]|$)|проявлени|выброс|фонтан|глушени/,
+ a:'ГНВП — газонефтеводопроявление: приток пластового флюида в скважину, когда давление раствора ниже пластового. Признаки — рост объёма в ёмкостях, перелив при остановке насосов. Скважину закрывают превентором и глушат утяжелённым раствором. Неуправляемое ГНВП — открытый фонтан, самая тяжёлая авария, поэтому бригады регулярно тренируются.',see:['bop','mud','complic']},
+{id:'stuck',t:'Прихват',k:/прихват|ловильн|(^|[^а-я])ясс?([^а-я]|$)|оставил[а-яa-z]* в скважин/,
+ a:'Прихват — колонну нельзя ни поднять, ни провернуть: её прижало перепадом давления к стенке, заклинило шламом или обвалом, или она попала в желоб. Освобождают расхаживанием, ударами ясса, ваннами (нефтяными, кислотными). Если не вышло — колонну отворачивают и ведут ловильные работы или забуривают новый ствол. Это уже авария.',see:['accident','complic']},
+{id:'accident',t:'Авария и брак',k:/(^|[^а-я])авари[яи]( при бурени|$| это| что)|что такое авари|(^|[^а-я])брак( при| в |$| это)/,
+ a:'Авария — нарушение, требующее специальных работ для ликвидации: прихват без освобождения, слом или оставление инструмента в скважине, открытый фонтан, падение колонны. Брак — работа, сделанная с нарушением и требующая переделки: например, некачественное цементирование или отклонение ствола от проекта. И то и другое учитывается в НПВ отдельными категориями.',see:['stuck','kick','npvdef']},
+/* регион и геология */
+{id:'permafrost',t:'Вечная мерзлота',k:/мерзлот|(^|[^а-я])ммп([^а-я]|$)|растеплени/,
+ a:'На Ямале верхние сотни метров разреза — многолетнемёрзлые породы (ММП). Тёплый раствор и добываемый флюид могут их растеплить, тогда грунт вокруг устья проседает. Поэтому применяют охлаждённые растворы, теплоизолированные направления и лифтовые трубы и тщательно цементируют верхние колонны.',see:['conductor','surface']},
+{id:'reservoir',t:'Пласт и коллектор',k:/(^|[^а-я])пласт( это|$)|коллектор|пористост|проницаемост|(^|[^а-я])внк|(^|[^а-я])гнк|продуктивн[а-яa-z]* пласт/,
+ a:'Продуктивный пласт — слой породы-коллектора (песчаник, известняк) с порами, заполненными нефтью, газом или водой. Пористость показывает, сколько флюида в нём помещается, проницаемость — насколько легко он течёт к скважине. Границы флюидов — водонефтяной (ВНК) и газонефтяной (ГНК) контакты; горизонтальный ствол стараются вести между ними.',see:['horizontal','gis']},
+{id:'wtypes',t:'Виды скважин',k:/вид[а-яa-z]* скважин|тип[а-яa-z]* скважин|назначени[а-яa-z]* скважин|разведочн|поисков[а-яa-z]* скваж|нагнетательн|добывающ[а-яa-z]* скваж|эксплуатационн[а-яa-z]* скваж/,
+ a:'По назначению: поисковые и разведочные — ищут залежь и уточняют её границы; эксплуатационные (добывающие) — добывают нефть и газ; нагнетательные — закачивают воду или газ для поддержания пластового давления; наблюдательные — следят за разработкой. По профилю: вертикальные, наклонно-направленные, горизонтальные, многозабойные, а также боковые стволы (ЗБС).',see:['horizontal','zbs','nnb']}
+];
+const KB_DEF=/что такое|что значит|что означает|расскажи (про|о|об)|объясни|как устроен|зачем нуж|для чего|чем отличает|какие бывают|из чего состоит|как работает|как (идет|проходит|строят|бурят|считают|считается)|что входит|расшифр|определени|кто такой|кто такие|что делает|поясни|^про /;
+function kbFind(s){let best=null,bs=0; for(const e of KB){const m=s.match(e.k); if(m){const sc=m[0].length+(e.k.source.startsWith('^')?5:0); if(sc>bs){bs=sc; best=e}}} return best}
+function kbAnswer(e){LASTX=''; const rel=(e.see||[]).map(id=>KB.find(x=>x.id===id)||KBX[id]).filter(Boolean).slice(0,4);
+  return say([{t:`<b>${esc2(e.t)}.</b> ${esc2(e.a)}`},...(rel.length?[{h:`<div class="xpl"><small>Рядом по теме</small></div>`+`<div class="acts">${rel.map(r=>`<button type="button" class="act ghost" data-ask="${esc2('Что такое '+r.t.toLowerCase()+'?')}" data-kb="${r.id}">${esc2(r.t)}</button>`).join('')}</div>`+src(e.src||'Справочник «Пульса» · общие сведения о бурении')}]:[{h:src(e.src||'Справочник «Пульса» · общие сведения о бурении')}])],'',{intent:'kb',kb:e.id})}
+const KBX={}; /* дополнительные темы (компании) подключаются ниже */
+
+/* подсказки при наборе */
+let CAT=[]; function buildCatalog(){const base=['Погода на месторождениях','Какая погода у меня?','Какая погода завтра?','Расскажи о компании ЭНГС','Буровой парк ЭНГС','Что такое ЦЦ ТЭК?','Конструкция скважины','Как строят скважину?','Из чего состоит буровая установка?','Что такое НПВ?','Чем отличается ВЗД от РУС?','Который час на месторождениях?','Как тебя зовут?','Расскажи анекдот','Сводка за сутки','Сводка за вчера','Сводка за неделю','Проходка с начала месяца','Проходка с начала года','Где сейчас НПВ?','НПВ за месяц','НПВ за неделю','Кто отстаёт от графика?','Сколько буровых в работе?','Сколько скважин закончено в этом месяце?','Топ-5 буровых по проходке за месяц','Топ-5 скважин по проходке за месяц','Худшие скважины по НПВ за месяц','Сравни заказчиков по выполнению плана','Сравни месторождения по проходке','Почему EBITDA ниже плана?','Почему выручка ниже плана?','Затраты к бизнес-плану','Коммерческая скорость к плану','Загрузка буровых к плану','НПВ с начала года','Откуда эта цифра?','Что умеешь?'];
+  const cu=CUSTOMERS.map(c=>`Как дела у ${c.short||c.n}?`), fl=FIELDS.map(f=>`Что на месторождении ${f.n}?`), wl=WELLS.flatMap(w=>[`Что по скв. ${w.no}?`,`Когда закончим скв. ${w.no}?`]), rg=[...new Set(WELLS.map(w=>w.rig))].map(r=>`Проходка буровой ${r} за месяц`);
+  CAT=[...base,...cu,...fl,...wl,...rg]}
+function suggest(q,n){const t=N(q).replace(/[?.,!]/g,' ').split(/\s+/).filter(x=>x.length>=2); if(!t.length) return [];
+  const sc=CAT.map(c=>{const ws=N(c).replace(/[«»?.,!]/g,' ').split(/[\s-]+/); let m=0; t.forEach(x=>{if(ws.some(w=>w.startsWith(x.slice(0,Math.max(2,Math.min(5,x.length)))))) m++}); return {c,m}}).filter(o=>o.m>0);
+  sc.sort((a,b)=>b.m-a.m||a.c.length-b.c.length); return sc.filter(o=>o.m>=Math.min(t.length,Math.max(1,t.length-1))).slice(0,n).map(o=>o.c)}
+const TA=()=>$('#aiTA'); function hideTA(){const e=TA(); if(e){e.innerHTML=''; e.hidden=true}}
+$('#aiQ').addEventListener('input',()=>{const v=$('#aiQ').value; const s=suggest(v,3); const e=TA(); if(!v.trim()||!s.length){hideTA(); return} e.hidden=false; e.innerHTML=s.map(x=>`<button type="button" data-q="${esc2(x)}">${hl(x,v)}</button>`).join('')});
+const hl=(x,v)=>{let h=esc2(x); N(v).split(/\s+/).filter(t=>t.length>=2).forEach(t=>{h=h.replace(new RegExp('(^|[\\s«(-])('+t.slice(0,5).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i'),'$1<b>$2</b>')}); return h};
+document.addEventListener('click',e=>{const b=e.target.closest('#aiTA [data-q]'); if(b){$('#aiQ').value=''; ask(b.dataset.q)}; const a=e.target.closest('.aipan [data-ask]'); if(a){const kb=a.dataset.kb&&(KB.find(x=>x.id===a.dataset.kb)||KBX[a.dataset.kb]); if(kb){addUser(a.textContent); kbAnswer(kb)} else ask(a.dataset.ask)}
+  const c=e.target.closest('.aipan [data-cust]'); if(c){if(state.screen!=='map') setScreen('map'); go({level:'cust',cust:c.dataset.cust,field:null,well:null}); const cu=CUSTOMERS.find(x=>x.id===c.dataset.cust); setMini(true,'Открыл '+(cu?(cu.short||cu.n):'заказчика'))}
+  const r=e.target.closest('.aipan [data-rep]'); if(r){try{if(window.PulseModules) PulseModules.go('rep'); setTimeout(()=>{const s=document.getElementById('repwrap').shadowRoot.querySelector('[data-go="ind:'+r.dataset.rep+'"]'); s&&s.click()},500); setMini(true,'Открыл «Отчёты»')}catch(err){}}});
+/* демо-сценарий для презентации */
+/* примеры вопросов — из текущих данных: заказчик с наибольшим числом скважин, скважина в бурении с наибольшим остатком */
+const EX=()=>{const cnt=c=>WELLS.filter(w=>w.cust===c).length, cu=[...CUSTOMERS].sort((a,b)=>cnt(b)-cnt(a))[0], ws=WELLS.filter(w=>w.status==="drill"&&w.target>w.depth).sort((a,b)=>(b.target-b.depth)-(a.target-a.depth)); const w=ws[0]||WELLS[0];
+  return {cu:cu?(cu.short||cu.n):'', w:w?w.no:''}};
+const DEMOQ=()=>{const x=EX(); return ['Сводка за сутки','А вчера?','Где сейчас НПВ?','Откуда эта цифра?','Почему EBITDA ниже плана?','Топ-5 буровых по проходке за месяц',...(x.cu?[`Как дела у ${x.cu}?`,'А с начала года?']:[]),...(x.w?[`Когда закончим скв. ${x.w}?`]:[])]};
+let demoOn=false;
+async function demo(){if(demoOn){demoOn=false; return} demoOn=true; $('#aiDemo').classList.add('on'); $('#aiDemo').textContent='Стоп';
+  let wxOk=false; try{wxOk=!!(await wxGet(wxPlaces({})))}catch(e){}
+  const QS=['Привет! Как дела?',...DEMOQ(),...(wxOk?['Какая погода на месторождениях?']:[]),'Спасибо, хорошего дня!'];
+  for(const q of QS){if(!demoOn||!open) break; const inp=$('#aiQ'); inp.value=''; for(const ch of q){if(!demoOn) break; inp.value+=ch; inp.dispatchEvent(new Event('input')); await wait(38)} await wait(450); if(!demoOn) break; inp.value=''; hideTA(); ask(q);
+    await wait(700); while(busy) await wait(120); await wait(2600)}
+  demoOn=false; $('#aiDemo').classList.remove('on'); $('#aiDemo').textContent='Демо'}
+
+/* голос — пример */
+function listen(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition; voice.hidden=false; $('#aiVoiceT').textContent='';
+  const fake=()=>{const q=sugs()[0]; setTimeout(()=>{$('#aiVoiceT').textContent='«'+q+'» · пример'},500); setTimeout(()=>{voice.hidden=true; if(!open) toggle(true); setTimeout(()=>ask(q),open?50:600)},1600)};
+  if(!SR) return fake(); let r; try{r=new SR()}catch(e){return fake()} r.lang='ru-RU'; r.interimResults=true; r.maxAlternatives=1; let txt='', ok=false;
+  r.onresult=e=>{txt=[...e.results].map(x=>x[0].transcript).join(' '); $('#aiVoiceT').textContent='«'+txt+'»'; if(e.results[e.results.length-1].isFinal) ok=true};
+  r.onerror=()=>{try{r.abort()}catch(e){} if(!txt) fake()}; r.onend=()=>{if(txt){voice.hidden=true; if(!open) toggle(true); setTimeout(()=>ask(txt),open?50:500)} else if(!voice.hidden&&!ok){}};
+  try{r.start(); setTimeout(()=>{try{r.stop()}catch(e){}},7000)}catch(e){fake()}}
+/* точка «есть новое» */
+try{const live=daySum(0).inc.some(i=>i.live); orb.querySelector('.dot').hidden=!live}catch(e){}
+})();
+
+/* настройки помощника: Профиль → Данные */
+const aiVis=()=>{try{const o=document.querySelector('.aiorb'); if(o) o.hidden=PREFS.aiOn===false; if(PREFS.aiOn===false&&open) toggle(false)}catch(e){}}; aiVis();
+const _aiRP=renderProfile; renderProfile=function(){_aiRP.apply(this,arguments); try{const sec=document.querySelector('#profwrap [data-p2s="data"]')||document.querySelector('#profwrap .prof'); if(!sec||sec.querySelector('.pbox.paiset')) return;
+  const row=(k,l,s)=>`<div class="prow"><span class="l">${l}<small>${s}</small></span><button type="button" class="sw" role="switch" data-ai="${k}" aria-checked="${PREFS[k]!==false}" aria-label="${l}"></button></div>`;
+  const b=document.createElement('div'); b.className='pbox paiset'; b.innerHTML='<h3>Помощник «Пульс»</h3>'+row('aiOn','Значок помощника на экране','отвечает по файлу базы на устройстве, без нейросети')+row('aiNet','Погода и геопозиция','по вопросу; наружу — только округлённые координаты');
+  const src=[...sec.querySelectorAll(':scope>.pbox')].find(x=>/Откуда данные/.test(x.textContent)); if(src) sec.insertBefore(b,src); else sec.appendChild(b);
+  b.querySelectorAll('[data-ai]').forEach(x=>x.onclick=()=>{const k=x.dataset.ai; PREFS[k]=PREFS[k]===false; savePrefs(); x.setAttribute('aria-checked',PREFS[k]!==false); aiVis()})}catch(e){console.error(e)}};
+
 window.__app={go,state:()=>state,WELLS,setScreen,nOpen,PREFS:()=>PREFS};
 };
 
