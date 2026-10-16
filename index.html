@@ -1405,7 +1405,7 @@ body.mod-stub .app>.filters,body.mod-stub main,body.mod-stub .tabbar,body.mod-st
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:122,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:123,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -2382,12 +2382,19 @@ function custRow(c,ws){const t=totals(ws,'month');
 /* сборка 122: вкладки скважины — подвести строку вкладок к верху панели */
 function wtScroller(){let e=document.querySelector('#pbody [data-wt]'); while(e&&e!==document.body){const o=getComputedStyle(e).overflowY; if(o==='auto'||o==='scroll') return e; e=e.parentElement} return panel}
 function wtSettle(st){const RMm=matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const go=()=>{const b=document.querySelector('#pbody [data-wt]'); if(!b) return; const row=b.parentElement, sc=wtScroller(); if(!sc) return;
-    sc.scrollTop=st; const old=sc.querySelector('.wt-pad'); if(old) old.remove();
-    const off=row.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-6, need=off+sc.clientHeight-sc.scrollHeight;
+  const place=()=>{const b=document.querySelector('#pbody [data-wt]'); if(!b) return null; const row=b.parentElement, sc=wtScroller(); if(!sc) return null;
+    const old=sc.querySelector('.wt-pad'); if(old) old.remove();
+    const off=Math.max(0,row.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-6);
+    const need=Math.max(off,st)+sc.clientHeight-sc.scrollHeight;
     if(need>0){const p=document.createElement('div'); p.className='wt-pad'; p.style.height=Math.ceil(need)+'px'; p.setAttribute('aria-hidden','true'); panel.appendChild(p)}
-    sc.scrollTo({top:Math.max(0,off),behavior:RMm?'auto':'smooth'})};
-  if(typeof isPhoneSheet==='function'&&isPhoneSheet()&&sheet!=='max'){setSheet('max'); setTimeout(go,320)} else requestAnimationFrame(go)}
+    sc.scrollTop=st; return {sc,off}};
+  const anim=(sc,from,to)=>{if(window.__wtAnim) cancelAnimationFrame(window.__wtAnim); if(RMm||Math.abs(to-from)<4){sc.scrollTop=to; return}
+    const d=Math.min(560,Math.max(320,Math.abs(to-from)*.6)), t0=performance.now(), e=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+    const step=now=>{const k=Math.min(1,(now-t0)/d); sc.scrollTop=from+(to-from)*e(k); if(k<1) window.__wtAnim=requestAnimationFrame(step); else window.__wtAnim=0};
+    window.__wtAnim=requestAnimationFrame(step)};
+  const r=place(); if(!r) return;
+  if(typeof isPhoneSheet==='function'&&isPhoneSheet()&&sheet!=='max'){setSheet('max'); setTimeout(()=>{const q=place(); if(q) anim(q.sc,q.sc.scrollTop,q.off)},300); return}
+  anim(r.sc,st,r.off)}
 function renderPanel(){
   if(stopWB){stopWB(); stopWB=null} charts=[]; const lev=state.level; let h='';
   const scope=scopeWells();
