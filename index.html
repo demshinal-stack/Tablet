@@ -1250,6 +1250,9 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 
 /* сборка 109: без всплывающих подсказок на сенсорных устройствах */
 @media (hover:none),(pointer:coarse){.maptip,.cum .ctip{display:none!important}}
+
+/* сборка 114: длинные названия в списках переносятся, а не наезжают на значение */
+.lp-it .l{flex:1 1 auto}.lp-it .l b{white-space:normal;overflow-wrap:anywhere}.lp-it .r{flex:0 0 auto}
 </style>
 </head>
 <body>
@@ -1329,7 +1332,7 @@ body.scr-stats .top{position:sticky;top:0;z-index:40}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:113,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:114,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4130,7 +4133,7 @@ function lpRender(){if(lpop.hidden||!LP.k) return; const k=LP.k, q=LP.q.trim().t
     if(k==='field') items=DICT.fields.filter(f=>m(f.n)).map(f=>({t:f.n,s:coordTxt(f)+(f.est?' · координаты оценочные':''),r:DICT.wells.filter(w=>w.field===f.id).length+' скв.'}));
     if(k==='pad') items=DICT.pads.filter(p=>m(p.pad+' '+FN(p.field))).map(p=>({t:'Куст '+p.pad,s:FN(p.field),r:DICT.wells.filter(w=>w.pad===p.pad&&w.field===p.field).length+' скв.'}));
     if(k==='well') items=DICT.wells.filter(w=>m(w.no+' '+w.pad+' '+FN(w.field)+' '+CN(w.cust))).map(w=>({t:'Скв. '+w.no,s:'куст '+w.pad+' · '+FN(w.field)+' · '+CN(w.cust),r:w.status+(w.type?' · '+w.type:'')}));
-    if(k==='type'){const PN={v:'вертикальная',j:'наклонно-направленная',s:'S-образная',hz:'горизонтальное окончание',shz:'субгоризонтальная',ml:'основной ствол'}, TP=DICT.typeProf||{}; items=DICT.types.map(t=>({t,r:DICT.wells.filter(w=>w.type===t).length+' скв.'+(TP[t]?' · схема: '+PN[TP[t]]:'')}))}
+    if(k==='type'){const PN={v:'вертикальная',j:'наклонно-направленная',s:'S-образная',hz:'горизонтальное окончание',shz:'субгоризонтальная',ml:'основной ствол'}, TP=DICT.typeProf||{}; items=DICT.types.map(t=>({t,s:TP[t]?'схема ствола: '+PN[TP[t]]:'',r:DICT.wells.filter(w=>w.type===t).length+' скв.'}))}
     if(k==='contract') items=DICT.contracts.map(c=>({t:c.code,s:'расшифровка не задана',r:DICT.wells.filter(w=>w.contract===c.code).length+' скв.'}));
     if(k==='status') items=DICT.statuses.map(t=>({t,r:DICT.wells.filter(w=>w.status===t).length+' скв.'}));
     if(k==='cust') items=CUSTOMERS.filter(c=>m(c.n+' '+c.short+' '+c.full)).map(c=>({t:c.short,s:c.full,r:DICT.wells.filter(w=>w.cust===c.id).length+' скв.'}));
