@@ -1658,7 +1658,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 30px))!imp
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:138,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:139,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4467,7 +4467,11 @@ const toggleExp=a=>{const k=KEY+'.'+a; EXP=EXP===k?null:k; render(true)};
 /* кнопки ↓↑ и ⇕: срабатывают по отрыву пальца (iOS может не прислать click после прокрутки или перерисовки), повторный click гасится;
    при раскрытой соседней плитке нажатие на кнопку другой плитки сворачивает раскрытую и сразу выполняет действие (раньше — только сворачивало) */
 let btDown=null, btDone=0;
-const btAct=b=>{if(b.dataset.exp!=null){toggleExp(b.dataset.exp); return} if(EXP&&!b.closest('.r2t.expd')) EXP=null; SORT[b.dataset.srt]=!SORT[b.dataset.srt]; render(true)};
+/* после сортировки плитка остаётся на том же месте экрана: перерисовка (особенно Safari) сбрасывала прокрутку — возвращаем сдвиг несколько раз, пока идёт анимация */
+const scrOf=el=>{let n=el; while(n){n=n.parentElement||(n.getRootNode&&n.getRootNode().host)||null; if(!n||n===document.body||n===document.documentElement) break; const o=getComputedStyle(n).overflowY; if(/(auto|scroll)/.test(o)&&n.scrollHeight>n.clientHeight+1) return n} return document.scrollingElement||document.documentElement};
+const keepTile=(id,top)=>{const fix=()=>{const b=shadow.querySelector('[data-srt="'+id+'"]'), t=b&&b.closest('.r2t'); if(!t) return; const d=t.getBoundingClientRect().top-top; if(Math.abs(d)<1) return; const sc=scrOf(t); if(sc===document.scrollingElement||sc===document.documentElement) window.scrollBy(0,d); else sc.scrollTop+=d};
+  fix(); requestAnimationFrame(fix); [60,180,400,800].forEach(ms=>setTimeout(fix,ms))};
+const btAct=b=>{if(b.dataset.exp!=null){toggleExp(b.dataset.exp); return} if(EXP&&!b.closest('.r2t.expd')) EXP=null; const id=b.dataset.srt, t0=b.closest('.r2t').getBoundingClientRect().top; SORT[id]=!SORT[id]; render(true); keepTile(id,t0)};
 shadow.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('[data-srt],[data-exp]'); btDown=b&&e.pointerType!=='mouse'?{b,x:e.clientX,y:e.clientY,t:performance.now()}:null},true);
 shadow.addEventListener('pointerup',e=>{if(!btDown) return; const d=btDown; btDown=null; if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>=12||performance.now()-d.t>=800) return;
   const R=d.b.getBoundingClientRect(); if(e.clientX<R.left-10||e.clientX>R.right+10||e.clientY<R.top-10||e.clientY>R.bottom+10) return; e.stopPropagation(); btDone=performance.now(); btAct(d.b)},true);
