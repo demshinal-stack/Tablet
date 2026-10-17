@@ -1698,7 +1698,7 @@ body .aipan.mini .aiqlab,body .aipan.mini .aiinw{display:none}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:144,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:145,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3593,11 +3593,11 @@ h2{font-size:20px}
 .sheet h3{font-size:16px;margin-bottom:4px}
 .sheet .note{font-size:12.5px;color:var(--muted);margin:0 0 10px}
 .ord{list-style:none;margin:0;padding:0;position:relative}
-.ord li{display:grid;grid-template-columns:26px minmax(0,1fr) 36px;gap:10px;align-items:center;padding:9px 6px 9px 10px;border-radius:var(--r-l);background:var(--band);margin-top:6px;touch-action:none;user-select:none;-webkit-user-select:none;transition:box-shadow .15s,transform .15s}
+.ord li{display:grid;grid-template-columns:26px minmax(0,1fr) 36px;gap:10px;align-items:center;padding:9px 6px 9px 10px;border-radius:var(--r-l);background:var(--band);margin-top:6px;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:box-shadow .15s,transform .15s}
 .ord li.drag{box-shadow:0 10px 26px rgba(0,25,55,.3);transform:scale(1.02);background:var(--surface);position:relative;z-index:2}
 .ord li .n{width:24px;height:24px;border-radius:var(--r-m);display:grid;place-items:center;font-size:12px;font-weight:700;color:#00234B}
 .ord li b{display:block;color:var(--ink);font-size:14px} .ord li small{color:var(--muted);font-size:12px}
-.ord li .h{width:36px;height:36px;display:grid;place-items:center;color:var(--muted);cursor:grab;border-radius:var(--r-m)}
+.ord li .h{width:44px;height:44px;margin:-4px;display:grid;place-items:center;color:var(--muted);cursor:grab;border-radius:var(--r-m);touch-action:none}
 .ord li .h:active{cursor:grabbing}
 .ord li.off{opacity:.62}
 .ord li.lock{opacity:.4} .ord li.lock .h{visibility:hidden}
