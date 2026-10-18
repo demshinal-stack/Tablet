@@ -1687,6 +1687,8 @@ body.nocap-export_db [data-db="exp"]{display:none!important}
 .adm-prev>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:10px;padding:8px 12px;border-top:1px solid var(--line)} .adm-prev>div:first-child{border-top:0}
 .adm-prev>div.off{color:var(--muted)} .adm-prev small{font-weight:400;color:var(--muted)}
 .adm-err{margin:0;color:var(--bad);font-weight:600;font-size:13.5px} .adm-err:empty{display:none}
+.adm-ferr{flex:1 1 100%;order:-1}
+.adm-f input[aria-invalid="true"]{border-color:var(--bad);box-shadow:0 0 0 2px color-mix(in srgb,var(--bad) 30%,transparent)}
 .adm-rl{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
 .adm-rlist{display:flex;flex-direction:column;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px}
 .adm-rlh{display:flex;align-items:center;justify-content:space-between;padding:4px 4px 6px}
@@ -1818,7 +1820,7 @@ body.nocap-export_db [data-db="exp"]{display:none!important}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:146,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:147,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -5900,8 +5902,8 @@ setTimeout(()=>{let t=''; try{const S=daySum(0), live=S.inc.filter(i=>i.live); i
       '<div class="adm-sb"><div class="adm-grid">'+fld('full_name','ФИО *',u&&u.full_name)+fld('login','Почта (логин) *',u&&u.login,'email')+fld('position','Должность',u&&u.position)+fld('department','Подразделение',u&&u.department)+
       '<label class="adm-f"><span>Статус</span><select data-k="status"'+(self||first?' disabled':'')+'>'+Object.entries(STAT).map(([k,t])=>'<option value="'+k+'"'+((u?u.status:'active')===k?' selected':'')+'>'+t+'</option>').join('')+'</select></label></div>'+
       '<h4>Роли</h4><div class="adm-roles-pick">'+S.roles.map(roleRow).join('')+'</div><p class="adm-hint">Ролей несколько — права складываются. Дата «до» — временная роль (замещение), пусто — бессрочно.'+(self?' Свою роль администратора и статус меняет другой администратор.':'')+'</p>'+
-      '<h4>Что увидит в приложении</h4><div class="adm-prev" id="admPrev"></div><p class="adm-err" role="alert"></p></div>'+
-      '<footer class="adm-sf">'+(u&&!self&&u.status==='active'?'<button type="button" class="adm-btn" data-act="as">Посмотреть его глазами</button>':'')+(u&&!self?'<button type="button" class="adm-btn ghost danger" data-act="del">Удалить</button>':'')+
+      '<h4>Что увидит в приложении</h4><div class="adm-prev" id="admPrev"></div></div>'+
+      '<footer class="adm-sf"><p class="adm-err adm-ferr" role="alert"></p>'+(u&&!self&&u.status==='active'?'<button type="button" class="adm-btn" data-act="as">Посмотреть его глазами</button>':'')+(u&&!self?'<button type="button" class="adm-btn ghost danger" data-act="del">Удалить</button>':'')+
       '<span class="sp"></span><button type="button" class="adm-btn" data-x>Отмена</button><button type="button" class="adm-btn pri" data-act="ok">'+(u?'Сохранить':'Добавить')+'</button></footer>',
     (box,close)=>{const err=box.querySelector('.adm-err');
       const val=()=>{const o={}; box.querySelectorAll('[data-k]').forEach(i=>o[i.dataset.k]=i.value.trim()); o.roles=[...box.querySelectorAll('[data-r]')].filter(i=>i.checked).map(i=>({role_id:i.dataset.r,valid_to:box.querySelector('[data-to="'+i.dataset.r+'"]').value||null})); return o};
@@ -5909,10 +5911,14 @@ setTimeout(()=>{let t=''; try{const S=daySum(0), live=S.inc.filter(i=>i.live); i
         S.users=keep.filter(x=>x.id!==id).concat([{id,login:v.login,full_name:v.full_name||'—',status:'active'}]); S.ur=keepU.filter(x=>x.user_id!==id).concat(v.roles.map(r=>({user_id:id,role_id:r.role_id,valid_to:r.valid_to})));
         let e; try{e=A.effective(simT(),id)}finally{S.users=keep; S.ur=keepU}
         box.querySelector('#admPrev').innerHTML=A.describe(T0,e).map(x=>'<div class="'+(x.on?'':'off')+'"><b>'+ae(x.name)+(x.dev?' <small>скоро</small>':'')+'</b><span>'+ae(x.text)+'</span></div>').join('')};
-      box.addEventListener('input',prev); box.addEventListener('change',prev); prev();
+      box.addEventListener('input',e=>{if(e.target.hasAttribute&&e.target.hasAttribute('aria-invalid')){e.target.removeAttribute('aria-invalid'); err.textContent=''} prev()}); box.addEventListener('change',prev); prev();
       box.querySelector('[data-act="ok"]').onclick=async()=>{const v=val(); err.textContent='';
-        if(!v.full_name||!v.login){err.textContent='Заполните ФИО и почту'; return}
-        if(S.users.some(x=>x.login.toLowerCase()===v.login.toLowerCase()&&(!u||x.id!==u.id))){err.textContent='Пользователь с такой почтой уже есть'; return}
+        box.querySelectorAll('[aria-invalid]').forEach(i=>i.removeAttribute('aria-invalid'));
+        const bad=(k,t)=>{const i=box.querySelector('[data-k="'+k+'"]'); err.textContent=t; if(i){i.setAttribute('aria-invalid','true'); i.scrollIntoView({block:'center',behavior:'smooth'}); setTimeout(()=>i.focus({preventScroll:true}),250)}};
+        if(!v.full_name){bad('full_name','Заполните ФИО'); return}
+        if(!v.login){bad('login','Заполните почту — это логин для входа'); return}
+        if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.login)){bad('login','Почта указана неверно: нужен вид name@company.ru'); return}
+        if(S.users.some(x=>x.login.toLowerCase()===v.login.toLowerCase()&&(!u||x.id!==u.id))){bad('login','Пользователь с такой почтой уже есть'); return}
         const id=u?u.id:'u'+Date.now().toString(36), was=u?{...u}:null, wasR=u?rolesOfUser(u.id):[];
         const rec=Object.assign({},u||{id,auth_source:'test',created_at:now(),last_login:null},{login:v.login,full_name:v.full_name,position:v.position||null,department:v.department||null,status:first?'active':(v.status||(u?u.status:'active'))});
         const keepU=S.users, keepR=S.ur;
