@@ -1924,7 +1924,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:159,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:160,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -6386,12 +6386,12 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
   tx(m,v){const x=v[0],y=v[1],z=v[2]; return [m[0]*x+m[4]*y+m[8]*z+m[12],m[1]*x+m[5]*y+m[9]*z+m[13],m[2]*x+m[6]*y+m[10]*z+m[14],m[3]*x+m[7]*y+m[11]*z+m[15]]}};
  function initGL(){gl=cv.getContext('webgl',{antialias:true,alpha:true,premultipliedAlpha:true}); if(!gl) return false; gl.getExtension('OES_element_index_uint');
   const mk=(t,s)=>{const sh=gl.createShader(t); gl.shaderSource(sh,s); gl.compileShader(sh); return sh};
-  PR=gl.createProgram(); gl.attachShader(PR,mk(gl.VERTEX_SHADER,'attribute vec4 p;uniform mat4 mvp;uniform mat4 mv;uniform float H;uniform float lift;varying float dz;varying float ve;varying float vh;varying vec2 vxy;uniform float ps;void main(){gl_PointSize=ps;bool ab=p.z<-500.0;vec4 w=vec4(p.x,p.y,ab?p.z+1000.0:p.z*H+lift,1.0);gl_Position=mvp*w;dz=-(mv*w).z;ve=p.w;vh=ab?0.0:p.z;vxy=p.xy;}'));
+  PR=gl.createProgram(); gl.attachShader(PR,mk(gl.VERTEX_SHADER,'attribute vec4 p;uniform mat4 mvp;uniform mat4 mv;uniform float H;uniform float lift;varying float dz;varying float ve;varying float vh;varying vec2 vxy;uniform float ps;uniform float dsc;void main(){gl_PointSize=ps;bool ab=p.z<-500.0;vec4 w=vec4(p.x,p.y,ab?(p.z+1000.0)*dsc:p.z*H+lift,1.0);gl_Position=mvp*w;dz=-(mv*w).z;ve=p.w;vh=ab?0.0:p.z;vxy=p.xy;}'));
   gl.attachShader(PR,mk(gl.FRAGMENT_SHADER,'#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\nuniform vec4 col;uniform vec2 fog;uniform vec3 ed;uniform float rp;uniform vec3 hi;uniform vec2 tn;varying float dz;varying float ve;varying float vh;varying vec2 vxy;'+
   'float hs(vec2 q){return fract(sin(dot(q,vec2(127.1,311.7)))*43758.5453);}float vn(vec2 q){vec2 i=floor(q),f=fract(q);f=f*f*(3.0-2.0*f);return mix(mix(hs(i),hs(i+vec2(1.0,0.0)),f.x),mix(hs(i+vec2(0.0,1.0)),hs(i+vec2(1.0,1.0)),f.x),f.y);}'+
   'void main(){if(rp>0.5){vec2 c=gl_PointCoord-0.5;if(dot(c,c)>0.25)discard;}float a=1.0;if(ed.x>0.0){float n=vn(vxy/(ed.x*0.55))*0.6+vn(vxy/(ed.x*0.16))*0.3+vn(vxy/(ed.x*0.05))*0.1;a=clamp(ve/ed.x-ed.y*(n-0.5)*1.6,0.0,1.0);a=a*a*(3.0-2.0*a);}if(a<ed.z)discard;'+
   'float f=clamp((dz-fog.x)/(fog.y-fog.x),0.0,1.0);vec3 c=mix(col.rgb,hi,tn.x*clamp(vh/tn.y,0.0,1.0));gl_FragColor=vec4(c,col.a*(1.0-0.78*f)*a);}'));
-  gl.linkProgram(PR); U.p=gl.getAttribLocation(PR,'p'); ['mvp','mv','H','lift','col','fog','ed','hi','tn','ps','rp'].forEach(k=>U[k]=gl.getUniformLocation(PR,k)); return true}
+  gl.linkProgram(PR); U.p=gl.getAttribLocation(PR,'p'); ['mvp','mv','H','lift','col','fog','ed','hi','tn','ps','rp','dsc'].forEach(k=>U[k]=gl.getUniformLocation(PR,k)); return true}
  /* ---- исходные сетки высот (км) ---- */
  const dec=(b64,T)=>{const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return new T(u.buffer)};
  const SRC={}; const src=k=>{if(SRC[k]) return SRC[k]; const A=typeof k==='string'?RD[k]:RD.fp[k], b8=A.b===8, q=dec(A.v,b8?Uint8Array:Uint16Array), mx=b8?255:65535, lb=A.land?dec(A.land,Uint8Array):null, n=A.nx*A.ny, v=new Float32Array(n), land=new Float32Array(n);
@@ -6462,11 +6462,12 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
  function freeRect(){const W=cv.clientWidth,H=cv.clientHeight, wr=wrap.getBoundingClientRect(); const x0=clamp((INS.l||0)-wr.left,0,W*0.5), y0=clamp((INS.t||0)-wr.top,0,H*0.5), x1=clamp(W-(INS.r||0),W*0.4,W), y1=clamp(innerHeight-(INS.b||0)-wr.top,H*0.4,H); return {x0,y0,x1,y1,W,H}}
  const TV=Math.tan(Rr(25));
  /* матрица вида для камеры c — как в draw() */
+ const dscNow=()=>{const f=freeRect(); return (f.y1-f.y0)<470?0.5:1};
  function mvpFor(c){const W=cv.clientWidth||1,Hh=cv.clientHeight||1, e=[c.tx+c.dist*Math.cos(c.el)*Math.sin(c.az),c.ty-c.dist*Math.cos(c.el)*Math.cos(c.az),c.dist*Math.sin(c.el)], fr=freeRect(), sx=((fr.x0+fr.x1)/2-fr.W/2)/(fr.W/2), sy=-((fr.y0+fr.y1)/2-fr.H/2)/(fr.H/2);
   return m4.mul([1,0,0,0,0,1,0,0,0,0,1,0,sx,sy,0,1],m4.mul(m4.persp(Rr(50),W/Hh,c.dist*0.02,c.dist*4),m4.look(e,[c.tx,c.ty,0],[0,0,1])))}
  /* срез месторождения: весь блок в свободной части экрана, скважины — на ближней к зрителю стороне */
  function fitBlock(){const el=Rr(27); let az=Rr(-25); const ps=pins.map(o=>o.p); if(ps.length){const mx=ps.reduce((a,p)=>a+p[0],0)/ps.length, my=ps.reduce((a,p)=>a+p[1],0)/ps.length; if(Math.hypot(mx,my)>S.span*0.04) az=Math.atan2(mx,-my)}
-  const f=freeRect(), m=14, top=(S.hmaxK||0)*Hmul, pts=[]; for(let k=0;k<S.rim.length;k+=Math.max(1,Math.floor(S.rim.length/48))){const q=S.rim[k]; pts.push([q[0],q[1],Math.max(q[2]*Hmul,top*0.5)],[q[0],q[1],-S.T])}
+  const f=freeRect(), DS=dscNow(), m=DS<1?8:14, top=(S.hmaxK||0)*Hmul, pts=[]; for(let k=0;k<S.rim.length;k+=Math.max(1,Math.floor(S.rim.length/48))){const q=S.rim[k]; pts.push([q[0],q[1],Math.max(q[2]*Hmul,top*0.5)],[q[0],q[1],-S.T*DS])}
   const ok=d=>{const M=mvpFor({az,el,dist:d,tx:0,ty:0}); return pts.every(q=>{const c=m4.tx(M,q); if(c[3]<=0) return false; const x=(c[0]/c[3]*.5+.5)*f.W, y=(1-(c[1]/c[3]*.5+.5))*f.H; return x>=f.x0+m&&x<=f.x1-m&&y>=f.y0+m&&y<=f.y1-m})};
   let lo=S.span*0.2, hi=S.span*8; if(!ok(hi)) return {az,el,dist:hi,tx:0,ty:0}; for(let i=0;i<26;i++){const mid=Math.sqrt(lo*hi); ok(mid)?hi=mid:lo=mid} return {az,el,dist:hi*1.03,tx:0,ty:0}}
  function fitBox(wk,hk,el){const f=freeRect(), th=TV*(f.x1-f.x0)/f.H, tv=TV*(f.y1-f.y0)/f.H; return Math.max(wk/(2*th),hk*Math.sin(el)/(2*tv),0.001)}
@@ -6543,7 +6544,7 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
   const mv=m4.look(e,[cam.tx,cam.ty,0],[0,0,1]), mvp=m4.mul(T,m4.mul(m4.persp(Rr(50),w/h,cam.dist*0.02,cam.dist*4),mv)), H=Hmul;
   const EW=Y.edge?S.edgeW:0;
   gl.useProgram(PR); gl.uniformMatrix4fv(U.mvp,false,mvp); gl.uniformMatrix4fv(U.mv,false,mv); gl.uniform1f(U.H,H); gl.uniform2f(U.fog,cam.dist*0.55,cam.dist*1.9); gl.enableVertexAttribArray(U.p);
-  gl.uniform3f(U.hi,...hiC); gl.uniform1f(U.ps,1); gl.uniform1f(U.rp,0); gl.uniform2f(U.tn,0,1); gl.uniform3f(U.ed,EW,1,0.35);
+  gl.uniform3f(U.hi,...hiC); gl.uniform1f(U.ps,1); gl.uniform1f(U.rp,0); const DSv=dscNow(); gl.uniform1f(U.dsc,DSv); gl.uniform2f(U.tn,0,1); gl.uniform3f(U.ed,EW,1,0.35);
   gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL); gl.colorMask(false,false,false,false); gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(1.5,4); gl.uniform1f(U.lift,0);
   gl.bindBuffer(gl.ARRAY_BUFFER,S.bS); gl.vertexAttribPointer(U.p,4,gl.FLOAT,false,0,0); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,S.bI); gl.drawElements(gl.TRIANGLES,S.nIdx,gl.UNSIGNED_INT,0);
   gl.disable(gl.POLYGON_OFFSET_FILL); gl.colorMask(true,true,true,true); gl.enable(gl.BLEND);
@@ -6570,7 +6571,7 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
   gl.depthMask(true); gl.disable(gl.BLEND);
   /* подписи глубин — на ближнем к зрителю ребре блока */
   if(depthEls.length){const show=Y.block&&UW&&S.kind==='field'; let best=null; const nR=S.rim.length-1; if(show) [0,Math.round(nR/4),Math.round(nR/2),Math.round(3*nR/4)].forEach(k=>{const q=S.rim[k], c=m4.tx(mvp,[q[0],q[1],q[2]*H]); if(c[3]>0){const y=(1-(c[1]/c[3]*.5+.5)); if(!best||y>best.y) best={y,q}}});
-   depthEls.forEach((el,k)=>{if(!best){el.hidden=true; return} const d=UW.ticks[k], c=m4.tx(mvp,[best.q[0],best.q[1],-S.T*d/UW.dm]); if(c[3]<=0){el.hidden=true; return} el.hidden=false; el.style.transform=`translate(${(c[0]/c[3]*.5+.5)*cv.clientWidth}px,${(1-(c[1]/c[3]*.5+.5))*cv.clientHeight}px) translate(6px,-50%)`})}
+   let lastY=-1e9; depthEls.forEach((el,k)=>{if(!best){el.hidden=true; return} const d=UW.ticks[k], c=m4.tx(mvp,[best.q[0],best.q[1],-S.T*d/UW.dm*DSv]); if(c[3]<=0){el.hidden=true; return} const y=(1-(c[1]/c[3]*.5+.5))*cv.clientHeight; if(y-lastY<14){el.hidden=true; return} lastY=y; el.hidden=false; el.style.transform=`translate(${(c[0]/c[3]*.5+.5)*cv.clientWidth}px,${y}px) translate(6px,-50%)`})}
   /* метки */
   const cw=cv.clientWidth,ch=cv.clientHeight, pts=[];
   pins.forEach((o,k)=>{const c=m4.tx(mvp,[o.p[0],o.p[1],o.p[2]*H]); if(c[3]<=0){o.el.hidden=true; return} const x=(c[0]/c[3]*.5+.5)*cw, y=(1-(c[1]/c[3]*.5+.5))*ch; o.el.hidden=!(x>-40&&x<cw+40&&y>-40&&y<ch+40); if(!o.el.hidden) pts.push({o,x,y,d:c[3]})});
@@ -6627,7 +6628,7 @@ const orbClick=()=>{if(anim&&anim.orbit){anim=null; orbB.setAttribute('aria-pres
     '<p class="note" style="margin:0">Включить рельеф — кнопка «3D» у кнопок карты. Высоты: открытые данные AWS Terrain Tiles (SRTM, GMTED2010, ArcticDEM).</p>';
    after?after.after(b):(host.querySelector('.prof')||host).appendChild(b);
    b.querySelectorAll('[data-r3] button').forEach(x=>x.onclick=()=>{const g=x.parentElement, k=g.dataset.r3, v=x.dataset.v; g.querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',y===x)); if(k==='style') setStyle(v); else if(k==='area') setArea(v); else setH(v)})}catch(e){console.error(e)}};
- window.PulseRelief={on:v=>setOn(v),zoom:f=>{anim=null; cam.dist=clampD(cam.dist*f); dirty=true},style:k=>{if(k&&PRE[k]) setStyle(k); return STY},area:k=>{if(['auto','npt','yanao'].includes(k)) setArea(k); return areaKey||'auto'},height:k=>{if(HK[k]) setH(k); return HKey},get state(){return {cam:{...cam},on,area:S&&S.key,kind:S&&S.kind,pins:pins.length,wells:pins.reduce((s,o)=>s+(o.ids?o.ids.length:0),0),mul:Hmul,step:S&&S.step,dark:dark()}}};
+ window.PulseRelief={on:v=>setOn(v),zoom:f=>{anim=null; cam.dist=clampD(cam.dist*f); dirty=true},style:k=>{if(k&&PRE[k]) setStyle(k); return STY},area:k=>{if(['auto','npt','yanao'].includes(k)) setArea(k); return areaKey||'auto'},height:k=>{if(HK[k]) setH(k); return HKey},get state(){return {free:freeRect(),ins:{...INS},cam:{...cam},on,area:S&&S.key,kind:S&&S.kind,pins:pins.length,wells:pins.reduce((s,o)=>s+(o.ids?o.ids.length:0),0),mul:Hmul,step:S&&S.step,dark:dark()}}};
  try{if(localStorage.getItem('pulse2-relief')==='1') requestAnimationFrame(()=>setOn(true))}catch(e){}
  }}
 
