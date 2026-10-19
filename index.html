@@ -1888,6 +1888,11 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 .wstk .l1 b{font-family:var(--f-display);font-weight:600;font-size:16px;color:var(--ink);white-space:nowrap}
 .wstk .l2{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 @media (prefers-reduced-motion:reduce){.wstk>div{transition:none}}
+
+/* 168: значок ИИ — в ряду нижнего меню (планшет, большой экран) */
+body.orb-dock .aiorb{right:14px}
+body.orb-dock .aiorb.tuck{right:14px;opacity:1}
+body.orb-dock.orb-squeeze .tabbar{right:76px!important}
 </style>
 </head>
 <body>
@@ -1970,7 +1975,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:167,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:168,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -5703,7 +5708,9 @@ let orbY=null; try{orbY=+localStorage.getItem('ai-orb-y')||null}catch(e){}
 function place(){const tb=$('.tabbar'), r=tb?tb.getBoundingClientRect():null, bot=r&&r.height>0&&r.width>r.height?r.top:innerHeight, top=($('.app>.top')||{getBoundingClientRect:()=>({bottom:60})}).getBoundingClientRect().bottom;
   /* не наезжать на кнопку «Показатели» над картой: значок ставим выше неё */
   const hf=$('.hfab'), hr=hf&&hf.offsetParent?hf.getBoundingClientRect():null, hfTop=hr&&hr.width&&hr.right>innerWidth-80?hr.top:Infinity;
-  const def=Math.min(wide()?bot-150:bot-140, hfTop-72), y=Math.max(top+70,Math.min(bot-64,orbY==null?def:orbY)); orb.style.top=y+'px';
+  const dock=innerWidth>=700&&!!r&&r.height>0&&r.width>r.height; document.body.classList.toggle('orb-dock',dock);
+  if(dock){document.body.classList.remove('orb-squeeze'); let q=tb.getBoundingClientRect(); if(q.right>innerWidth-70){document.body.classList.add('orb-squeeze'); q=tb.getBoundingClientRect()} orb.style.top=Math.round(q.top+q.height/2-24)+'px'}
+  else {document.body.classList.remove('orb-squeeze'); const def=Math.min(wide()?bot-150:bot-140, hfTop-72), y=Math.max(top+70,Math.min(bot-64,orbY==null?def:orbY)); orb.style.top=y+'px'}
   if(wide()){pan.style.top=(top+10)+'px'; pan.style.bottom=(innerHeight-bot+10)+'px'} else {pan.style.top=''; pan.style.bottom=(innerHeight-bot)+'px'}}
 addEventListener('resize',()=>setTimeout(place,60)); setTimeout(place,300); setInterval(place,1500);
 /* клавиатура (iPhone/iPad): видимая часть экрана — visualViewport; шторку ставим над клавиатурой, во весь видимый экран */
@@ -5720,7 +5727,7 @@ document.addEventListener('pointermove',e=>{if(e.buttons&&!e.target.closest('.ai
 /* касание — открыть; удержание — голос; перетаскивание по вертикали — сдвинуть */
 let pd=null, lp=0;
 orb.addEventListener('pointerdown',e=>{pd={y:e.clientY,t:Date.now(),oy:parseFloat(orb.style.top),moved:false}; orb.setPointerCapture(e.pointerId); lp=setTimeout(()=>{if(pd&&!pd.moved){pd.voice=true; listen()}},480)});
-orb.addEventListener('pointermove',e=>{if(!pd) return; const dy=e.clientY-pd.y; if(Math.abs(dy)>6){pd.moved=true; clearTimeout(lp); orbY=pd.oy+dy; place()}});
+orb.addEventListener('pointermove',e=>{if(!pd||document.body.classList.contains('orb-dock')) return; const dy=e.clientY-pd.y; if(Math.abs(dy)>6){pd.moved=true; clearTimeout(lp); orbY=pd.oy+dy; place()}});
 orb.addEventListener('pointerup',()=>{clearTimeout(lp); if(!pd) return; const p=pd; pd=null; if(p.moved){try{localStorage.setItem('ai-orb-y',orbY)}catch(e){} return} if(p.voice) return; toggle(true)});
 /* ---------- окно ---------- */
 function ctxText(){const s=state; if(s.mode==='rep') return 'Отчёты'; if(s.screen==='stats') return 'Утренняя сводка'; if(s.screen==='profile') return 'Профиль';
