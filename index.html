@@ -1866,6 +1866,10 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 .wb2 .rc .ok{color:var(--good,#1F8A5B)}
 .wb2 .rc.plan{background:color-mix(in srgb,var(--surface) 70%,transparent);border-style:dashed;border-color:var(--muted)}
 .wb2 .rc.plan .h{color:var(--muted);font-weight:500}
+.wb2 .rc.cur{background:color-mix(in srgb,var(--prog) 12%,var(--surface));border-color:var(--prog)}
+.wb2 .rc.cur.npv{background:color-mix(in srgb,var(--st-npv) 12%,var(--surface));border-color:var(--st-npv)}
+.wb2 .rc.cur .h span{color:var(--prog);font-weight:600}
+.wb2 .rc.cur.npv .h span{color:var(--st-npv)}
 .wb2 .rc.act{background:color-mix(in srgb,var(--prog) 12%,var(--surface));border-color:var(--prog);padding:6px 10px;height:70px}
 .wb2 .rc.act.npv{background:color-mix(in srgb,var(--st-npv) 12%,var(--surface));border-color:var(--st-npv)}
 .wb2 .rc .ey{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--prog)}
@@ -1966,7 +1970,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:166,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:167,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3063,18 +3067,51 @@ function wellbore2(sch,cv,w0){
   let C={}; const readColors=()=>{C={...PAL[THEME()]}};
   let phase=0, last=0, SD=null, FDT=0, raf=0, alive=true; readColors();
 /* ---------- модель ---------- */
+/* Факт — только до «сейчас». Номер секции в рапорте бывает неверным (например, «Спуск хвостовика» на 500 м),
+   поэтому секцию определяем по смыслу операции и глубине, и строго по порядку: колонна не может стать «мельче» предыдущей. */
+const SECRE=[/направлен/i,/кондуктор/i,/техн|промежут/i,/э\/к|эксплуатац/i,/хвостовик/i];
+const isRun=g=>g[2]==='C'&&/спуск|цемент|креплени/i.test(g[4]);
+function prep(){
+  const n=W.tp.length-1, lim=s=>W.tp[s+1]*1.5+30;
+  const nameS=txt=>{for(let s=0;s<SECRE.length&&s<n;s++) if(SECRE[s].test(txt)) return s; return -1};
+  const segs=W.segs.filter(g=>g[0]<W.tNow-1e-9).map(g=>{const q=g.slice(); q[1]=Math.min(q[1],W.tNow); return q});
+  const runs=[]; let prev=-1, shoe=0;
+  for(const g of segs){if(!isRun(g)) continue; const D=Math.max(g[5],g[6]); let s=nameS(g[4]); const r=runs[runs.length-1];
+    if(r&&D<=shoe+5){if(g[0]-r.t1<1.5) r.t1=Math.max(r.t1,g[1]); continue}              // та же колонна: продолжение спуска/цементажа
+    if(s>=0&&s<=prev){runs.push({s:prev,t0:g[0],t1:g[1],shoe:D}); shoe=D; continue}      // повторный спуск той же секции глубже
+    if(s>prev&&(D>lim(s)||D<W.tp[s]*.5)) s=-1;                                           // название не сходится с глубиной
+    if(s<0){s=prev+1; while(s<n-1&&D>lim(s)) s++}
+    s=Math.min(s,n-1); runs.push({s,t0:g[0],t1:g[1],shoe:D}); prev=s; shoe=D}
+  const fin={}; runs.forEach(r=>fin[r.s]=Math.max(fin[r.s]||0,r.t1));  // секция закончена — после её последнего спуска
+  W.runs=runs; W.fin=fin; W.fsegs=segs; W.nameS=nameS; W.lim=lim;
+  /* секция каждой операции; затем — только вперёд: секция не может «вернуться» назад во времени */
+  const o=W.op, oRun=o.k==='C'&&/спуск|цемент|креплени/i.test(o.n);
+  let bound=secOf(o.k,o.n,W.tNow-1e-6,W.depth,oRun); W.nowS=bound;
+  for(let i=segs.length-1;i>=0;i--){const g=segs[i], tm=(g[0]+g[1])/2; g.sec=Math.min(bound,secOf(g[2],g[4],tm,Math.max(g[5],g[6]),isRun(g))); bound=g.sec}
+}
+const finished=(s,t)=>W.fin[s]!=null&&t>=W.fin[s]-1e-9&&!(t>=W.tNow-1e-6&&W.fin[s]>=W.tNow-1e-6);
+const doneMax=t=>{let m=-1; for(const k in W.fin) if(finished(+k,t)) m=Math.max(m,+k); return m};
+function secOf(k,txt,t,dep,run){const n=W.tp.length-1;
+  if(run){const r=W.runs.find(r=>t>=r.t0-1e-9&&t<=r.t1+1e-9); if(r) return r.s}
+  const dm=doneMax(t), ns=W.nameS(txt); if(ns>=0&&ns>=dm&&ns<=dm+1) return ns;
+  let s=Math.min(n-1,dm+1); while(s<n-1&&dep>W.lim(s)) s++; return s}
 function at(t){
-  if(t>=W.tNow-1e-6) return {t:W.tNow,dep:W.depth,k:W.op.k,s:W.op.s,n:W.op.n,frac:1,el:W.op.t||0};
-  const g=W.segs.find(g=>t>=g[0]&&t<g[1])||W.segs[0], f=clamp((t-g[0])/Math.max(1e-6,g[1]-g[0]),0,1);
-  return {t,dep:Math.min(W.depth,g[5]+(g[6]-g[5])*f),k:g[2],s:g[3],n:g[4],frac:f,el:t-g[0]};
+  if(!W.runs) prep();
+  if(t>=W.tNow-1e-6){const g=W.op, run=g.k==='C'&&/спуск|цемент|креплени/i.test(g.n), k=g.k==='C'&&!run?'W':g.k; return {t:W.tNow,dep:W.depth,k,s:W.nowS,n:g.n,frac:1,el:g.t||0}}
+  const S=W.fsegs; if(!S.length) return {t,dep:0,k:'D',s:0,n:'',frac:0,el:0};
+  const g=S.find(g=>t>=g[0]&&t<g[1])||S.find(g=>g[0]>t)||S[S.length-1], f=clamp((t-g[0])/Math.max(1e-6,g[1]-g[0]),0,1);
+  const run=isRun(g), k=g[2]==='C'&&!run?'W':g[2], dep=Math.min(W.depth,g[5]+(g[6]-g[5])*f);
+  return {t,dep,k,s:g.sec,n:g[4],frac:f,el:t-g[0]};
 }
 function casing(s,t){
-  const cs=W.segs.filter(g=>g[2]==='C'&&g[3]===s&&g[0]<Math.min(t,W.tNow));
-  if(!cs.length){for(let j=s+1;j<W.tp.length-1;j++){if(W.segs.some(g=>g[2]==='C'&&g[3]===j&&g[0]<Math.min(t,W.tNow))) return {done:true,shoe:W.tp[s+1]}} return null}
-  const lastC=cs[cs.length-1], shoe=lastC[6]||W.tp[s+1];
-  const later=W.segs.some(g=>g[0]>=lastC[1]-1e-6&&g[0]<t&&g[2]!=='C');
-  if(t>=Math.min(lastC[1],W.tNow)-1e-6&&(later||t>=W.tNow-1e-6&&!(W.op.k==='C'&&W.op.s===s))) return {done:true,shoe};
-  return {done:false,shoe,frac:clamp((t-cs[0][0])/Math.max(1e-6,lastC[1]-cs[0][0]),0,1)};
+  if(!W.runs) prep();
+  const rs=W.runs.filter(r=>r.s===s&&r.t0<t);
+  if(!rs.length){const d=W.runs.find(r=>r.s>s&&r.t0<t); return d?{done:true,shoe:Math.min(W.tp[s+1],d.shoe)}:null}
+  const r=rs[rs.length-1];
+  if(finished(s,t)) return {done:true,shoe:r.shoe};
+  if(t>=r.t1-1e-9) return {done:false,shoe:r.shoe,base:r.shoe,frac:1};   // между спусками одной секции
+  const prevShoe=rs.length>1?rs[rs.length-2].shoe:0;
+  return {done:false,shoe:r.shoe,base:prevShoe,frac:clamp((t-r.t0)/Math.max(1e-6,r.t1-r.t0),0,1)};
 }
 /* траектория: мелкая сетка по стволу, точки в метрах (x — отход, z — по вертикали) */
 let PATH=[];
@@ -3100,7 +3137,7 @@ function layout(){
   const vx=Math.max(...L.P.filter(p=>p.y<L.oy+(ch-top-bottom)*.35).map(p=>p.x));
   L.railX=Math.round(Math.max(vx+maxR*2+34,cw*.36)); L.railW=cw-L.railX-12;
   L.railBottom=x0=>{let m=ch-8; for(const p of L.P){if(p.x>=x0-14) m=Math.min(m,p.y-maxR*2-12)} return m};
-  buildCards.key=''; bgKey='';
+   bgKey='';
 }
 const sp=md=>{const i=clamp(md/W.T*(L.P.length-1),0,L.P.length-1), i0=Math.floor(i), i1=Math.min(L.P.length-1,i0+1), f=i-i0, a=L.P[i0], b=L.P[i1]; return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,nx:a.nx+(b.nx-a.nx)*f,ny:a.ny+(b.ny-a.ny)*f,tx:a.tx+(b.tx-a.tx)*f,ty:a.ty+(b.ty-a.ty)*f}};
 const seg=(m0,m1)=>{const out=[]; if(m1<=m0) return out; out.push(sp(m0)); for(const p of L.P){if(p.md>m0&&p.md<m1) out.push(p)} out.push(sp(m1)); return out};
@@ -3115,33 +3152,32 @@ let cards=[];
 function cardsData(v){
   const n=W.tp.length-1, list=[];
   for(let s=0;s<n;s++){
-    const c=casing(s,v.t), b=W.tp[s+1], head=SEC[s].n, D=SEC[s].c; let st='plan', anchor=b, html, key;
-    if(s===v.s&&!(c&&c.done&&v.k==='D')){st='act'; const cas=v.k==='C'||(c&&!c.done); anchor=cas?((c&&c.shoe)||v.dep):v.dep; key=(cas?'C':v.k)+s;
-      html=`<div class="ey" data-f="ey"></div><div class="h" data-f="hh"></div><div class="s" data-f="ds"></div><div class="pb"><i data-f="dp"></i></div>`}
-    else if(c&&c.done){st='done'; anchor=c.shoe; key='ok'+s+Math.round(c.shoe);
-      html=`<div class="h"><em>${head} ${D}</em><span class="ok" aria-label="спущена">✓ ${nf(c.shoe)} м</span></div>`}
-    else {key='p'+s; html=`<div class="h"><em>${head} ${D}</em><span>до ${nf(b)} м</span></div>`}
-    list.push({s,st,anchor,html,key,npv:v.k==='N'&&st==='act'});
+    const c=casing(s,v.t), b=W.tp[s+1], head=SEC[s].n, D=SEC[s].c; let st='plan', anchor=b, tail, key;
+    if(s===v.s){st='act'; anchor=v.k==='C'?((c&&c.shoe)||v.dep):v.dep; tail=v.k==='N'?'НПВ':v.k==='C'?'спуск':v.k==='W'?'работы':'бурится'; key='a'+s+tail}
+    else if(c&&c.done){st='done'; anchor=c.shoe; tail='✓ '+nf(c.shoe)+' м'; key='ok'+s+Math.round(c.shoe)}
+    else {tail='до '+nf(b)+' м'; key='p'+s}
+    list.push({s,st,anchor,key,html:`<div class="h"><em>${head} ${D}</em><span${st==='done'?' class="ok"':''}>${tail}</span></div>`,npv:v.k==='N'&&st==='act'});
   }
   return list;
 }
+/* все секции — строки одной высоты на постоянных местах; подробности текущей — в одном блоке под списком */
+let det=null;
 function buildCards(v){
-  const list=cardsData(v), key=list.map(o=>o.key+o.st).join('|');
-  if(key!==buildCards.key){buildCards.key=key; const old=cards;
-    cards=list.map(o=>{const prev=old.find(c=>c.s===o.s); let e=prev&&prev.el; if(!e){e=document.createElement('div'); sch.appendChild(e)}
-      const chg=!prev||prev.key!==o.key; e.className='rc '+o.st+(o.npv?' npv':''); e.innerHTML=o.html; if(chg&&prev&&!RM.matches){e.animate([{opacity:.25},{opacity:1}],{duration:260,easing:'ease-out'})} e.style.width=L.railW+'px'; const h=o.st==='act'?70:28; return {...o,el:e,h,y:prev?prev.y:null}});
-    old.forEach(c=>{if(!cards.some(d=>d.el===c.el)) c.el.remove()})}
-  else cards.forEach((c,i)=>c.anchor=list[i].anchor);
-  /* текст, который меняется на ходу */
-  cards.forEach(c=>{if(c.st!=='act') return; const q=f=>c.el.querySelector('[data-f="'+f+'"]'), set=(e,t)=>{if(e&&e.textContent!==t) e.textContent=t};
-    const s=c.s, b=W.tp[s+1], cc=casing(s,v.t), cas=v.k==='C'||(cc&&!cc.done), top=s>0?((casing(s-1,v.t)||{shoe:W.tp[s]}).shoe):0;
-    set(q('ey'),v.k==='N'?'НПВ · '+v.n.toUpperCase():cas?'СПУСК КОЛОННЫ':'БУРИТСЯ СЕЙЧАС');
-    set(q('hh'),cas||v.k==='N'?SEC[s].n+' '+SEC[s].c:SEC[s].dop.replace(/^Бурение п/,'П')+' '+SEC[s].c);
-    set(q('ds'),v.k==='N'?'забой '+nf(v.dep)+' м · простой '+nf1(v.el*24)+' ч':cas?v.n:v.dep<=b?nf(top)+' → '+nf(v.dep)+' из '+nf(b)+' м · ост. '+nf(b-v.dep):nf(top)+' → '+nf(v.dep)+' м · по проекту до '+nf(b));
-    const p=cas?(cc?cc.frac:v.frac):clamp((v.dep-top)/Math.max(1,b-top),0,1); q('dp').style.width=(p*100).toFixed(1)+'%'});
-  /* места: по порядку секций сверху вниз, фиксированной высоты — не ездят за долотом */
-  let y=L.top-34; const tg=cards.map(c=>{const t=y; y+=c.h+6; return t});
-  cards.forEach((c,i)=>{c.y=c.y==null||RM.matches?tg[i]:Math.abs(tg[i]-c.y)<.2?tg[i]:c.y+(tg[i]-c.y)*(1-Math.exp(-FDT/.09)); c.el.style.transform=`translate(${L.railX}px,${c.y.toFixed(1)}px)`});
+  const list=cardsData(v);
+  if(cards.length!==list.length){cards.forEach(c=>c.el.remove()); cards=list.map(o=>{const e=document.createElement('div'); sch.appendChild(e); return {...o,el:e,h:28,k0:''}})}
+  if(!det||!det.isConnected){det=document.createElement('div'); det.innerHTML=`<div class="ey" data-f="ey"></div><div class="h" data-f="hh"></div><div class="s" data-f="ds"></div><div class="pb"><i data-f="dp"></i></div>`; sch.appendChild(det)}
+  const y0=L.top-34, W0=L.railW+'px';
+  list.forEach((o,i)=>{const c=cards[i]; Object.assign(c,{st:o.st,anchor:o.anchor,npv:o.npv,y:y0+i*34});
+    if(c.k0!==o.key){c.k0=o.key; c.el.className='rc '+(o.st==='act'?'cur':o.st)+(o.npv?' npv':''); c.el.innerHTML=o.html}
+    if(c.el.style.width!==W0) c.el.style.width=W0; const tr=`translate(${L.railX}px,${c.y}px)`; if(c.el.style.transform!==tr) c.el.style.transform=tr});
+  const q=f=>det.querySelector('[data-f="'+f+'"]'), set=(e,t)=>{if(e&&e.textContent!==t) e.textContent=t};
+  const dc='rc act'+(v.k==='N'?' npv':''); if(det.className!==dc) det.className=dc; if(det.style.width!==W0) det.style.width=W0;
+  const tr=`translate(${L.railX}px,${y0+list.length*34+4}px)`; if(det.style.transform!==tr) det.style.transform=tr;
+  const s=v.s, b=W.tp[s+1], cc=casing(s,v.t), cas=v.k==='C', top=s>0?((casing(s-1,v.t)||{shoe:W.tp[s]}).shoe):0;
+  set(q('ey'),v.k==='N'?'НПВ · '+v.n.toUpperCase():cas?'СПУСК КОЛОННЫ':v.k==='W'?'РАБОТЫ БЕЗ УГЛУБЛЕНИЯ':'БУРИТСЯ СЕЙЧАС');
+  set(q('hh'),cas||v.k!=='D'?SEC[s].n+' '+SEC[s].c:SEC[s].dop.replace(/^Бурение п/,'П')+' '+SEC[s].c);
+  set(q('ds'),v.k==='W'?'забой '+nf(v.dep)+' м · '+nf1(v.el*24)+' ч':v.k==='N'?'забой '+nf(v.dep)+' м · простой '+nf1(v.el*24)+' ч':cas?v.n:v.dep<=b?nf(top)+' → '+nf(v.dep)+' из '+nf(b)+' м · ост. '+nf(b-v.dep):nf(top)+' → '+nf(v.dep)+' м · по проекту до '+nf(b));
+  const p=v.k==='W'||v.k==='N'?v.frac:cas?(cc&&cc.frac!=null?cc.frac:v.frac):clamp((v.dep-top)/Math.max(1,b-top),0,1), pw=(p*100).toFixed(1)+'%'; if(q('dp').style.width!==pw) q('dp').style.width=pw;
 }
 
 /* ---------- статичный фон: породы, шкалы, вышка — рисуем один раз ---------- */
@@ -3169,11 +3205,13 @@ function draw(v){
   const n=W.tp.length-1; let prevShoe=0; const gsteel=C['steel-hi'];
   for(let s=0;s<n;s++){
     const c=casing(s,v.t), hc=r(SEC[s].cas), sw=1.4, hb=hc+sw+ann;
+    if(c&&c.done&&s===v.s&&v.dep>c.shoe+1){ribbon(c.shoe,v.dep,hb,C.mud); line(c.shoe,v.dep,-hb,1,C.muted); line(c.shoe,v.dep,hb,1,C.muted)}
     if(c&&c.done){ribbon(0,c.shoe,hb,cemFill()); ribbon(0,c.shoe,hc,C.mud); line(0,c.shoe,-hc-sw/2,sw,gsteel); line(0,c.shoe,hc+sw/2,sw,gsteel);
       const e=sp(c.shoe); ctx.fillStyle=gsteel; for(const sg of [-1,1]){const bx=e.x+e.nx*sg*(hc+sw), by=e.y+e.ny*sg*(hc+sw); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+e.nx*sg*4,by+e.ny*sg*4); ctx.lineTo(bx-e.tx*6,by-e.ty*6); ctx.closePath(); ctx.fill()} prevShoe=c.shoe}
-    else if(v.dep>prevShoe-1&&(v.s>=s||v.dep>W.tp[s])){
+    else if(s===v.s&&v.dep>prevShoe-1){
       ribbon(prevShoe,Math.max(prevShoe,v.dep),hb,C.mud); line(prevShoe,v.dep,-hb,1,C.muted); line(prevShoe,v.dep,hb,1,C.muted);
-      if(c&&!c.done){const mc=c.shoe*c.frac; line(0,mc,-hc-sw/2,sw,gsteel); line(0,mc,hc+sw/2,sw,gsteel)}
+      if(c&&!c.done&&c.base){ribbon(0,c.base,hb,cemFill()); ribbon(0,c.base,hc,C.mud); line(0,c.base,-hc-sw/2,sw,gsteel); line(0,c.base,hc+sw/2,sw,gsteel)}
+      if(c&&!c.done){const mc=(c.base||0)+(c.shoe-(c.base||0))*c.frac; line(0,mc,-hc-sw/2,sw,gsteel); line(0,mc,hc+sw/2,sw,gsteel)}
     }
     const pTop=Math.max(W.tp[s],c&&c.done?c.shoe:v.dep);
     if(pTop<W.tp[s+1]-1&&!(c&&c.done)){line(pTop,W.tp[s+1],-hb,1.1,C.plan,[4,3]); line(pTop,W.tp[s+1],hb,1.1,C.plan,[4,3])}
@@ -3211,7 +3249,7 @@ function draw(v){
     if(SD==null||RM.matches||V.snap){SD={d:v.dep,u:0}; V.snap=false} else {const wq=9, x=SD.d-v.dep, e=Math.exp(-wq*dt); const nx=(x+(SD.u+wq*x)*dt)*e; SD.u=(SD.u-(SD.u+wq*x)*wq*dt)*e; SD.d=v.dep+nx; if(Math.abs(nx)<.05&&Math.abs(SD.u)<.5){SD.d=v.dep; SD.u=0}}
     v.dep=SD.d; layout(); buildCards(v); draw(v)}
   buildPath(); raf=requestAnimationFrame(frame);
-  return ()=>{alive=false; cancelAnimationFrame(raf); cards.forEach(c=>c.el.remove()); cards=[]}
+  return ()=>{alive=false; cancelAnimationFrame(raf); cards.forEach(c=>c.el.remove()); cards=[]; if(det) det.remove()}
 }
 
 function wellbore(canvas,w){
