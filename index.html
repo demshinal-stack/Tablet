@@ -1855,6 +1855,35 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 }
 /* ===== сборка 164: «хлебные крошки» в шапке не показываются (назад — кнопкой «Назад» в нижнем меню) ===== */
 #crumbs,.crumbs{display:none!important}
+/* 166: схема бурения по профилю — карточки секций справа */
+.wb2{background:var(--surface)}
+.wb2 canvas{display:block;width:100%}
+.wb2 .rc{font-variant-numeric:tabular-nums;position:absolute;left:0;top:0;box-sizing:border-box;height:28px;padding:5px 9px;border-radius:10px;background:var(--surface);border:1px solid var(--line);color:var(--ink);will-change:transform}
+.wb2 .rc .h{font-size:12.5px;font-weight:600;display:flex;justify-content:space-between;gap:6px;white-space:nowrap;overflow:hidden}
+.wb2 .rc .h span{font-weight:500;color:var(--muted);flex:none}
+.wb2 .rc .h em{font-style:normal;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.wb2 .rc .s{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb2 .rc .ok{color:var(--good,#1F8A5B)}
+.wb2 .rc.plan{background:color-mix(in srgb,var(--surface) 70%,transparent);border-style:dashed;border-color:var(--muted)}
+.wb2 .rc.plan .h{color:var(--muted);font-weight:500}
+.wb2 .rc.act{background:color-mix(in srgb,var(--prog) 12%,var(--surface));border-color:var(--prog);padding:6px 10px;height:70px}
+.wb2 .rc.act.npv{background:color-mix(in srgb,var(--st-npv) 12%,var(--surface));border-color:var(--st-npv)}
+.wb2 .rc .ey{font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--prog)}
+.wb2 .rc.npv .ey{color:var(--st-npv)}
+.wb2 .rc .pb{height:4px;border-radius:2px;background:color-mix(in srgb,var(--prog) 18%,transparent);overflow:hidden;margin-top:4px}
+.wb2 .rc .pb i{display:block;height:4px;background:var(--prog)}
+.wb2 .rc.npv .pb i{background:var(--st-npv)}
+.wb2-lg{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:11.5px;color:var(--muted);margin-top:-10px}
+.wb2-lg span{display:inline-flex;align-items:center;gap:6px}
+.wb2-lg i{display:inline-block}
+/* 166: шапка скважины прилипает к верху ленты */
+.wstk{position:sticky;top:0;height:0;z-index:7;margin:-18px -18px 0}
+.wstk>div{position:absolute;left:0;right:0;top:0;padding:9px 18px 9px;background:color-mix(in srgb,var(--surface) 94%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);opacity:0;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease;pointer-events:none}
+.wstk.on>div{opacity:1;transform:none;pointer-events:auto}
+.wstk .l1{display:flex;align-items:center;gap:8px;min-width:0}
+.wstk .l1 b{font-family:var(--f-display);font-weight:600;font-size:16px;color:var(--ink);white-space:nowrap}
+.wstk .l2{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+@media (prefers-reduced-motion:reduce){.wstk>div{transition:none}}
 </style>
 </head>
 <body>
@@ -1937,7 +1966,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:165,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:166,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3020,6 +3049,171 @@ function stageLabels(ctx,o){const {ns,tp,ys,stg,dep,yD,bx,W,H,top,cs}=o, lx=bx+1
   // забой
   const label='Забой '+nf0(dep)+' м'; ctx.font='600 11px Golos Text, system-ui'; const lw=ctx.measureText(label).width+14, px=Math.min(W-lw-6,lx);
   ctx.fillStyle=o.npv?cs['st-npv']:cs.fact; ctx.beginPath(); ctx.roundRect?ctx.roundRect(px,pill.y-10,lw,20,10):ctx.rect(px,pill.y-10,lw,20); ctx.fill(); ctx.fillStyle=cs.surface; ctx.fillText(label,px+7,pill.y+4)}
+/* Пульс 2 · сборка 166 — вкладка «Бурение»: схема по реальному профилю ствола.
+   Колонны, цемент и открытый ствол — вдоль траектории; одна текущая карточка секции;
+   карточки на постоянных местах; глубина сглажена пружиной; фон рисуется один раз. */
+function wellbore2(sch,cv,w0){
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), nf=v=>Math.round(v).toLocaleString('ru-RU'), nf1=v=>(Math.round(v*10)/10).toLocaleString('ru-RU');
+  const RM=matchMedia('(prefers-reduced-motion: reduce)');
+  const SEC=DSG.map(s=>({n:s.n,c:s.c,cas:s.casing,dop:s.drill||'',cop:s.casingOp||''}));
+  const W={no:w0.no,T:w0.T,tNow:w0.tNow,depth:w0.depth,tp:w0.tp,op:w0.op,segs:w0.fact.segs.map(g=>[g.t0,g.t1,g.op.k,g.op.s,g.op.n,g.d0,g.d1])};
+  const PAL={dark:{mud:'#0A1322',cem:'#33445C',cem2:'#4E627D',rock1:'#0F2036',rock2:'#132744',rockd:'#24406A','steel-lo':'#7F8EA3','steel-hi':'#E6ECF3',plan:'#6F86A6',accent:'#00BFAE',npv:'#FF6B5E',muted:'#97A9C2',faint:'#5F7593',line:'#2A4060',ink:'#E8EEF6',pipe:'#E6ECF3',card:'#0C1A2E'},
+    light:{mud:'#CFDAE8',cem:'#B9A68A',cem2:'#9C8869',rock1:'#ECE3D4',rock2:'#F3ECE0',rockd:'#D3C2A4','steel-lo':'#5D6B7E','steel-hi':'#56677D',plan:'#7C90AA',accent:'#00A693',npv:'#D8443A',muted:'#536781',faint:'#7D8FA6',line:'#C9D5E3',ink:'#0E2240',pipe:'#2E4565',card:'#FFFFFF'}};
+  const THEME=()=>{const m=(getComputedStyle(document.documentElement).getPropertyValue('--surface').trim()).match(/#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i); return m&&(parseInt(m[1],16)*.3+parseInt(m[2],16)*.59+parseInt(m[3],16)*.11)>150?'light':'dark'};
+  let C={}; const readColors=()=>{C={...PAL[THEME()]}};
+  let phase=0, last=0, SD=null, FDT=0, raf=0, alive=true; readColors();
+/* ---------- модель ---------- */
+function at(t){
+  if(t>=W.tNow-1e-6) return {t:W.tNow,dep:W.depth,k:W.op.k,s:W.op.s,n:W.op.n,frac:1,el:W.op.t||0};
+  const g=W.segs.find(g=>t>=g[0]&&t<g[1])||W.segs[0], f=clamp((t-g[0])/Math.max(1e-6,g[1]-g[0]),0,1);
+  return {t,dep:Math.min(W.depth,g[5]+(g[6]-g[5])*f),k:g[2],s:g[3],n:g[4],frac:f,el:t-g[0]};
+}
+function casing(s,t){
+  const cs=W.segs.filter(g=>g[2]==='C'&&g[3]===s&&g[0]<Math.min(t,W.tNow));
+  if(!cs.length){for(let j=s+1;j<W.tp.length-1;j++){if(W.segs.some(g=>g[2]==='C'&&g[3]===j&&g[0]<Math.min(t,W.tNow))) return {done:true,shoe:W.tp[s+1]}} return null}
+  const lastC=cs[cs.length-1], shoe=lastC[6]||W.tp[s+1];
+  const later=W.segs.some(g=>g[0]>=lastC[1]-1e-6&&g[0]<t&&g[2]!=='C');
+  if(t>=Math.min(lastC[1],W.tNow)-1e-6&&(later||t>=W.tNow-1e-6&&!(W.op.k==='C'&&W.op.s===s))) return {done:true,shoe};
+  return {done:false,shoe,frac:clamp((t-cs[0][0])/Math.max(1e-6,lastC[1]-cs[0][0]),0,1)};
+}
+/* траектория: мелкая сетка по стволу, точки в метрах (x — отход, z — по вертикали) */
+let PATH=[];
+function buildPath(){const N=400, tj=w0.traj, A=tj&&tj.at?tj.at:(md=>({x:0,z:md,inc:0})), out=[]; for(let i=0;i<=N;i++){const md=W.T*i/N, q=A(md); out.push({md,x:Math.max(0,q.x),z:q.z,inc:q.inc})} PATH=out}
+const pAt=md=>{const i=clamp(md/W.T*(PATH.length-1),0,PATH.length-1), i0=Math.floor(i), i1=Math.min(PATH.length-1,i0+1), f=i-i0, a=PATH[i0], b=PATH[i1]; return {x:a.x+(b.x-a.x)*f,z:a.z+(b.z-a.z)*f,inc:a.inc+(b.inc-a.inc)*f}};
+
+/* ---------- раскладка (только при смене размера/скважины) ---------- */
+const ctx=cv.getContext('2d'); let L=null, layoutKey='';
+function layout(){
+  const cw=sch.clientWidth, chMax=Math.round(Math.max(380,Math.min(560,innerHeight*.62))), key=cw+'|'+chMax+'|'+THEME(); if(key===layoutKey) return; layoutKey=key; readColors(); hatchPat=null;
+  const xmax=Math.max(1,...PATH.map(p=>p.x)), zmax=Math.max(1,...PATH.map(p=>p.z));
+  const left=46, top=64, right=14, bottom=34, maxR=cw<420?7:8;
+  const k=Math.min(xmax<300?1e9:(cw-left-right-maxR*2)/xmax,(chMax-top-bottom)/zmax);
+  /* высота по содержимому: без пустого низа, но не ниже места под подписи */
+  const ch=Math.round(Math.max(Math.min(chMax,top+zmax*k+bottom+maxR*2),340));
+  const dpr=Math.min(2,devicePixelRatio||1); cv.style.height=ch+'px'; cv.width=Math.round(cw*dpr); cv.height=Math.round(ch*dpr);
+  const ox=left+maxR+4, oy=top;
+  L={cw,ch,dpr,k,ox,oy,maxR,left,top,bottom,xmax,zmax,X:x=>ox+x*k,Y:z=>oy+z*k};
+  /* экранные точки ствола и нормали */
+  L.P=PATH.map(p=>({md:p.md,x:L.X(p.x),y:L.Y(p.z)}));
+  for(let i=0;i<L.P.length;i++){const a=L.P[Math.max(0,i-8)], b=L.P[Math.min(L.P.length-1,i+8)], dx=b.x-a.x, dy=b.y-a.y, l=Math.hypot(dx,dy)||1; L.P[i].nx=-dy/l; L.P[i].ny=dx/l; L.P[i].tx=dx/l; L.P[i].ty=dy/l}
+  /* колонка подписей: правее вертикального участка, над горизонтальным */
+  const vx=Math.max(...L.P.filter(p=>p.y<L.oy+(ch-top-bottom)*.35).map(p=>p.x));
+  L.railX=Math.round(Math.max(vx+maxR*2+34,cw*.36)); L.railW=cw-L.railX-12;
+  L.railBottom=x0=>{let m=ch-8; for(const p of L.P){if(p.x>=x0-14) m=Math.min(m,p.y-maxR*2-12)} return m};
+  buildCards.key=''; bgKey='';
+}
+const sp=md=>{const i=clamp(md/W.T*(L.P.length-1),0,L.P.length-1), i0=Math.floor(i), i1=Math.min(L.P.length-1,i0+1), f=i-i0, a=L.P[i0], b=L.P[i1]; return {x:a.x+(b.x-a.x)*f,y:a.y+(b.y-a.y)*f,nx:a.nx+(b.nx-a.nx)*f,ny:a.ny+(b.ny-a.ny)*f,tx:a.tx+(b.tx-a.tx)*f,ty:a.ty+(b.ty-a.ty)*f}};
+const seg=(m0,m1)=>{const out=[]; if(m1<=m0) return out; out.push(sp(m0)); for(const p of L.P){if(p.md>m0&&p.md<m1) out.push(p)} out.push(sp(m1)); return out};
+const off=(pts,d)=>pts.map(p=>[p.x+p.nx*d,p.y+p.ny*d]);
+function ribbon(m0,m1,hw,fill){const pts=seg(m0,m1); if(pts.length<2) return; const a=off(pts,-hw), b=off(pts,hw).reverse(); ctx.beginPath(); a.concat(b).forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.closePath(); ctx.fillStyle=fill; ctx.fill()}
+function line(m0,m1,d,w,stroke,dash){const pts=seg(m0,m1); if(pts.length<2) return; ctx.beginPath(); off(pts,d).forEach((q,i)=>i?ctx.lineTo(q[0],q[1]):ctx.moveTo(q[0],q[1])); ctx.lineWidth=w; ctx.lineJoin='round'; ctx.lineCap='butt'; ctx.strokeStyle=stroke; ctx.setLineDash(dash||[]); ctx.stroke(); ctx.setLineDash([])}
+let hatchPat=null, hatchTheme='';
+function cemFill(){const th=THEME(); if(hatchPat&&hatchTheme===th) return hatchPat; hatchTheme=th; const c=document.createElement('canvas'); c.width=c.height=6; const x=c.getContext('2d'); x.fillStyle=C.cem; x.fillRect(0,0,6,6); x.strokeStyle=C.cem2; x.lineWidth=1.3; x.beginPath(); x.moveTo(-1,7); x.lineTo(7,-1); x.stroke(); hatchPat=ctx.createPattern(c,'repeat'); return hatchPat}
+
+/* ---------- карточки: создаём при смене состава, двигаем плавно ---------- */
+let cards=[];
+function cardsData(v){
+  const n=W.tp.length-1, list=[];
+  for(let s=0;s<n;s++){
+    const c=casing(s,v.t), b=W.tp[s+1], head=SEC[s].n, D=SEC[s].c; let st='plan', anchor=b, html, key;
+    if(s===v.s&&!(c&&c.done&&v.k==='D')){st='act'; const cas=v.k==='C'||(c&&!c.done); anchor=cas?((c&&c.shoe)||v.dep):v.dep; key=(cas?'C':v.k)+s;
+      html=`<div class="ey" data-f="ey"></div><div class="h" data-f="hh"></div><div class="s" data-f="ds"></div><div class="pb"><i data-f="dp"></i></div>`}
+    else if(c&&c.done){st='done'; anchor=c.shoe; key='ok'+s+Math.round(c.shoe);
+      html=`<div class="h"><em>${head} ${D}</em><span class="ok" aria-label="спущена">✓ ${nf(c.shoe)} м</span></div>`}
+    else {key='p'+s; html=`<div class="h"><em>${head} ${D}</em><span>до ${nf(b)} м</span></div>`}
+    list.push({s,st,anchor,html,key,npv:v.k==='N'&&st==='act'});
+  }
+  return list;
+}
+function buildCards(v){
+  const list=cardsData(v), key=list.map(o=>o.key+o.st).join('|');
+  if(key!==buildCards.key){buildCards.key=key; const old=cards;
+    cards=list.map(o=>{const prev=old.find(c=>c.s===o.s); let e=prev&&prev.el; if(!e){e=document.createElement('div'); sch.appendChild(e)}
+      const chg=!prev||prev.key!==o.key; e.className='rc '+o.st+(o.npv?' npv':''); e.innerHTML=o.html; if(chg&&prev&&!RM.matches){e.animate([{opacity:.25},{opacity:1}],{duration:260,easing:'ease-out'})} e.style.width=L.railW+'px'; const h=o.st==='act'?70:28; return {...o,el:e,h,y:prev?prev.y:null}});
+    old.forEach(c=>{if(!cards.some(d=>d.el===c.el)) c.el.remove()})}
+  else cards.forEach((c,i)=>c.anchor=list[i].anchor);
+  /* текст, который меняется на ходу */
+  cards.forEach(c=>{if(c.st!=='act') return; const q=f=>c.el.querySelector('[data-f="'+f+'"]'), set=(e,t)=>{if(e&&e.textContent!==t) e.textContent=t};
+    const s=c.s, b=W.tp[s+1], cc=casing(s,v.t), cas=v.k==='C'||(cc&&!cc.done), top=s>0?((casing(s-1,v.t)||{shoe:W.tp[s]}).shoe):0;
+    set(q('ey'),v.k==='N'?'НПВ · '+v.n.toUpperCase():cas?'СПУСК КОЛОННЫ':'БУРИТСЯ СЕЙЧАС');
+    set(q('hh'),cas||v.k==='N'?SEC[s].n+' '+SEC[s].c:SEC[s].dop.replace(/^Бурение п/,'П')+' '+SEC[s].c);
+    set(q('ds'),v.k==='N'?'забой '+nf(v.dep)+' м · простой '+nf1(v.el*24)+' ч':cas?v.n:v.dep<=b?nf(top)+' → '+nf(v.dep)+' из '+nf(b)+' м · ост. '+nf(b-v.dep):nf(top)+' → '+nf(v.dep)+' м · по проекту до '+nf(b));
+    const p=cas?(cc?cc.frac:v.frac):clamp((v.dep-top)/Math.max(1,b-top),0,1); q('dp').style.width=(p*100).toFixed(1)+'%'});
+  /* места: по порядку секций сверху вниз, фиксированной высоты — не ездят за долотом */
+  let y=L.top-34; const tg=cards.map(c=>{const t=y; y+=c.h+6; return t});
+  cards.forEach((c,i)=>{c.y=c.y==null||RM.matches?tg[i]:Math.abs(tg[i]-c.y)<.2?tg[i]:c.y+(tg[i]-c.y)*(1-Math.exp(-FDT/.09)); c.el.style.transform=`translate(${L.railX}px,${c.y.toFixed(1)}px)`});
+}
+
+/* ---------- статичный фон: породы, шкалы, вышка — рисуем один раз ---------- */
+const BG=document.createElement('canvas'); let bgKey='';
+function drawBg(){const th=THEME(), key=layoutKey+th; if(key===bgKey) return; bgKey=key;
+  const {cw,ch,dpr,X,Y}=L; BG.width=cv.width; BG.height=cv.height; const g=BG.getContext('2d'); g.setTransform(dpr,0,0,dpr,0,0);
+  /* породы — горизонтальные слои по вертикали */
+  const zb=[0,.07,.15,.24,.36,.47,.58,.68,.8,.9,1.06].map(f=>L.oy+f*(ch-L.oy-L.bottom+20));
+  for(let i=0;i<zb.length-1;i++){g.fillStyle=i%2?C.rock2:C.rock1; g.fillRect(0,zb[i],cw,zb[i+1]-zb[i])}
+  g.fillStyle=C.rockd; for(let i=1;i<zb.length-1;i++) g.fillRect(0,zb[i],cw,.6);
+  g.fillStyle=C.card; g.fillRect(0,0,cw,L.oy); g.fillStyle=C.plan; g.fillRect(0,L.oy-1,cw,1.5);
+  /* шкала по вертикали и отходу */
+  g.font='10px Golos Text, system-ui'; g.textAlign='right'; g.fillStyle=C.muted; g.fillText('м',L.left-8,L.oy-8);
+  const zs=L.zmax>2500?1000:500; for(let z=zs;z<=L.zmax;z+=zs){g.fillStyle=C.muted; g.fillText(nf(z),L.left-8,Y(z)+3.5); g.fillStyle=C.line; g.fillRect(L.left-5,Y(z),cw-L.left,0.6)}
+  if(L.xmax>300){g.textAlign='center'; g.fillStyle=C.muted; const xs=L.xmax>2500?1000:500; for(let x=xs;x<=L.xmax;x+=xs) g.fillText(nf(x),X(x),ch-12); g.textAlign='left'; g.fillText('отход, м →',L.left-30,ch-12)}
+  /* вышка */
+  const x0=X(0), y0=L.oy; g.strokeStyle=C.ink; g.globalAlpha=.75; g.lineWidth=1.2; g.beginPath(); g.moveTo(x0-14,y0-1); g.lineTo(x0-3,y0-44); g.moveTo(x0+14,y0-1); g.lineTo(x0+3,y0-44); for(const f of [.25,.5,.75]){const yy=y0-1-f*43, hw=14-f*11; g.moveTo(x0-hw,yy); g.lineTo(x0+hw,yy)} g.stroke(); g.lineWidth=2.2; g.beginPath(); g.moveTo(x0-6,y0-44); g.lineTo(x0+6,y0-44); g.stroke(); g.globalAlpha=1;
+}
+/* ---------- рисунок ---------- */
+function draw(v){
+  const {cw,ch,dpr,maxR,X,Y,k}=L; ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,cw,ch);
+  const r=mm=>2+Math.max(0,mm-110)/(426-110)*(maxR-2), ann=2;
+  drawBg(); ctx.drawImage(BG,0,0,cw,ch);
+  /* колонны вдоль ствола */
+  const n=W.tp.length-1; let prevShoe=0; const gsteel=C['steel-hi'];
+  for(let s=0;s<n;s++){
+    const c=casing(s,v.t), hc=r(SEC[s].cas), sw=1.4, hb=hc+sw+ann;
+    if(c&&c.done){ribbon(0,c.shoe,hb,cemFill()); ribbon(0,c.shoe,hc,C.mud); line(0,c.shoe,-hc-sw/2,sw,gsteel); line(0,c.shoe,hc+sw/2,sw,gsteel);
+      const e=sp(c.shoe); ctx.fillStyle=gsteel; for(const sg of [-1,1]){const bx=e.x+e.nx*sg*(hc+sw), by=e.y+e.ny*sg*(hc+sw); ctx.beginPath(); ctx.moveTo(bx,by); ctx.lineTo(bx+e.nx*sg*4,by+e.ny*sg*4); ctx.lineTo(bx-e.tx*6,by-e.ty*6); ctx.closePath(); ctx.fill()} prevShoe=c.shoe}
+    else if(v.dep>prevShoe-1&&(v.s>=s||v.dep>W.tp[s])){
+      ribbon(prevShoe,Math.max(prevShoe,v.dep),hb,C.mud); line(prevShoe,v.dep,-hb,1,C.muted); line(prevShoe,v.dep,hb,1,C.muted);
+      if(c&&!c.done){const mc=c.shoe*c.frac; line(0,mc,-hc-sw/2,sw,gsteel); line(0,mc,hc+sw/2,sw,gsteel)}
+    }
+    const pTop=Math.max(W.tp[s],c&&c.done?c.shoe:v.dep);
+    if(pTop<W.tp[s+1]-1&&!(c&&c.done)){line(pTop,W.tp[s+1],-hb,1.1,C.plan,[4,3]); line(pTop,W.tp[s+1],hb,1.1,C.plan,[4,3])}
+  }
+  /* бурильная колонна, раствор, долото */
+  const s=clamp(v.s,0,n-1), hcS=r(SEC[s].cas), hbB=hcS+1.4+ann, bp=sp(v.dep), col=v.k==='N'?C.npv:C.accent;
+  if(v.k!=='C'){
+    line(0,Math.max(0,v.dep-hbB*1.2/k),0,1.6,C.pipe);
+    if(v.k==='D'&&v.dep>20){ctx.fillStyle=C.accent; const gap=W.T/36, shift=(phase*gap*0.35)%gap;
+      for(let m=shift;m<v.dep-20;m+=gap){const p=sp(m); ctx.globalAlpha=.85; ctx.beginPath(); ctx.arc(p.x,p.y,1.4,0,7); ctx.fill()}
+      ctx.strokeStyle=C.accent; ctx.lineWidth=1.1; ctx.globalAlpha=.55; const inner=Math.max(4,hbB*.62);
+      for(let m=v.dep-20-shift;m>15;m-=gap){const p=sp(m); for(const sg of [-1,1]){const cx=p.x+p.nx*sg*inner, cy=p.y+p.ny*sg*inner; ctx.beginPath(); ctx.moveTo(cx+p.tx*2.5+p.nx*2.2,cy+p.ty*2.5+p.ny*2.2); ctx.lineTo(cx-p.tx*1.5,cy-p.ty*1.5); ctx.lineTo(cx+p.tx*2.5-p.nx*2.2,cy+p.ty*2.5-p.ny*2.2); ctx.stroke()}}
+      ctx.globalAlpha=1}
+    const bw=Math.max(5,hbB*.95), bh=Math.max(6,bw*.8), ang=Math.atan2(bp.ty,bp.tx)-Math.PI/2;
+    const g=ctx.createRadialGradient(bp.x,bp.y,0,bp.x,bp.y,bw*3); g.addColorStop(0,col+'99'); g.addColorStop(1,col+'00'); ctx.fillStyle=g; ctx.beginPath(); ctx.arc(bp.x,bp.y,bw*3,0,7); ctx.fill();
+    ctx.save(); ctx.translate(bp.x,bp.y); ctx.rotate(ang);
+    ctx.fillStyle=C['steel-hi']; ctx.beginPath(); ctx.moveTo(-bw,-bh); ctx.lineTo(bw,-bh); ctx.lineTo(bw*.8,-bh*.35); ctx.quadraticCurveTo(0,bh*.3,-bw*.8,-bh*.35); ctx.closePath(); ctx.fill();
+    if(v.k==='D'){ctx.fillStyle=C.mud; for(let q=0;q<8;q++){const th=q*Math.PI/4+phase*4, c2=Math.cos(th); if(c2<0) continue; ctx.beginPath(); ctx.arc(bw*.72*Math.sin(th),-bh*.45,.8+1.1*c2,0,7); ctx.fill()}}
+    ctx.restore();
+    if(v.k==='N'){ctx.strokeStyle=C.npv; ctx.globalAlpha=.45+.45*Math.sin(phase*4); ctx.lineWidth=2; ctx.beginPath(); ctx.arc(bp.x,bp.y,bw*2.2,0,7); ctx.stroke(); ctx.globalAlpha=1}
+  }
+  /* метка забоя на шкале */
+  ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(L.left-1,bp.y); ctx.lineTo(L.left-8,bp.y-4.5); ctx.lineTo(L.left-8,bp.y+4.5); ctx.fill();
+  /* выноски */
+  cards.forEach(c=>{if(c.y==null||c.st!=='act') return; const sec=SEC[c.s], hc=r(sec.cas), hb=hc+1.4+ann, a=sp(c.anchor), side=a.nx<0?-1:1, ax=a.x+Math.abs(a.nx)*hb+2, ay=a.y+(a.ny>0?-1:1)*0, yC=c.y+Math.min(c.h/2,16), xm=L.railX-8;
+    ctx.strokeStyle=c.st==='act'?(c.npv?C.npv:C.accent):C.line; ctx.globalAlpha=c.st==='plan'?.75:1; ctx.lineWidth=c.st==='act'?1.3:1; ctx.setLineDash(c.st==='plan'?[3,3]:[]);
+    ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(xm,ay); ctx.lineTo(xm,yC); ctx.lineTo(L.railX,yC); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha=1;
+    ctx.fillStyle=ctx.strokeStyle; ctx.beginPath(); ctx.arc(ax,ay,1.8,0,7); ctx.fill()});
+}
+
+  function frame(now){if(!alive) return; raf=requestAnimationFrame(frame);
+    if(!sch.clientWidth||!sch.isConnected) return;
+    const dt=last?Math.min(.05,(now-last)/1000):0; last=now; if(!RM.matches) phase+=dt;
+    const V=cv._V||{}, T=Math.min(W.tNow,V.t!=null?V.t:W.tNow), v=at(T); FDT=dt;
+    if(SD==null||RM.matches||V.snap){SD={d:v.dep,u:0}; V.snap=false} else {const wq=9, x=SD.d-v.dep, e=Math.exp(-wq*dt); const nx=(x+(SD.u+wq*x)*dt)*e; SD.u=(SD.u-(SD.u+wq*x)*wq*dt)*e; SD.d=v.dep+nx; if(Math.abs(nx)<.05&&Math.abs(SD.u)<.5){SD.d=v.dep; SD.u=0}}
+    v.dep=SD.d; layout(); buildCards(v); draw(v)}
+  buildPath(); raf=requestAnimationFrame(frame);
+  return ()=>{alive=false; cancelAnimationFrame(raf); cards.forEach(c=>c.el.remove()); cards=[]}
+}
+
 function wellbore(canvas,w){
   canvas._V=canvas._V||{t:w.tNow};
   if(w.traj&&!w.traj.vertical) return wellboreDir(canvas,w);
@@ -3263,7 +3457,7 @@ function wtScroller(){let e=document.querySelector('#pbody [data-wt]'); while(e&
 function wtSettle(st){const RMm=matchMedia('(prefers-reduced-motion: reduce)').matches;
   const place=()=>{const b=document.querySelector('#pbody [data-wt]'); if(!b) return null; const row=b.parentElement, sc=wtScroller(); if(!sc) return null;
     const old=sc.querySelector('.wt-pad'); if(old) old.remove();
-    const off=Math.max(0,row.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-6);
+    const stk=document.querySelector('#pbody .wstk>div'), off=Math.max(0,row.getBoundingClientRect().top-sc.getBoundingClientRect().top+sc.scrollTop-6-(stk?stk.offsetHeight:0));
     const need=Math.max(off,st)+sc.clientHeight-sc.scrollHeight;
     if(need>0){const p=document.createElement('div'); p.className='wt-pad'; p.style.height=Math.ceil(need)+'px'; p.setAttribute('aria-hidden','true'); panel.appendChild(p)}
     sc.scrollTop=st; return {sc,off}};
@@ -3319,7 +3513,7 @@ function renderPanel(){
   }
   if(lev==='well'){
     const w=WELLS.find(x=>x.id===state.well), tab=state.wtab, lag=w.tNow-timeAt(w.planS,w.depth), rem=Math.max(0,w.planS.end-timeAt(w.planS,w.depth));
-    h=`<div class="pn"><div class="ph"><div class="eyebrow">${w.field.n} · куст ${esc(w.pad)}</div><h1>Скв. ${esc(w.no)}</h1><span class="rule"></span>
+    h=`<div class="pn"><div class="wstk" id="wstk"><div><div class="l1"><b>Скв. ${esc(w.no)}</b>${pill(w.status)}</div><div class="l2">${esc(w.field.n)} · куст ${esc(w.pad)} · ${esc(w.cust.n)}</div></div></div><div class="ph"><div class="eyebrow">${w.field.n} · куст ${esc(w.pad)}</div><h1>Скв. ${esc(w.no)}</h1><span class="rule"></span>
       <div class="sub">${pill(w.status)} &nbsp;${esc(w.rig)} · ${esc(w.cust.n)}</div>${w.sync.ok?'':`<div class="syncw"><b>Рапорт не получен при загрузке ${fmtMsk(LOAD.at)}</b>Показаны данные на ${fmtMsk(w.sync.at,1)} МСК · ${esc(w.sync.why)}</div>`}</div>
       <div class="big"><b>${nf0(w.depth)}</b><span>м из ${nf0(w.target)} · ${Math.round(Math.min(1,w.depth/w.target)*100)} %</span></div>
       ${(()=>{const X=["day","month","year"].map(k=>npvShare([w],k)); return `<button type="button" class="npvw" id="npvW">${[["Сутки",0],["Месяц",1],["Год",2]].map(([n,i])=>`<span><small>НПВ · ${n.toLowerCase()}</small><b class="${X[i].opct>NORM.npv_bad?"bad":""}">${pct1(X[i].opct)}</b><em>весь ${pct1(X[i].pct)} · ${nf1(X[i].h)} ч</em></span>`).join("")}<i>›</i></button>`})()}
@@ -3331,7 +3525,7 @@ function renderPanel(){
     if(tab==='drill') h+=`<div class="rp nogest"><button type="button" class="rp-b" id="rpGo" aria-label="Показать бурение с начала"><svg viewBox="0 0 24 24" aria-hidden="true"><path id="rpIco" d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg></button>
       <div class="rp-m"><div class="rp-t"><b id="rpD"></b><span id="rpS"></span></div><input type="range" id="rpR" min="0" max="${w.tNow.toFixed(3)}" step="0.01" value="${w.tNow.toFixed(3)}" aria-label="Момент бурения"></div>
       <div class="rp-sp seg" id="rpSp">${[1,2,4].map(k=>`<button type="button" data-k="${k}" aria-pressed="${k===1}">${k}×</button>`).join('')}</div></div>
-      <div class="wb"><canvas id="wbc" style="height:420px" aria-label="Схема скважины"></canvas></div><div class="facts"><div style="grid-column:1/-1"><span>Профиль</span><b>${w.traj?w.traj.type:'Вертикальная'}</b></div>${w.traj&&!w.traj.vertical?(()=>{const Tj=w.traj, q=Tj.at(Math.min(w.depth,w.T)), e=Tj.planAt(w.T), af=Tj.factReal?'':'≈ ', ap=Tj.planReal?'':'≈ '; return `<div><span>Зенитный угол</span><b>${af}${Math.round(q.inc)}°</b></div><div><span>Отход сейчас</span><b>${af}${nf0(q.x)} м</b></div><div><span>По вертикали</span><b>${af}${nf0(q.z)} м</b></div><div><span>Отход по проекту</span><b>${ap}${nf0(e.x)} м</b></div>`+(Tj.tvd?`<div><span>Проект по вертикали</span><b>${nf0(Tj.tvd)} м</b></div>`:'')})():''}${w.traj&&w.traj.note?`<p class="note trajnote" style="grid-column:1/-1;margin:2px 0 0">${esc(w.traj.note)}</p>`:''}<div style="grid-column:1/-1"><span>Назначение</span><b>${esc(purpName(w.purpose))}</b></div><div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><div><span>Переедет на</span><b>${w.next?esc(w.next)+(w.nextNote?' · '+esc(w.nextNote):''):'—'}</b></div><div style="grid-column:1/-1"><span>Ресурс оборуд.</span><b>${resHTML(w)}</b></div></div>`;
+      <div class="wb wb2" id="wbx"><canvas id="wbc" aria-label="Схема скважины по профилю ствола: колонны, цемент, долото"></canvas></div><div class="wb2-lg" aria-hidden="true"><span><i style="width:14px;height:3px;background:var(--ink);border-radius:2px"></i>колонна</span><span><i style="width:12px;height:8px;background:#B9A68A;border-radius:2px"></i>цемент</span><span><i style="width:8px;height:8px;background:var(--prog);border-radius:50%"></i>долото</span><span><i style="width:14px;border-top:1.5px dashed var(--muted)"></i>проект</span><span>ширина колонн преувеличена · породы условно</span></div><div class="facts"><div style="grid-column:1/-1"><span>Профиль</span><b>${w.traj?w.traj.type:'Вертикальная'}</b></div>${w.traj&&!w.traj.vertical?(()=>{const Tj=w.traj, q=Tj.at(Math.min(w.depth,w.T)), e=Tj.planAt(w.T), af=Tj.factReal?'':'≈ ', ap=Tj.planReal?'':'≈ '; return `<div><span>Зенитный угол</span><b>${af}${Math.round(q.inc)}°</b></div><div><span>Отход сейчас</span><b>${af}${nf0(q.x)} м</b></div><div><span>По вертикали</span><b>${af}${nf0(q.z)} м</b></div><div><span>Отход по проекту</span><b>${ap}${nf0(e.x)} м</b></div>`+(Tj.tvd?`<div><span>Проект по вертикали</span><b>${nf0(Tj.tvd)} м</b></div>`:'')})():''}${w.traj&&w.traj.note?`<p class="note trajnote" style="grid-column:1/-1;margin:2px 0 0">${esc(w.traj.note)}</p>`:''}<div style="grid-column:1/-1"><span>Назначение</span><b>${esc(purpName(w.purpose))}</b></div><div><span>Пришла с</span><b>${esc(w.from||'—')}</b></div><div><span>Переедет на</span><b>${w.next?esc(w.next)+(w.nextNote?' · '+esc(w.nextNote):''):'—'}</b></div><div style="grid-column:1/-1"><span>Ресурс оборуд.</span><b>${resHTML(w)}</b></div></div>`;
     if(tab==='ggd') h+=`<div class="sec"><div class="sec-h"><h3>Глубина — день</h3><div class="legend"><span><i style="background:var(--fact)"></i>факт</span><span><i style="background:var(--plan)"></i>ГТН</span><span><i style="background:var(--lks)"></i>ЛКС</span><span><i style="background:var(--st-npv);opacity:.5;height:9px"></i>НПВ</span></div></div><div class="chart" id="ggd"></div></div>
       <div class="facts"><div><span>Забуривание</span><b>${fmtDY(dateAt(w.spud))}</b></div><div><span>Сутки на скважине</span><b>${nf1(w.tNow)} из ${nf1(w.planS.end)}</b></div><div><span>К графику ГТН</span><b style="color:${lag>NORM.lag_card?'var(--bad)':lag<-NORM.lag_card?'var(--good)':'var(--ink)'}">${signed1(lag)} сут</b></div><div><span>ЛКС на скважину</span><b>${nf1(w.lksS.end)} сут</b></div><div><span>Прогноз окончания</span><b>${fmtDY(dateAt(rem))}</b></div><div><span>НПВ на скважине</span><b>${nf1(d3.sum(w.fact.segs.filter(g=>g.op.k==='N'&&g.t0<w.tNow),g=>Math.min(g.t1,w.tNow)-g.t0)*24)} ч</b></div></div>`;
     if(tab==='dyn') h+=dynHTML('wd');
@@ -3361,7 +3555,7 @@ function renderPanel(){
     h+='</div>'; panel.innerHTML=h; bindGo(panel);
     panel.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{const sc=wtScroller(), st=sc?sc.scrollTop:0; state.wtab=b.dataset.wt; renderPanel(); wtSettle(st)});
     document.getElementById('opSum').onclick=()=>nOpen('well',{w:w.id,d:0}); document.getElementById('npvW').onclick=()=>npvOpen([w],'month');
-    if(tab==='drill'){const cv=document.getElementById('wbc'); cv._V={t:w.tNow}; const stop=wellbore(cv,w);
+    if(tab==='drill'){const cv=document.getElementById('wbc'); cv._V={t:w.tNow}; const stop=wellbore2(document.getElementById('wbx'),cv,w);
       const R=document.getElementById('rpR'), go=document.getElementById('rpGo'), ico=document.getElementById('rpIco'); let play=false, raf=0, last=0, spd=1;
       const DUR=16; // секунд на весь путь при 1×
       const show=()=>{const v=viewAt(w,cv._V.t), now=v.t>=w.tNow-1e-6; R.value=v.t;
@@ -3371,7 +3565,7 @@ function renderPanel(){
       const setIco=()=>{ico.setAttribute('d',play?'M7 5h3.6v14H7zM13.4 5H17v14h-3.6z':'M8 5.5v13l11-6.5z'); go.setAttribute('aria-label',play?'Пауза':'Показать бурение с начала')};
       const tick=ts=>{if(!play) return; const dt=last?Math.min(.1,(ts-last)/1000):0; last=ts; cv._V.t=Math.min(w.tNow,cv._V.t+dt*w.tNow/DUR*spd); show();
         if(cv._V.t>=w.tNow){play=false; setIco(); return} raf=requestAnimationFrame(tick)};
-      go.onclick=()=>{play=!play; if(play){if(cv._V.t>=w.tNow-1e-6) cv._V.t=0; last=0; raf=requestAnimationFrame(tick)} else cancelAnimationFrame(raf); setIco(); show()};
+      go.onclick=()=>{play=!play; if(play){if(cv._V.t>=w.tNow-1e-6){cv._V.t=0; cv._V.snap=true} last=0; raf=requestAnimationFrame(tick)} else cancelAnimationFrame(raf); setIco(); show()};
       R.oninput=()=>{play=false; cancelAnimationFrame(raf); setIco(); cv._V.t=+R.value; show()};
       document.querySelectorAll('#rpSp button').forEach(b=>b.onclick=()=>{spd=+b.dataset.k; document.querySelectorAll('#rpSp button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
       show(); stopWB=()=>{play=false; cancelAnimationFrame(raf); stop()}}
@@ -6658,6 +6852,12 @@ const orbClick=()=>{if(anim&&anim.orbit){anim=null; orbB.setAttribute('aria-pres
  try{if(localStorage.getItem('pulse2-relief')==='1') requestAnimationFrame(()=>setOn(true))}catch(e){}
  }}
 
+
+/* 166: новая карточка — с начала ленты; шапка скважины прилипает */
+(function(){const P=document.getElementById('pbody'); if(!P||typeof renderPanel!=='function') return; let pk=null;
+  const stk=()=>{const s=document.getElementById('wstk'), ph=P.querySelector('.ph'); if(!s||!ph) return; const on=ph.getBoundingClientRect().bottom<P.getBoundingClientRect().top+4; if(s.classList.contains('on')!==on){s.classList.toggle('on',on); s.setAttribute('aria-hidden',String(!on))}};
+  let q=0; P.addEventListener('scroll',()=>{if(!q) q=requestAnimationFrame(()=>{q=0; stk()})},{passive:true});
+  const rp=renderPanel; renderPanel=function(){const k=[state.level,state.well,state.field,state.cust].join('|'), ch=k!==pk; pk=k; const r=rp.apply(this,arguments); if(ch){if(window.__wtAnim){cancelAnimationFrame(window.__wtAnim); window.__wtAnim=0} P.scrollTop=0} stk(); return r}})();
 window.__app={go,state:()=>state,WELLS,setScreen,nOpen,PREFS:()=>PREFS};
 };
 
