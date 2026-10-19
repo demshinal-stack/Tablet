@@ -1975,7 +1975,7 @@ body.orb-dock.orb-squeeze .tabbar{right:76px!important}
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:168,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:169,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -4679,7 +4679,7 @@ button.r2t{cursor:pointer;width:100%}
 .r2g .hit{fill:transparent}
 .r2g [data-t]{cursor:pointer}
 .r2tip{position:fixed;z-index:50;pointer-events:none;background:var(--tip,#00234B);color:var(--tip-ink,#fff);font-size:12.5px;line-height:1.35;padding:7px 9px;border-radius:9px;max-width:260px;box-shadow:0 6px 18px rgba(0,25,55,.25);opacity:0;transition:opacity .12s}
-.r2tip.on{opacity:1} /* сборка 109: без всплывающих подсказок на сенсорных устройствах */ @media (hover:none),(pointer:coarse){.r2tip{display:none!important}} 
+.r2tip.on{opacity:1} .r2ch svg.r2dim :is(rect,circle,ellipse,line,path,polygon,polyline,text):not(.r2on):not(.r2keep):not(.hit):not(.r2band){opacity:.28;transition:opacity .12s} .r2ch svg :is(rect,circle,ellipse,line,path,polygon,polyline,text).r2on{transition:opacity .12s} .r2ch svg .r2band{fill:var(--ink,#fff);opacity:.09;pointer-events:none} /* сборка 109: без всплывающих подсказок на сенсорных устройствах */ @media (hover:none),(pointer:coarse){.r2tip{display:none!important}} 
 /* анимация: только при первом заходе на экран за сессию */
 .r2g.anim .gy{transform-box:fill-box;transform-origin:50% 100%;animation:r2gy .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
 .r2g.anim .gyd{transform-box:fill-box;transform-origin:50% 0;animation:r2gy .8s cubic-bezier(.2,.8,.2,1) both;animation-delay:var(--d,0s)}
@@ -5335,9 +5335,28 @@ function nearT(e){if(e.target.closest&&e.target.closest('[data-dm]')) return nul
   svg.querySelectorAll('[data-t]').forEach(el=>{if(el.classList.contains('hit')) return; const r=el.getBoundingClientRect(); const dx=Math.max(r.left-x,0,x-r.right), dy=Math.max(r.top-y,0,y-r.bottom);
     if(dx>R) return; const d=dx*3+Math.min(dy,R*4)*.25+(dy>R*4?1e6:0); if(d<bd){bd=d; best=el}}); return best}
 const TOUCHUI=matchMedia('(hover:none),(pointer:coarse)').matches;
-function tipAt(e){const tip=shadow.querySelector('.r2tip'); if(!tip) return; if(TOUCHUI&&e.pointerType!=='mouse'){tip.classList.remove('on'); return} const el=nearT(e); if(!el){tip.classList.remove('on'); return}
+/* 169: подсветка того, о чём подсказка — строка (горизонтальные полосы), столбец (вертикальные), одинаковые клетки или сам сегмент */
+function r2hl(el){const prev=r2hl.svg, svg=el&&el.closest?el.closest('.r2ch svg'):null;
+  if(prev&&(prev!==svg||!el)){prev.classList.remove('r2dim'); prev.querySelectorAll('.r2on,.r2keep').forEach(x=>x.classList.remove('r2on','r2keep')); prev.querySelectorAll('.r2band').forEach(x=>x.remove()); r2hl.svg=null; r2hl.el=null}
+  if(!svg||el===r2hl.el) return;
+  svg.querySelectorAll('.r2on,.r2keep').forEach(x=>x.classList.remove('r2on','r2keep')); svg.querySelectorAll('.r2band').forEach(x=>x.remove()); r2hl.el=el; r2hl.svg=svg;
+  const ALL=[...svg.querySelectorAll('rect,circle,ellipse,line,path,polygon,polyline,text')], tag=el.tagName.toLowerCase();
+  const same=el.dataset.t?[...svg.querySelectorAll('[data-t]')].filter(x=>x!==el&&x.dataset.t===el.dataset.t&&!x.classList.contains('hit')):[];
+  svg.classList.add('r2dim');
+  if(same.length){[el,...same].forEach(x=>x.classList.add('r2on')); return}
+  if(!el.classList.contains('hit')&&!/^(rect|line|circle|ellipse)$/.test(tag)){el.classList.add('r2on'); ALL.forEach(x=>{if(x.tagName.toLowerCase()==='text') x.classList.add('r2keep')}); return}
+  const R=el.getBoundingClientRect(), S=svg.getBoundingClientRect(), hz=el.classList.contains('hit')||R.width>=R.height;
+  let a=hz?R.top:R.left, b=hz?R.bottom:R.right; if(b-a<12){const m=(a+b)/2; a=m-6; b=m+6} const th=b-a;
+  ALL.forEach(x=>{if(x===el&&el.classList.contains('hit')) return; const r=x.getBoundingClientRect(); if(!r.width&&!r.height) return; const ext=hz?r.height:r.width, c=hz?(r.top+r.bottom)/2:(r.left+r.right)/2;
+    if(ext>th*1.6+8){x.classList.add('r2keep'); return} if(c>=a-1&&c<=b+1) x.classList.add('r2on')});
+  try{const inv=svg.getScreenCTM().inverse(), P=(X,Y)=>{const q=svg.createSVGPoint(); q.x=X; q.y=Y; return q.matrixTransform(inv)};
+    const p1=hz?P(S.left,a-2):P(a-3,S.top), p2=hz?P(S.right,b+2):P(b+3,S.bottom), r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('class','r2band'); r.setAttribute('x',Math.min(p1.x,p2.x)); r.setAttribute('y',Math.min(p1.y,p2.y)); r.setAttribute('width',Math.abs(p2.x-p1.x)); r.setAttribute('height',Math.abs(p2.y-p1.y)); r.setAttribute('rx',6);
+    const first=svg.querySelector('.r2on'); let anc=first; while(anc&&anc.parentNode!==svg) anc=anc.parentNode; svg.insertBefore(r,anc||svg.firstChild)}catch(e){}}
+function tipAt(e){const tip=shadow.querySelector('.r2tip'); if(!tip) return; if(TOUCHUI&&e.pointerType!=='mouse'){tip.classList.remove('on'); return} const el=nearT(e); r2hl(e.pointerType==='mouse'?el:null); if(!el){tip.classList.remove('on'); return}
   tip.textContent=el.dataset.t; tip.classList.add('on'); const x=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+12), y=Math.max(60,e.clientY-tip.offsetHeight-12); tip.style.left=x+'px'; tip.style.top=y+'px'}
 shadow.addEventListener('pointermove',e=>{if(e.pointerType==='mouse') tipAt(e)});
+shadow.addEventListener('pointerout',e=>{const rt=e.relatedTarget; if(e.pointerType==='mouse'&&(!rt||!shadow.contains(rt))){r2hl(null); const tip=shadow.querySelector('.r2tip'); if(tip) tip.classList.remove('on')}});
 shadow.addEventListener('pointerup',e=>{if(e.pointerType!=='mouse'){tipAt(e); const tip=shadow.querySelector('.r2tip'); clearTimeout(tipAt._t); tipAt._t=setTimeout(()=>tip&&tip.classList.remove('on'),2200)}});
 /* сортировка списков, раскрытие групп инцидентов — без перехода на другой экран */
 const toggleExp=a=>{const k=KEY+'.'+a; EXP=EXP===k?null:k; render(true)};
