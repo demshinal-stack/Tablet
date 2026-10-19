@@ -1937,7 +1937,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:164,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:165,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -3268,8 +3268,8 @@ function wtSettle(st){const RMm=matchMedia('(prefers-reduced-motion: reduce)').m
     if(need>0){const p=document.createElement('div'); p.className='wt-pad'; p.style.height=Math.ceil(need)+'px'; p.setAttribute('aria-hidden','true'); panel.appendChild(p)}
     sc.scrollTop=st; return {sc,off}};
   const anim=(sc,from,to)=>{if(window.__wtAnim) cancelAnimationFrame(window.__wtAnim); if(RMm||Math.abs(to-from)<4){sc.scrollTop=to; return}
-    const d=Math.min(560,Math.max(320,Math.abs(to-from)*.6)), t0=performance.now(), e=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
-    const step=now=>{const k=Math.min(1,(now-t0)/d); sc.scrollTop=from+(to-from)*e(k); if(k<1) window.__wtAnim=requestAnimationFrame(step); else window.__wtAnim=0};
+    const d=Math.min(560,Math.max(320,Math.abs(to-from)*.6)); let t0=null; const e=x=>x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
+    const step=now=>{if(t0==null) t0=now; const k=Math.min(1,(now-t0)/d); sc.scrollTop=from+(to-from)*e(k); if(k<1) window.__wtAnim=requestAnimationFrame(step); else window.__wtAnim=0};
     window.__wtAnim=requestAnimationFrame(step)};
   const r=place(); if(!r) return;
   if(typeof isPhoneSheet==='function'&&isPhoneSheet()&&sheet!=='max'){setSheet('max'); setTimeout(()=>{const q=place(); if(q) anim(q.sc,q.sc.scrollTop,q.off)},300); return}
@@ -6100,7 +6100,7 @@ setTimeout(()=>{let t=''; try{const S=daySum(0), live=S.inc.filter(i=>i.live); i
   const sig=e=>e.tagName+'|'+[...e.attributes].filter(a=>/^(data-|aria-label$|id$)/.test(a.name)).map(a=>a.name+'='+a.value).join('&')+'|'+(e.textContent||'').replace(/\s+/g,' ').trim().slice(0,24);
   const st=()=>{try{const s=state; return [s.screen,s.level,s.field,s.cust,s.well,s.mode,document.body.className.includes('mode-rep')].join('/')}catch(e){return ''}};
   const scr=el=>{let n=el.parentElement; while(n&&n!==document.body){const o=getComputedStyle(n).overflowY; if(/(auto|scroll)/.test(o)&&n.scrollHeight>n.clientHeight+1) return n; n=n.parentElement} return null};
-  document.addEventListener('click',ev=>{const el=ev.target.closest&&ev.target.closest(SEL); if(!el||el.closest('#repwrap,.aipan,.aiorb,.aitag,iframe')) return;
+  document.addEventListener('click',ev=>{const el=ev.target.closest&&ev.target.closest(SEL); if(!el||el.closest('#repwrap,.aipan,.aiorb,.aitag,iframe,[data-wt]')) return;
     const k=sig(el), all=()=>[...document.querySelectorAll(SEL)].filter(x=>sig(x)===k), i=all().indexOf(el), top=el.getBoundingClientRect().top, s0=st(), t0=performance.now();
     const fix=()=>{if(TT>t0||st()!==s0) return; let n=el.isConnected?el:all()[i]; if(!n){const dk=x=>x.tagName+'|'+[...x.attributes].filter(z=>/^data-/.test(z.name)).map(z=>z.name+'='+z.value).join('&'), d0=dk(el); if(d0.includes('=')) n=[...document.querySelectorAll(SEL)].find(x=>dk(x)===d0)} if(!n) return; let d=n.getBoundingClientRect().top-top; if(Math.abs(d)<=1) return;
       let c=scr(n), g=0; mine=true; try{while(c&&Math.abs(d)>1&&g++<5){const b=n.getBoundingClientRect().top; c.scrollTop+=d; const a=n.getBoundingClientRect().top; d=a-top; if(Math.abs(a-b)<0.5) c=scr(c)}}finally{mine=false}};
