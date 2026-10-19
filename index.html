@@ -1924,7 +1924,7 @@ body.hf-sheet.hf-min.mode-map .panel{transform:translateY(calc(100% + 100vh))!im
 <div class="updt" id="updt" role="status" hidden><span>Вышла новая версия</span><button type="button" id="updGo">Обновить</button><button type="button" class="x" id="updX" aria-label="Позже">×</button></div>
 <script>
 /* версия приложения: поднимать вместе с version.json и VERSION в sw.js */
-const APP={name:'Пульс 2',version:'2.0.0',build:160,date:'12.10.2026'};
+const APP={name:'Пульс 2',version:'2.0.0',build:161,date:'12.10.2026'};
 /* ======================= ДАННЫЕ: PulseDB ======================= */
 /* В приложении цифр нет. Все значения запрашиваются у PulseDB, а она отдаёт таблицы хранилища (схема pulse2, см. schema.sql):
    DB_MODE='file' — файл базы (те же таблицы и колонки), который пользователь загружает на своё устройство (IndexedDB, только у него);
@@ -6375,7 +6375,7 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
  const LS={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
  const HK={low:0.5,norm:1,high:1.8,max:3}; let HKey=HK[LS.get('pulse2-relief-h')]?LS.get('pulse2-relief-h'):'norm';
  let gl=null,PR=null,U={},S=null,dirty=true,on=false,raf=0,Hmul=40,areaKey=['npt','yanao'].includes(LS.get('pulse2-relief-area'))?LS.get('pulse2-relief-area'):null,sig='',focus=null,anim=null;
- const cam={az:0,el:0,dist:1,tx:0,ty:0};
+ const cam={az:0,el:0,dist:1,tx:0,ty:0,tz:0};
  const Rr=d=>d*Math.PI/180, clamp=(v,a,b)=>Math.max(a,Math.min(b,v)), RM=matchMedia('(prefers-reduced-motion: reduce)');
  /* та же проекция, что у обычной карты: P(lon,lat) → км (y вниз); здесь y вверх */
  const llKm=(lon,lat)=>{const p=P(lon,lat); return [p[0],-p[1]]}, d3Km=p=>[p[0],-p[1]], kmLL=(x,y)=>proj.invert([x,-y]);
@@ -6463,19 +6463,28 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
  const TV=Math.tan(Rr(25));
  /* матрица вида для камеры c — как в draw() */
  const dscNow=()=>{const f=freeRect(); return (f.y1-f.y0)<470?0.5:1};
- function mvpFor(c){const W=cv.clientWidth||1,Hh=cv.clientHeight||1, e=[c.tx+c.dist*Math.cos(c.el)*Math.sin(c.az),c.ty-c.dist*Math.cos(c.el)*Math.cos(c.az),c.dist*Math.sin(c.el)], fr=freeRect(), sx=((fr.x0+fr.x1)/2-fr.W/2)/(fr.W/2), sy=-((fr.y0+fr.y1)/2-fr.H/2)/(fr.H/2);
-  return m4.mul([1,0,0,0,0,1,0,0,0,0,1,0,sx,sy,0,1],m4.mul(m4.persp(Rr(50),W/Hh,c.dist*0.02,c.dist*4),m4.look(e,[c.tx,c.ty,0],[0,0,1])))}
+ function mvpFor(c){const W=cv.clientWidth||1,Hh=cv.clientHeight||1, e=[c.tx+c.dist*Math.cos(c.el)*Math.sin(c.az),c.ty-c.dist*Math.cos(c.el)*Math.cos(c.az),(c.tz||0)+c.dist*Math.sin(c.el)], fr=freeRect(), sx=((fr.x0+fr.x1)/2-fr.W/2)/(fr.W/2), sy=-((fr.y0+fr.y1)/2-fr.H/2)/(fr.H/2);
+  return m4.mul([1,0,0,0,0,1,0,0,0,0,1,0,sx,sy,0,1],m4.mul(m4.persp(Rr(50),W/Hh,c.dist*0.02,c.dist*4),m4.look(e,[c.tx,c.ty,c.tz||0],[0,0,1])))}
  /* срез месторождения: весь блок в свободной части экрана, скважины — на ближней к зрителю стороне */
- function fitBlock(){const el=Rr(27); let az=Rr(-25); const ps=pins.map(o=>o.p); if(ps.length){const mx=ps.reduce((a,p)=>a+p[0],0)/ps.length, my=ps.reduce((a,p)=>a+p[1],0)/ps.length; if(Math.hypot(mx,my)>S.span*0.04) az=Math.atan2(mx,-my)}
+ function fitBlock(){const fr0=freeRect(), el=Rr((fr0.x1-fr0.x0)/Math.max(1,fr0.y1-fr0.y0)>1.6?21:27); let az=Rr(-25); const ps=pins.map(o=>o.p); if(ps.length){const mx=ps.reduce((a,p)=>a+p[0],0)/ps.length, my=ps.reduce((a,p)=>a+p[1],0)/ps.length; if(Math.hypot(mx,my)>S.span*0.04) az=Math.atan2(mx,-my)}
   const f=freeRect(), DS=dscNow(), m=DS<1?8:14, top=(S.hmaxK||0)*Hmul, pts=[]; for(let k=0;k<S.rim.length;k+=Math.max(1,Math.floor(S.rim.length/48))){const q=S.rim[k]; pts.push([q[0],q[1],Math.max(q[2]*Hmul,top*0.5)],[q[0],q[1],-S.T*DS])}
-  const ok=d=>{const M=mvpFor({az,el,dist:d,tx:0,ty:0}); return pts.every(q=>{const c=m4.tx(M,q); if(c[3]<=0) return false; const x=(c[0]/c[3]*.5+.5)*f.W, y=(1-(c[1]/c[3]*.5+.5))*f.H; return x>=f.x0+m&&x<=f.x1-m&&y>=f.y0+m&&y<=f.y1-m})};
-  let lo=S.span*0.2, hi=S.span*8; if(!ok(hi)) return {az,el,dist:hi,tx:0,ty:0}; for(let i=0;i<26;i++){const mid=Math.sqrt(lo*hi); ok(mid)?hi=mid:lo=mid} return {az,el,dist:hi*1.03,tx:0,ty:0}}
+  const box=c=>{const M=mvpFor(c); let r=[1e9,1e9,-1e9,-1e9]; for(const q of pts){const v=m4.tx(M,q); if(v[3]<=0) return null; const x=(v[0]/v[3]*.5+.5)*f.W, y=(1-(v[1]/v[3]*.5+.5))*f.H; r=[Math.min(r[0],x),Math.min(r[1],y),Math.max(r[2],x),Math.max(r[3],y)]} return r};
+  /* цель по высоте: середина между поверхностью и дном; затем подбираем расстояние так, чтобы рамка блока вошла в свободную область */
+  let tz=(top*0.5-S.T*DS)/2;
+  const mt=pins.length?Math.min(64,(f.y1-f.y0)*0.16):m; const fits=d=>{const r=box({az,el,dist:d,tx:0,ty:0,tz}); return r&&r[0]>=f.x0+m&&r[2]<=f.x1-m&&r[1]>=f.y0+mt&&r[3]<=f.y1-m};
+  const solve=()=>{let lo=S.span*0.2, hi=S.span*8; if(!fits(hi)) return hi; for(let i=0;i<26;i++){const mid=Math.sqrt(lo*hi); fits(mid)?hi=mid:lo=mid} return hi};
+  let d=solve();
+  /* поправка центра по вертикали: сдвигаем цель так, чтобы поля сверху и снизу были равны, и подбираем расстояние заново */
+  const offAt=(dd,z)=>{const r=box({az,el,dist:dd,tx:0,ty:0,tz:z}); return r?((r[1]-f.y0-mt)-(f.y1-m-r[3])):null};
+  for(let it=0;it<2;it++){let a=-S.span*0.8, b2=S.span*0.4; const oa=offAt(d*1.4,a), ob=offAt(d*1.4,b2); if(oa==null||ob==null||Math.sign(oa)===Math.sign(ob)) break;
+   for(let i=0;i<22;i++){const mz=(a+b2)/2, om=offAt(d*1.4,mz); if(om==null) break; (Math.sign(om)===Math.sign(oa))?a=mz:b2=mz} tz=(a+b2)/2; d=solve()}
+  return {az,el,dist:d*1.03,tx:0,ty:0,tz}}
  function fitBox(wk,hk,el){const f=freeRect(), th=TV*(f.x1-f.x0)/f.H, tv=TV*(f.y1-f.y0)/f.H; return Math.max(wk/(2*th),hk*Math.sin(el)/(2*tv),0.001)}
  let needHome=false, fromMap=false, autoFit=false, fitIns=''; const sized=()=>cv.clientWidth>0&&cv.clientHeight>0;
- function home(){autoFit=true; fitIns=JSON.stringify(INS); if(!S) return {az:0,el:Rr(30),dist:1,tx:0,ty:0}; if(S.kind==='field'){const F=fitField(); if(sty().block) return fitBlock(); const e=Rr(38); return {az:cam.az,el:e,dist:fitBox(F.ext,F.ext,e)*1.1,tx:F.cx,ty:F.cy}}
-  const ps=pins.map(o=>o.p), e=Rr(30); if(!ps.length) return {az:0,el:e,dist:fitBox(S.span,S.span,e),tx:0,ty:0};
+ function home(){autoFit=true; fitIns=JSON.stringify(INS); if(!S) return {az:0,el:Rr(30),dist:1,tx:0,ty:0,tz:0}; if(S.kind==='field'){const F=fitField(); if(sty().block) return fitBlock(); const e=Rr(38); return {az:cam.az,el:e,dist:fitBox(F.ext,F.ext,e)*1.1,tx:F.cx,ty:F.cy,tz:0}}
+  const ps=pins.map(o=>o.p), e=Rr(30); if(!ps.length) return {az:0,el:e,dist:fitBox(S.span,S.span,e),tx:0,ty:0,tz:0};
   const xs=ps.map(p=>p[0]), ys=ps.map(p=>p[1]), w=Math.max(...xs)-Math.min(...xs), h=Math.max(...ys)-Math.min(...ys), m=Math.max(60,0.25*Math.max(w,h));
-  return {az:0,el:e,dist:clamp(fitBox(w+2*m,h+2*m,e),S.span*0.12,S.span*2.5),tx:(Math.max(...xs)+Math.min(...xs))/2,ty:(Math.max(...ys)+Math.min(...ys))/2}}
+  return {az:0,el:e,dist:clamp(fitBox(w+2*m,h+2*m,e),S.span*0.12,S.span*2.5),tx:(Math.max(...xs)+Math.min(...xs))/2,ty:(Math.max(...ys)+Math.min(...ys))/2,tz:0}}
  /* крупный план месторождения: по кустам и контуру, не меньше 9 км */
  function fitField(){const ps=pins.map(o=>o.p); if(!ps.length) return {cx:0,cy:0,ext:S.span*0.6}; const xs=ps.map(p=>p[0]), ys=ps.map(p=>p[1]), cx=(Math.min(...xs)+Math.max(...xs))/2, cy=(Math.min(...ys)+Math.max(...ys))/2; return {cx,cy,ext:Math.max(9,Math.max(...xs)-Math.min(...xs),Math.max(...ys)-Math.min(...ys))*1.35}}
  function flyTo(t){if(RM.matches||!on){Object.assign(cam,t); dirty=true; return} anim={from:{...cam},to:t,t0:performance.now(),d:650}; dirty=true}
@@ -6539,9 +6548,9 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
   const D=dark(), Y=sty(), bg=D?[0,18/255,31/255]:[0.80,0.85,0.91], line=D?[0.62,0.86,1]:[0.10,0.24,0.40], coast=D?[0.55,0.95,0.92]:[0.0,0.42,0.40], riv=D?[0.35,0.68,1]:[0.12,0.45,0.85], acc=D?[0,0.86,0.78]:[0,0.55,0.48], hiC=D?[1.0,0.84,0.55]:[0.55,0.28,0.08];
   setBg(Y.bg,D);
   gl.viewport(0,0,w,h); if(Y.bg==='flat') gl.clearColor(...bg,1); else gl.clearColor(0,0,0,0); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
-  const e=[cam.tx+cam.dist*Math.cos(cam.el)*Math.sin(cam.az),cam.ty-cam.dist*Math.cos(cam.el)*Math.cos(cam.az),cam.dist*Math.sin(cam.el)];
+  const e=[cam.tx+cam.dist*Math.cos(cam.el)*Math.sin(cam.az),cam.ty-cam.dist*Math.cos(cam.el)*Math.cos(cam.az),(cam.tz||0)+cam.dist*Math.sin(cam.el)];
   const fr=freeRect(), sx=((fr.x0+fr.x1)/2-fr.W/2)/(fr.W/2), sy=-((fr.y0+fr.y1)/2-fr.H/2)/(fr.H/2), T=[1,0,0,0,0,1,0,0,0,0,1,0,sx,sy,0,1];
-  const mv=m4.look(e,[cam.tx,cam.ty,0],[0,0,1]), mvp=m4.mul(T,m4.mul(m4.persp(Rr(50),w/h,cam.dist*0.02,cam.dist*4),mv)), H=Hmul;
+  const mv=m4.look(e,[cam.tx,cam.ty,cam.tz||0],[0,0,1]), mvp=m4.mul(T,m4.mul(m4.persp(Rr(50),w/h,cam.dist*0.02,cam.dist*4),mv)), H=Hmul;
   const EW=Y.edge?S.edgeW:0;
   gl.useProgram(PR); gl.uniformMatrix4fv(U.mvp,false,mvp); gl.uniformMatrix4fv(U.mv,false,mv); gl.uniform1f(U.H,H); gl.uniform2f(U.fog,cam.dist*0.55,cam.dist*1.9); gl.enableVertexAttribArray(U.p);
   gl.uniform3f(U.hi,...hiC); gl.uniform1f(U.ps,1); gl.uniform1f(U.rp,0); const DSv=dscNow(); gl.uniform1f(U.dsc,DSv); gl.uniform2f(U.tn,0,1); gl.uniform3f(U.ed,EW,1,0.35);
@@ -6586,7 +6595,7 @@ try{if(window.PulseModules&&PulseModules.cur()==='admin') PulseModules.go('admin
  const fr2=()=>{const I=insFit(); return {x0:I.l,x1:MW-I.r,y0:I.t,y1:MH-I.b}};
  let keep2D=null;
  function from2D(){keep2D=null; if(!S||S.kind!=='area'||!zt||!MW) return; const f=fr2(), c=zt.invert([(f.x0+f.x1)/2,(f.y0+f.y1)/2]), p=S.locD3(c); if(!p) return;
-  cam.az=0; cam.el=Rr(30); cam.tx=p[0]; cam.ty=p[1]; cam.dist=clamp(fitBox((f.x1-f.x0)/zt.k,(f.y1-f.y0)/zt.k,cam.el),S.span*0.12,S.span*2.5); keep2D={zt,cam:JSON.stringify(cam),key:S.key}; dirty=true}
+  cam.az=0; cam.el=Rr(30); cam.tx=p[0]; cam.ty=p[1]; cam.tz=0; cam.dist=clamp(fitBox((f.x1-f.x0)/zt.k,(f.y1-f.y0)/zt.k,cam.el),S.span*0.12,S.span*2.5); keep2D={zt,cam:JSON.stringify(cam),key:S.key}; dirty=true}
  function to2D(){const k2=keep2D; keep2D=null; if(!S||S.kind!=='area'||!MW) return; if(k2&&k2.key===S.key&&k2.cam===JSON.stringify(cam)){svg.call(zoom.transform,k2.zt); return} const f=fr2(), x=cam.tx+S.c[0], y=-(cam.ty+S.c[1]), wk=cam.dist/fitBox(1,0,cam.el);
   const k=clamp((f.x1-f.x0)/Math.max(1,wk),zoom.scaleExtent()[0],zoom.scaleExtent()[1]);
   svg.call(zoom.transform,d3.zoomIdentity.translate((f.x0+f.x1)/2,(f.y0+f.y1)/2).scale(k).translate(-x,-y))}
@@ -6628,7 +6637,7 @@ const orbClick=()=>{if(anim&&anim.orbit){anim=null; orbB.setAttribute('aria-pres
     '<p class="note" style="margin:0">Включить рельеф — кнопка «3D» у кнопок карты. Высоты: открытые данные AWS Terrain Tiles (SRTM, GMTED2010, ArcticDEM).</p>';
    after?after.after(b):(host.querySelector('.prof')||host).appendChild(b);
    b.querySelectorAll('[data-r3] button').forEach(x=>x.onclick=()=>{const g=x.parentElement, k=g.dataset.r3, v=x.dataset.v; g.querySelectorAll('button').forEach(y=>y.setAttribute('aria-pressed',y===x)); if(k==='style') setStyle(v); else if(k==='area') setArea(v); else setH(v)})}catch(e){console.error(e)}};
- window.PulseRelief={on:v=>setOn(v),zoom:f=>{anim=null; cam.dist=clampD(cam.dist*f); dirty=true},style:k=>{if(k&&PRE[k]) setStyle(k); return STY},area:k=>{if(['auto','npt','yanao'].includes(k)) setArea(k); return areaKey||'auto'},height:k=>{if(HK[k]) setH(k); return HKey},get state(){return {free:freeRect(),ins:{...INS},cam:{...cam},on,area:S&&S.key,kind:S&&S.kind,pins:pins.length,wells:pins.reduce((s,o)=>s+(o.ids?o.ids.length:0),0),mul:Hmul,step:S&&S.step,dark:dark()}}};
+ window.PulseRelief={fitNow:()=>{const r=fitBlock(); return {r,cur:{...cam}}},on:v=>setOn(v),zoom:f=>{anim=null; cam.dist=clampD(cam.dist*f); dirty=true},style:k=>{if(k&&PRE[k]) setStyle(k); return STY},area:k=>{if(['auto','npt','yanao'].includes(k)) setArea(k); return areaKey||'auto'},height:k=>{if(HK[k]) setH(k); return HKey},get state(){return {fitIns,span:S&&S.span,auto:autoFit,anim:!!anim,blk:(()=>{if(!S||!S.rim) return null; const M=mvpFor(cam), f=freeRect(); let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; S.rim.forEach(q=>{[[q[0],q[1],q[2]*Hmul],[q[0],q[1],-S.T*dscNow()]].forEach(v=>{const c=m4.tx(M,v); if(c[3]>0){const x=(c[0]/c[3]*.5+.5)*f.W, y=(1-(c[1]/c[3]*.5+.5))*f.H; x0=Math.min(x0,x); x1=Math.max(x1,x); y0=Math.min(y0,y); y1=Math.max(y1,y)}})}); return [x0,y0,x1,y1].map(Math.round)})(),free:freeRect(),ins:{...INS},cam:{...cam},on,area:S&&S.key,kind:S&&S.kind,pins:pins.length,wells:pins.reduce((s,o)=>s+(o.ids?o.ids.length:0),0),mul:Hmul,step:S&&S.step,dark:dark()}}};
  try{if(localStorage.getItem('pulse2-relief')==='1') requestAnimationFrame(()=>setOn(true))}catch(e){}
  }}
 
